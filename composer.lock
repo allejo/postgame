@@ -4,8 +4,48 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "67c1835351b9e9542626a4f3be055846",
+    "content-hash": "d1bbbf2f7812cd6d50f96f1531938a73",
     "packages": [
+        {
+            "name": "allejo/bzflag-networking.php",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/allejo/bzflag-networking.php.git",
+                "reference": "a991dc0284e13c82b907e03a87a4547f76b6af1a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/allejo/bzflag-networking.php/zipball/a991dc0284e13c82b907e03a87a4547f76b6af1a",
+                "reference": "a991dc0284e13c82b907e03a87a4547f76b6af1a",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "allejo\\bzflag\\networking\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Vladimir \"allejo\" Jimenez",
+                    "email": "me@allejo.io"
+                }
+            ],
+            "description": "A library for unpacking BZFlag network packets",
+            "time": "2019-05-14T04:41:44+00:00"
+        },
         {
             "name": "doctrine/annotations",
             "version": "v1.6.1",
@@ -6339,7 +6379,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "allejo/bzflag-networking.php": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
