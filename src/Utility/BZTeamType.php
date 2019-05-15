@@ -19,4 +19,20 @@ abstract class BZTeamType
     const OBSERVER = 5;
     const RABBIT = 6;
     const HUNTER = 7;
+
+    private static $strings = [
+        self::ROGUE => 'rogue',
+        self::RED => 'red',
+        self::GREEN => 'green',
+        self::BLUE => 'blue',
+        self::PURPLE => 'purple',
+        self::OBSERVER => 'observer',
+        self::RABBIT => 'rabbit',
+        self::HUNTER => 'hunter',
+    ];
+
+    public static function toString(int $code): string
+    {
+        return self::$strings[$code] ?? 'unknown';
+    }
 }
