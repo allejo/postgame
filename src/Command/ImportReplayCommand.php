@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use allejo\bzflag\networking\Packets\PacketInvalidException;
-use App\Service\ReplayService;
+use App\Service\ReplayImportService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,10 +14,10 @@ class ImportReplayCommand extends Command
 {
     protected static $defaultName = 'app:replay:import';
 
-    /** @var ReplayService */
+    /** @var ReplayImportService */
     private $replayService;
 
-    public function __construct(ReplayService $replayService)
+    public function __construct(ReplayImportService $replayService)
     {
         parent::__construct();
 

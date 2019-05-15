@@ -24,7 +24,7 @@ use App\Entity\Replay;
 use App\Utility\BZChatTarget;
 use Doctrine\ORM\EntityManagerInterface;
 
-class ReplayService
+class ReplayImportService
 {
     /** @var EntityManagerInterface */
     private $em;
