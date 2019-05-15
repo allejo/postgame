@@ -1,8 +1,14 @@
 <?php declare(strict_types=1);
 
+/*
+ * (c) Vladimir "allejo" Jimenez <me@allejo.io>
+ *
+ * For the full copyright and license information, please view the
+ * LICENSE.md file that was distributed with this source code.
+ */
+
 namespace App\Service;
 
-use allejo\bzflag\networking\Replay as BZFlagReplay;
 use allejo\bzflag\networking\Packets\GamePacket;
 use allejo\bzflag\networking\Packets\MsgAddPlayer;
 use allejo\bzflag\networking\Packets\MsgAdminInfo;
@@ -13,6 +19,7 @@ use allejo\bzflag\networking\Packets\MsgKilled;
 use allejo\bzflag\networking\Packets\MsgMessage;
 use allejo\bzflag\networking\Packets\MsgRemovePlayer;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
+use allejo\bzflag\networking\Replay as BZFlagReplay;
 use App\Entity\CaptureEvent;
 use App\Entity\ChatMessage;
 use App\Entity\FlagUpdate;
@@ -63,6 +70,7 @@ class ReplayImportService
      * This array is updated as players join and leave.
      *
      * @see BZTeamType For constants of team numerical values
+     *
      * @var array<int, int>
      */
     private $currPlayersCurrentTeam;
@@ -115,17 +123,15 @@ class ReplayImportService
      * @param bool   $dryRun   Whether or not to actually write to the database
      *
      * @throws \InvalidArgumentException when a non-existent file is given or a directory is given
-     * @throws PacketInvalidException when an invalid replay is given
+     * @throws PacketInvalidException    when an invalid replay is given
      */
     public function importReplay(string $filename, bool $dryRun): void
     {
-        if (!file_exists($filename))
-        {
+        if (!file_exists($filename)) {
             throw new \InvalidArgumentException(sprintf('File not found: %s', $filename));
         }
 
-        if (!is_file($filename))
-        {
+        if (!is_file($filename)) {
             throw new \InvalidArgumentException(sprintf('A file must be given as a value for $filename'));
         }
 
@@ -143,13 +149,11 @@ class ReplayImportService
         $this->em->persist($this->currReplay);
 
         $packets = $replay->getPackets();
-        foreach ($packets as $packet)
-        {
+        foreach ($packets as $packet) {
             $this->handlePacket($packet);
         }
 
-        if (!$dryRun)
-        {
+        if (!$dryRun) {
             $this->em->flush();
         }
     }
@@ -161,7 +165,7 @@ class ReplayImportService
             253 => null,
         ];
         $this->currPlayersCurrentTeam = [
-            253 => 'Observer'
+            253 => 'Observer',
         ];
         $this->currPlayersJoinRecord = [];
         $this->currFuturePlayers = [];
@@ -176,8 +180,7 @@ class ReplayImportService
      */
     private function handlePacket(GamePacket $packet): void
     {
-        switch ($packet::PACKET_TYPE)
-        {
+        switch ($packet::PACKET_TYPE) {
             case MsgAddPlayer::PACKET_TYPE:
                 $this->handleMsgAddPlayer($packet);
                 break;
@@ -222,16 +225,14 @@ class ReplayImportService
 
         // This player has joined this replay at least once before, because we
         // have their callsign
-        if (isset($this->currPlayersByCallsign[$packet->getCallsign()]))
-        {
+        if (isset($this->currPlayersByCallsign[$packet->getCallsign()])) {
             $player = $this->currPlayersByCallsign[$packet->getCallsign()];
             $recordJoin = !isset($this->currPlayersByIndex[$packet->getPlayerIndex()]);
         }
 
         // We don't have a player cached meaning this is the first time the
         // player has joined, so let's try finding them in the database.
-        if ($player === null)
-        {
+        if ($player === null) {
             $playerRepo = $this->em->getRepository(Player::class);
             $player = $playerRepo->findOneBy([
                 'replay' => $this->currReplay,
@@ -241,8 +242,7 @@ class ReplayImportService
 
         // We don't have a record for this player for this replay, so let's
         // create a new instance.
-        if ($player === null)
-        {
+        if ($player === null) {
             $player = new Player();
             $player
                 ->setReplay($this->currReplay)
@@ -258,8 +258,7 @@ class ReplayImportService
 
         // Only record the join in the database if it's an actual join
         // @todo To be honest, I can't remember how this boolean works
-        if ($recordJoin)
-        {
+        if ($recordJoin) {
             $joinEvent = new JoinEvent();
             $joinEvent
                 ->setReplay($this->currReplay)
@@ -278,12 +277,10 @@ class ReplayImportService
 
     private function handleMsgAdminInfo(MsgAdminInfo $packet): void
     {
-        foreach ($packet->getPlayers() as $player)
-        {
+        foreach ($packet->getPlayers() as $player) {
             $playerIndex = $player->playerIndex;
 
-            if (isset($this->currPartialJoins[$playerIndex]))
-            {
+            if (isset($this->currPartialJoins[$playerIndex])) {
                 $join = $this->currPartialJoins[$playerIndex];
                 $join
                     ->setIpAddress($player->ipAddress)
@@ -312,7 +309,7 @@ class ReplayImportService
 
     /**
      * @param GamePacket|MsgFlagGrab|MsgFlagDrop $packet
-     * @param bool $isGrab
+     * @param bool                               $isGrab
      */
     private function handleMsgFlagUpdate(GamePacket $packet, bool $isGrab): void
     {
@@ -358,25 +355,21 @@ class ReplayImportService
             ->setTimestamp($packet->getTimestampAsDateTime())
         ;
 
-        if ($pFrom <= BZChatTarget::LAST_PLAYER)
-        {
+        if ($pFrom <= BZChatTarget::LAST_PLAYER) {
             $message
                 ->setPlayer($this->currPlayersByIndex[$pFrom])
                 ->setTeamFrom($this->currPlayersCurrentTeam[$pFrom])
             ;
-        }
-        else
-        {
+        } else {
             $message->setTeamFrom($pFrom);
         }
 
-        if ($pTo <= BZChatTarget::LAST_PLAYER)
-        {
+        if ($pTo <= BZChatTarget::LAST_PLAYER) {
             // Somehow packets can be out of order and a server sent it before
             // the player joined
-            if (!isset($this->currPlayersByIndex[$pTo]))
-            {
+            if (!isset($this->currPlayersByIndex[$pTo])) {
                 $this->queuePacket($pTo, $packet);
+
                 return;
             }
 
@@ -384,9 +377,7 @@ class ReplayImportService
                 ->setTarget($this->currPlayersByIndex[$pTo])
                 ->setTeamTo($this->currPlayersCurrentTeam[$pTo])
             ;
-        }
-        else
-        {
+        } else {
             $message->setTeamTo($pTo);
         }
 
@@ -412,8 +403,7 @@ class ReplayImportService
         unset($this->currPlayersCurrentTeam[$playerId]);
         unset($this->currPlayersJoinRecord[$playerId]);
 
-        if (in_array($playerId, $this->currFuturePlayers))
-        {
+        if (in_array($playerId, $this->currFuturePlayers)) {
             unset($this->currFuturePlayers[$playerId]);
         }
     }
@@ -422,13 +412,12 @@ class ReplayImportService
      * Queue a packet for future processing because the specified player ID does
      * not yet exist.
      *
-     * @param int $playerId
+     * @param int        $playerId
      * @param GamePacket $packet
      */
     private function queuePacket(int $playerId, GamePacket $packet): void
     {
-        if (!isset($this->currFuturePlayers[$playerId]))
-        {
+        if (!isset($this->currFuturePlayers[$playerId])) {
             $this->currFuturePlayers[$playerId] = [];
         }
 
@@ -446,16 +435,14 @@ class ReplayImportService
      */
     private function dequeueFuturePlayer(int $playerId): void
     {
-        if (!isset($this->currFuturePlayers[$playerId]))
-        {
+        if (!isset($this->currFuturePlayers[$playerId])) {
             return;
         }
 
         $packets = $this->currFuturePlayers[$playerId];
         unset($this->currFuturePlayers[$playerId]);
 
-        foreach ($packets as $packet)
-        {
+        foreach ($packets as $packet) {
             $this->handlePacket($packet);
         }
     }

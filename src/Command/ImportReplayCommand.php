@@ -1,5 +1,12 @@
 <?php declare(strict_types=1);
 
+/*
+ * (c) Vladimir "allejo" Jimenez <me@allejo.io>
+ *
+ * For the full copyright and license information, please view the
+ * LICENSE.md file that was distributed with this source code.
+ */
+
 namespace App\Command;
 
 use allejo\bzflag\networking\Packets\PacketInvalidException;
@@ -40,27 +47,22 @@ class ImportReplayCommand extends Command
         $dryRun = $input->getOption('dry-run');
         $replayFile = $input->getArgument('file');
 
-        if ($dryRun)
-        {
+        if ($dryRun) {
             $output->writeln('This command is running in "dry mode" meaning nothing will be persisted to the database');
         }
 
         $isDir = is_dir($replayFile);
 
-        if (!$isDir)
-        {
+        if (!$isDir) {
             $output->writeln(sprintf('Reading replay file: %s', $replayFile));
 
             try {
                 $this->replayService->importReplay($replayFile, $dryRun);
                 $output->writeln(sprintf('Finished.'));
-            }
-            catch (PacketInvalidException $e) {
+            } catch (PacketInvalidException $e) {
                 $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFile));
                 $output->writeln(sprintf('  %s', $e->getMessage()));
-            }
-            catch (\InvalidArgumentException $e)
-            {
+            } catch (\InvalidArgumentException $e) {
                 $output->writeln(sprintf('An invalid filepath was given (%s)', $replayFile));
                 $output->writeln(sprintf('  %s', $e->getMessage()));
             }
