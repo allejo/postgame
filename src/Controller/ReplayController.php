@@ -28,15 +28,22 @@ class ReplayController extends AbstractController
     }
 
     /**
-     * @Route("/replays/{id}/{filename}", name="replay_show")
+     * @Route(
+     *     "/replays/{id}/{filename}/{_format}",
+     *     name="replay_show",
+     *     defaults={
+     *         "_format": "html"
+     *     }
+     * )
      *
      * @param int                  $id
      * @param string               $filename
+     * @param string               $_format
      * @param ReplaySummaryService $summaryService
      *
      * @return Response
      */
-    public function show(int $id, string $filename, ReplaySummaryService $summaryService): Response
+    public function show(int $id, string $filename, string $_format, ReplaySummaryService $summaryService): Response
     {
         $em = $this->getDoctrine()->getManager();
         $replay = $em->getRepository(Replay::class)->findOneBy([
@@ -49,6 +56,12 @@ class ReplayController extends AbstractController
         }
 
         $summary = $summaryService->getSummary($replay);
+
+        if ($_format === 'json') {
+            return $this->json([
+                'players' => $summary,
+            ]);
+        }
 
         return $this->render('replay/show.html.twig', [
             'replay' => $replay,

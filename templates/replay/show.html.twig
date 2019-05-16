@@ -1,1 +1,24 @@
-{{ players | json_encode }}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <p>{{ replay.fileName }}</p>
+    <p>{{ (replay.duration / 60) | round(1, 'ceil') }} minutes</p>
+
+    <ul>
+        {% for i, player in players %}
+            <li>
+                {{ player.callsign }} (Team: {{ player.teamLiteral }}) [{{ player.score.kills }} - {{ player.score.deaths }} - {{ player.score.teamKills }}]
+
+                <ul>
+                    {% for j, stats in player.against %}
+                        <li>
+                            vs. {{ players[j].callsign }} [{{ stats.kills }} - {{ stats.deaths }}]
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+
+{#    {{ players | json_encode }}#}
+{% endblock %}
