@@ -66,10 +66,10 @@ class ReplayController extends AbstractController
                 'start' => $replay->getStartTime()->format(DATE_ATOM),
                 'end' => $replay->getEndTime()->format(DATE_ATOM),
                 'duration' => $summaryService->getDuration(),
-                'team_a' => $summaryService->getWinner(),
-                'team_a_score' => $summaryService->getWinnerScore(),
-                'team_b' => $summaryService->getLoser(),
-                'team_b_score' => $summaryService->getLoserScore(),
+                'winner' => $summaryService->getWinner(),
+                'winner_score' => $summaryService->getWinnerScore(),
+                'loser' => $summaryService->getLoser(),
+                'loser_score' => $summaryService->getLoserScore(),
                 'players' => $summaryService->getPlayerRecords(),
             ];
         } catch (UnsummarizedException $e) {

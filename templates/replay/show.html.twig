@@ -3,6 +3,9 @@
 {% block body %}
     <p>{{ filename }}</p>
     <p>{{ duration }} minutes</p>
+    <p>
+        {{ winner | team_literal | title }} ({{ winner_score }}) vs ({{ loser_score }}) {{ loser | team_literal | title }}
+    </p>
 
     <ul>
         {% for i, player in players %}
