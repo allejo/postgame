@@ -26,6 +26,11 @@ class DefaultArray implements \ArrayAccess, \IteratorAggregate, \JsonSerializabl
         $this->defaultValue = $defaultValue;
     }
 
+    public function getAsArray(): array
+    {
+        return $this->store;
+    }
+
     public function getIterator(): \Traversable
     {
         return new \ArrayIterator($this->store);
