@@ -41,7 +41,7 @@ class DefaultArray implements \ArrayAccess, \IteratorAggregate, \JsonSerializabl
         return true;
     }
 
-    public function offsetGet($offset)
+    public function &offsetGet($offset)
     {
         if (!isset($this->store[$offset])) {
             $this->store[$offset] = $this->getDefaultValue();
