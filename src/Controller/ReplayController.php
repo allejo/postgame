@@ -11,8 +11,10 @@ namespace App\Controller;
 
 use App\Entity\Replay;
 use App\Service\ReplaySummaryService;
+use App\Utility\UnsummarizedException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ReplayController extends AbstractController
@@ -55,17 +57,29 @@ class ReplayController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $summary = $summaryService->getSummary($replay);
+        $summaryService->summarize($replay);
 
-        if ($_format === 'json') {
-            return $this->json([
-                'players' => $summary,
-            ]);
+        try {
+            $replaySummary = [
+                'id' => $replay->getId(),
+                'filename' => $replay->getFileName(),
+                'start' => $replay->getStartTime()->format(DATE_ATOM),
+                'end' => $replay->getEndTime()->format(DATE_ATOM),
+                'duration' => $summaryService->getDuration(),
+                'team_a' => $summaryService->getWinner(),
+                'team_a_score' => $summaryService->getWinnerScore(),
+                'team_b' => $summaryService->getLoser(),
+                'team_b_score' => $summaryService->getLoserScore(),
+                'players' => $summaryService->getPlayerRecords(),
+            ];
+        } catch (UnsummarizedException $e) {
+            throw new HttpException(500, 'Replay summarizing failed');
         }
 
-        return $this->render('replay/show.html.twig', [
-            'replay' => $replay,
-            'players' => $summary,
-        ]);
+        if ($_format === 'json') {
+            return $this->json($replaySummary);
+        }
+
+        return $this->render('replay/show.html.twig', $replaySummary);
     }
 }

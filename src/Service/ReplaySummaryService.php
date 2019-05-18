@@ -22,6 +22,7 @@ use App\Utility\SummaryDeathRecord;
 use App\Utility\SummaryKillRecord;
 use App\Utility\SummaryPlayerRecord;
 use App\Utility\SummarySession;
+use App\Utility\UnsummarizedException;
 use Doctrine\ORM\EntityManagerInterface;
 
 class ReplaySummaryService
@@ -29,40 +30,129 @@ class ReplaySummaryService
     /** @var EntityManagerInterface */
     private $em;
 
+    /** @var SummaryPlayerRecord[] */
+    private $playerRecords;
+
+    /** @var int[] */
+    private $teamScores;
+
+    /** @var bool */
+    private $summarized;
+
+    /** @var int */
+    private $duration;
+
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
+        $this->summarized = false;
+        $this->teamScores = new DefaultArray(0);
+        $this->playerRecords = [];
+    }
+
+    /**
+     * Get the duration of the replay in minutes.
+     *
+     * @throws UnsummarizedException
+     *
+     * @return int
+     */
+    public function getDuration(): int
+    {
+        $this->throwUnsummarizedException();
+
+        return $this->duration;
+    }
+
+    /**
+     * @see BZTeamType
+     *
+     * @throws UnsummarizedException
+     *
+     * @return int
+     */
+    public function getWinner(): int
+    {
+        $this->throwUnsummarizedException();
+
+        $winner = array_keys($this->teamScores->getAsArray(), max($this->teamScores->getAsArray()));
+
+        return $winner[0];
+    }
+
+    /**
+     * @throws UnsummarizedException
+     *
+     * @return int
+     */
+    public function getWinnerScore(): int
+    {
+        return $this->teamScores[$this->getWinner()];
+    }
+
+    /**
+     * @see BZTeamType
+     *
+     * @throws UnsummarizedException
+     *
+     * @return int
+     */
+    public function getLoser(): int
+    {
+        $this->throwUnsummarizedException();
+
+        $loser = array_keys($this->teamScores->getAsArray(), min($this->teamScores->getAsArray()));
+
+        return $loser[0];
+    }
+
+    /**
+     * @throws UnsummarizedException
+     *
+     * @return int
+     */
+    public function getLoserScore(): int
+    {
+        return $this->teamScores[$this->getLoser()];
+    }
+
+    /**
+     * @throws UnsummarizedException
+     *
+     * @return SummaryPlayerRecord[]
+     */
+    public function getPlayerRecords(): array
+    {
+        $this->throwUnsummarizedException();
+
+        return $this->playerRecords;
     }
 
     /**
      * @param Replay $replay
-     *
-     * @return SummaryPlayerRecord[]
      */
-    public function getSummary(Replay $replay): array
+    public function summarize(Replay $replay): void
     {
+        $this->duration = (int)ceil($replay->getDuration() / 60);
+
         $findByFilter = [
             'replay' => $replay,
         ];
 
-        /** @var SummaryPlayerRecord[] $playersById */
-        $playersById = [];
+        $this->handlePlayers($findByFilter);
+        $this->handleKillRecords($findByFilter);
+        $this->handleJoins($findByFilter);
+        $this->handleParts($findByFilter);
+        $this->handleCaps($findByFilter);
+        $this->handleTeamLoyalty($replay);
 
-        $this->handlePlayers($playersById, $findByFilter);
-        $this->handleKillRecords($playersById, $findByFilter);
-        $this->handleJoins($playersById, $findByFilter);
-        $this->handleParts($playersById, $findByFilter);
-        $this->handleCaps($playersById, $findByFilter);
-        $this->handleTeamLoyalty($playersById, $replay);
-
-        return $playersById;
+        $this->summarized = true;
     }
 
     /**
-     * @param SummaryPlayerRecord[] $roster
-     * @param array                 $findByFilter
+     * @param array $findByFilter
      */
-    private function handlePlayers(array &$roster, array $findByFilter): void
+    private function handlePlayers(array $findByFilter): void
     {
         $players = $this->em->getRepository(Player::class)->findBy($findByFilter);
 
@@ -70,15 +160,14 @@ class ReplaySummaryService
             $record = new SummaryPlayerRecord();
             $record->callsign = $player->getCallsign();
 
-            $roster[$player->getId()] = $record;
+            $this->playerRecords[$player->getId()] = $record;
         }
     }
 
     /**
-     * @param SummaryPlayerRecord[] $roster
-     * @param array                 $findByFilter
+     * @param array $findByFilter
      */
-    private function handleKillRecords(array &$roster, array $findByFilter): void
+    private function handleKillRecords(array $findByFilter): void
     {
         $kills = $this->em->getRepository(KillEvent::class)->findBy($findByFilter);
 
@@ -86,35 +175,34 @@ class ReplaySummaryService
             $victimId = $kill->getVictim()->getId();
             $killerId = $kill->getKiller()->getId();
 
-            ++$roster[$victimId]->score->deaths;
-            ++$roster[$killerId]->score->kills;
+            ++$this->playerRecords[$victimId]->score->deaths;
+            ++$this->playerRecords[$killerId]->score->kills;
 
             // This was a team kill
             if ($kill->getVictimTeam() === $kill->getKillerTeam()) {
-                ++$roster[$killerId]->score->teamKills;
+                ++$this->playerRecords[$killerId]->score->teamKills;
             }
 
             $deathRecord = new SummaryDeathRecord();
             $deathRecord->killedBy = $killerId;
             $deathRecord->timestamp = $kill->getTimestamp();
 
-            $roster[$victimId]->deaths[] = $deathRecord;
-            ++$roster[$victimId]->against[$killerId]->deaths;
+            $this->playerRecords[$victimId]->deaths[] = $deathRecord;
+            ++$this->playerRecords[$victimId]->against[$killerId]->deaths;
 
             $killRecord = new SummaryKillRecord();
             $killRecord->victim = $victimId;
             $killRecord->timestamp = $kill->getTimestamp();
 
-            $roster[$killerId]->kills[] = $killRecord;
-            ++$roster[$killerId]->against[$victimId]->kills;
+            $this->playerRecords[$killerId]->kills[] = $killRecord;
+            ++$this->playerRecords[$killerId]->against[$victimId]->kills;
         }
     }
 
     /**
-     * @param SummaryPlayerRecord[] $roster
-     * @param array                 $findByFilter
+     * @param array $findByFilter
      */
-    private function handleJoins(array &$roster, array $findByFilter): void
+    private function handleJoins(array $findByFilter): void
     {
         $joins = $this->em->getRepository(JoinEvent::class)->findBy($findByFilter);
 
@@ -124,22 +212,21 @@ class ReplaySummaryService
             $session->ipAddress = $join->getIpAddress();
             $session->joinTime = $join->getTimestamp();
 
-            $roster[$join->getPlayer()->getId()]->sessions[] = $session;
+            $this->playerRecords[$join->getPlayer()->getId()]->sessions[] = $session;
         }
     }
 
     /**
-     * @param SummaryPlayerRecord[] $roster
-     * @param array                 $findByFilter
+     * @param array $findByFilter
      */
-    private function handleParts(array &$roster, array $findByFilter): void
+    private function handleParts(array $findByFilter): void
     {
         $parts = $this->em->getRepository(PartEvent::class)->findBy($findByFilter);
 
         foreach ($parts as $part) {
             $playerId = $part->getPlayer()->getId();
 
-            foreach ($roster[$playerId]->sessions as &$session) {
+            foreach ($this->playerRecords[$playerId]->sessions as &$session) {
                 if (
                     $session->partTime === null &&
                     $part->getJoinEvent()->getTimestamp()->getTimestamp() === $session->joinTime->getTimestamp()
@@ -154,10 +241,9 @@ class ReplaySummaryService
     }
 
     /**
-     * @param SummaryPlayerRecord[] $roster
-     * @param array                 $findByFilter
+     * @param array $findByFilter
      */
-    private function handleCaps(array &$roster, array $findByFilter): void
+    private function handleCaps(array $findByFilter): void
     {
         $caps = $this->em->getRepository(CaptureEvent::class)->findBy($findByFilter);
 
@@ -169,21 +255,22 @@ class ReplaySummaryService
             $record->team = $cap->getCapperTeam();
             $record->timestamp = $cap->getTimestamp();
 
-            $roster[$capperId]->flagCaptures[] = $record;
+            $this->playerRecords[$capperId]->flagCaptures[] = $record;
+
+            ++$this->teamScores[$cap->getCapperTeam()];
         }
     }
 
     /**
-     * @param SummaryPlayerRecord[] $roster
-     * @param Replay                $replay
+     * @param Replay $replay
      */
-    private function handleTeamLoyalty(array &$roster, Replay $replay)
+    private function handleTeamLoyalty(Replay $replay)
     {
         $teamLoyalty = new DefaultArray(function () {
             return new DefaultArray(0);
         });
 
-        foreach ($roster as $id => $record) {
+        foreach ($this->playerRecords as $id => $record) {
             foreach ($record->sessions as $session) {
                 if ($session->totalTime === null) {
                     $teamLoyalty[$id][$session->team] += $replay->getEndTime()->getTimestamp() - $session->joinTime->getTimestamp();
@@ -193,7 +280,7 @@ class ReplaySummaryService
             }
         }
 
-        foreach ($roster as $id => $record) {
+        foreach ($this->playerRecords as $id => $record) {
             $record->team = $this->reduceMax($teamLoyalty[$id]);
             $record->teamLiteral = BZTeamType::toString($record->team);
         }
@@ -220,5 +307,15 @@ class ReplaySummaryService
         }
 
         return $key;
+    }
+
+    /**
+     * @throws UnsummarizedException
+     */
+    private function throwUnsummarizedException(): void
+    {
+        if (!$this->summarized) {
+            throw new UnsummarizedException('No replay has been summarized; be sure to call summarize() first.');
+        }
     }
 }
