@@ -30,14 +30,14 @@ class ChatMessage
     private $replay;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Player", inversedBy="chatMessages")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Player", inversedBy="sentMessages")
      */
-    private $player;
+    private $sender;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Player", inversedBy="chatMessages")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Player", inversedBy="receivedMessages")
      */
-    private $target;
+    private $recipient;
 
     /**
      * @ORM\Column(type="integer")
@@ -76,26 +76,26 @@ class ChatMessage
         return $this;
     }
 
-    public function getPlayer(): ?Player
+    public function getSender(): ?Player
     {
-        return $this->player;
+        return $this->sender;
     }
 
-    public function setPlayer(?Player $player): self
+    public function setSender(?Player $sender): self
     {
-        $this->player = $player;
+        $this->sender = $sender;
 
         return $this;
     }
 
-    public function getTarget(): ?Player
+    public function getRecipient(): ?Player
     {
-        return $this->target;
+        return $this->recipient;
     }
 
-    public function setTarget(?Player $target): self
+    public function setRecipient(?Player $recipient): self
     {
-        $this->target = $target;
+        $this->recipient = $recipient;
 
         return $this;
     }

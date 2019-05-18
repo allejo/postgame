@@ -357,7 +357,7 @@ class ReplayImportService
 
         if ($pFrom <= BZChatTarget::LAST_PLAYER) {
             $message
-                ->setPlayer($this->currPlayersByIndex[$pFrom])
+                ->setSender($this->currPlayersByIndex[$pFrom])
                 ->setTeamFrom($this->currPlayersCurrentTeam[$pFrom])
             ;
         } else {
@@ -374,7 +374,7 @@ class ReplayImportService
             }
 
             $message
-                ->setTarget($this->currPlayersByIndex[$pTo])
+                ->setRecipient($this->currPlayersByIndex[$pTo])
                 ->setTeamTo($this->currPlayersCurrentTeam[$pTo])
             ;
         } else {

@@ -42,9 +42,14 @@ class Player
     private $captureEvents;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\ChatMessage", mappedBy="player")
+     * @ORM\OneToMany(targetEntity="App\Entity\ChatMessage", mappedBy="sender")
      */
-    private $chatMessages;
+    private $sentMessages;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ChatMessage", mappedBy="recipient")
+     */
+    private $receivedMessages;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\FlagUpdate", mappedBy="player", orphanRemoval=true)
@@ -74,7 +79,8 @@ class Player
     public function __construct()
     {
         $this->captureEvents = new ArrayCollection();
-        $this->chatMessages = new ArrayCollection();
+        $this->sentMessages = new ArrayCollection();
+        $this->receivedMessages = new ArrayCollection();
         $this->flagUpdates = new ArrayCollection();
         $this->joinEvents = new ArrayCollection();
         $this->deathEvents = new ArrayCollection();
@@ -145,28 +151,59 @@ class Player
     /**
      * @return Collection|ChatMessage[]
      */
-    public function getChatMessages(): Collection
+    public function getSentMessages(): Collection
     {
-        return $this->chatMessages;
+        return $this->sentMessages;
     }
 
-    public function addChatMessage(ChatMessage $chatMessage): self
+    public function addSentMessage(ChatMessage $chatMessage): self
     {
-        if (!$this->chatMessages->contains($chatMessage)) {
-            $this->chatMessages[] = $chatMessage;
-            $chatMessage->setPlayer($this);
+        if (!$this->sentMessages->contains($chatMessage)) {
+            $this->sentMessages[] = $chatMessage;
+            $chatMessage->setSender($this);
         }
 
         return $this;
     }
 
-    public function removeChatMessage(ChatMessage $chatMessage): self
+    public function removeSentMessage(ChatMessage $chatMessage): self
     {
-        if ($this->chatMessages->contains($chatMessage)) {
-            $this->chatMessages->removeElement($chatMessage);
+        if ($this->sentMessages->contains($chatMessage)) {
+            $this->sentMessages->removeElement($chatMessage);
             // set the owning side to null (unless already changed)
-            if ($chatMessage->getPlayer() === $this) {
-                $chatMessage->setPlayer(null);
+            if ($chatMessage->getSender() === $this) {
+                $chatMessage->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ChatMessage[]
+     */
+    public function getReceivedMessages(): Collection
+    {
+        return $this->receivedMessages;
+    }
+
+    public function addReceivedMessage(ChatMessage $receivedMessage): self
+    {
+        if (!$this->receivedMessages->contains($receivedMessage)) {
+            $this->receivedMessages[] = $receivedMessage;
+            $receivedMessage->setRecipient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceivedMessage(ChatMessage $receivedMessage): self
+    {
+        if ($this->receivedMessages->contains($receivedMessage)) {
+            $this->receivedMessages->removeElement($receivedMessage);
+            // set the owning side to null (unless already changed)
+            if ($receivedMessage->getRecipient() === $this) {
+                $receivedMessage->setRecipient(null);
             }
         }
 
