@@ -1,27 +1,73 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <p>{{ filename }}</p>
-    <p>{{ duration }} minutes</p>
-    <p>
-        {{ winner | team_literal | title }} ({{ winner_score }}) vs ({{ loser_score }}) {{ loser | team_literal | title }}
-    </p>
+    <div class="container">
+        <p>{{ filename }}</p>
+        <p>{{ duration }} minutes</p>
+        <p>
+            {{ winner | team_literal | title }} ({{ winner_score }}) vs ({{ loser_score }}) {{ loser | team_literal | title }}
+        </p>
 
-    <ul>
-        {% for i, player in players %}
-            <li>
-                {{ player.callsign }} (Team: {{ player.teamLiteral }}) [{{ player.score.kills }} - {{ player.score.deaths }} - {{ player.score.teamKills }}]
+        <section>
+            <h2>Scoreboard</h2>
 
-                <ul>
-                    {% for j, stats in player.against %}
-                        <li>
-                            vs. {{ players[j].callsign }} [{{ stats.kills }} - {{ stats.deaths }}]
-                        </li>
+            <table class="table--skinny" data-sortable="true">
+                <thead>
+                    <tr>
+                        <th data-sort-case-insensitive="true">
+                            Callsign
+                        </th>
+                        <th data-sort-cast="number">
+                            Team
+                        </th>
+                        <th data-sort-cast="number">
+                            Score
+                        </th>
+                        <th data-sort-cast="number">
+                            Kills
+                        </th>
+                        <th data-sort-cast="number">
+                            Deaths
+                        </th>
+                        <th data-sort-cast="number">
+                            Team Kills
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for player in players %}
+                        <tr>
+                            <td>{{ player.callsign }}</td>
+                            <td data-sort-value="{{ player.team }}">
+                                <abbr title="{{ player.teamLiteral | title }} team">
+                                    ({{ player.teamLiteral | upper | split('') | first }})
+                                </abbr>
+                            </td>
+                            <td>{{ player.score.kills - player.score.deaths }}</td>
+                            <td>{{ player.score.kills }}</td>
+                            <td>{{ player.score.deaths }}</td>
+                            <td>{{ player.score.teamKills }}</td>
+                        </tr>
                     {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
+                </tbody>
+            </table>
+        </section>
 
-{#    {{ players | json_encode }}#}
+        <ul>
+            {% for i, player in players %}
+                <li>
+                    {{ player.callsign }} (Team: {{ player.teamLiteral }}) [{{ player.score.kills }} - {{ player.score.deaths }} - {{ player.score.teamKills }}]
+
+                    <ul>
+                        {% for j, stats in player.against %}
+                            <li>
+                                vs. {{ players[j].callsign }} [{{ stats.kills }} - {{ stats.deaths }}]
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}
