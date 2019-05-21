@@ -5,6 +5,8 @@
  * (and its CSS file) in your base layout (base.html.twig).
  */
 
+require('@fortawesome/fontawesome-free/css/all.min.css');
+
 // any CSS you require will output into a single css file (app.css in this case)
 require('../vendor/style-guide/src/sass/styles.scss');
 require('../css/app.css');
