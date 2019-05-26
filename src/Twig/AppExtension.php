@@ -10,6 +10,7 @@
 namespace App\Twig;
 
 use App\Utility\BZTeamType;
+use App\Utility\StringUtilities;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -18,6 +19,7 @@ class AppExtension extends AbstractExtension
     public function getFilters()
     {
         return [
+            new TwigFilter('slug', [StringUtilities::class, 'slug']),
             new TwigFilter('team_literal', [BZTeamType::class, 'toString']),
         ];
     }
