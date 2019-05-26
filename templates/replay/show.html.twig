@@ -1,60 +1,103 @@
 {% extends 'base.html.twig' %}
 
+{% macro team_card(team, score) %}
+    {%- set team_str = team | team_literal -%}
+
+    <div class="team-card col-12 col-md-6">
+        <div class="team-card__icon">
+            <img
+                src="{{ asset('build/team_' ~ (team_str | lower) ~ '.png') }}"
+                alt="{{ team_str | title }} team icon"
+            >
+        </div>
+        <div class="team-card__name">
+            {{ team_str | title }} Team
+        </div>
+        <div class="team-card__score">
+            {{ score }}
+        </div>
+    </div>
+{% endmacro %}
+
 {% block body %}
+    {% from _self import team_card %}
+
     <div class="container">
-        <p>{{ filename }}</p>
-        <p>{{ duration }} minutes</p>
-        <p>
-            {{ winner | team_literal | title }} ({{ winner_score }}) vs ({{ loser_score }}) {{ loser | team_literal | title }}
-        </p>
+        <div class="score-card row">
+            {{ team_card(winner, winner_score) }}
+            {{ team_card(loser, loser_score) }}
+        </div>
 
-        <section>
-            <h2>Scoreboard</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Recording Details</h2>
 
-            <table class="table--skinny" data-sortable="true">
-                <thead>
-                    <tr>
-                        <th data-sort-case-insensitive="true">
-                            Callsign
-                        </th>
-                        <th data-sort-cast="number">
-                            Team
-                        </th>
-                        <th data-sort-cast="number">
-                            Score
-                        </th>
-                        <th data-sort-cast="number">
-                            Kills
-                        </th>
-                        <th data-sort-cast="number">
-                            Deaths
-                        </th>
-                        <th data-sort-cast="number">
-                            Team Kills
-                        </th>
-                    </tr>
-                </thead>
+                <dl>
+                    <dt>Timestamp</dt>
+                    <dd>
+                        <time datetime="{{ start | date('c') }}">
+                            {{ start | date('F d, Y G:i e') }}
+                        </time>
+                    </dd>
 
-                <tbody>
-                    {% for player in players if player.score.kills != 0 and player.score.deaths != 0 %}
-                        <tr>
-                            <td>{{ player.callsign }}</td>
-                            <td data-sort-value="{{ player.team }}">
-                                <abbr title="{{ player.teamLiteral | title }} team">
-                                    ({{ player.teamLiteral | upper | split('') | first }})
-                                </abbr>
-                            </td>
-                            <td>{{ player.score.kills - player.score.deaths }}</td>
-                            <td>{{ player.score.kills }}</td>
-                            <td>{{ player.score.deaths }}</td>
-                            <td>{{ player.score.teamKills }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
+                    <dt>Duration</dt>
+                    <dd>{{ duration }} minutes</dd>
 
-        <section>
+                    <dt>Filename</dt>
+                    <dd>{{ filename }}</dd>
+                </dl>
+            </div>
+
+            <div class="col-md-6">
+                <section class="mb-3">
+                    <h2>Scoreboard</h2>
+
+                    <table class="table--skinny w-100" data-sortable="true">
+                        <thead>
+                            <tr>
+                                <th class="w-100" data-sort-case-insensitive="true">
+                                    Callsign
+                                </th>
+                                <th data-sort-cast="number">
+                                    Team
+                                </th>
+                                <th data-sort-cast="number">
+                                    Score
+                                </th>
+                                <th data-sort-cast="number">
+                                    Kills
+                                </th>
+                                <th data-sort-cast="number">
+                                    Deaths
+                                </th>
+                                <th data-sort-cast="number">
+                                    Team Kills
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for player in players if player.score.kills != 0 and player.score.deaths != 0 %}
+                                <tr>
+                                    <td>{{ player.callsign }}</td>
+                                    <td class="text-center" data-sort-value="{{ player.team }}">
+                                        <abbr title="{{ player.teamLiteral | title }} team">
+                                            ({{ player.teamLiteral | upper | split('') | first }})
+                                        </abbr>
+                                    </td>
+                                    <td class="text-center">{{ player.score.kills - player.score.deaths }}</td>
+                                    <td class="text-center">{{ player.score.kills }}</td>
+                                    <td class="text-center">{{ player.score.deaths }}</td>
+                                    <td class="text-center">{{ player.score.teamKills }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </div>
+
+        <section class="border-t my-4 py-4">
             <h2>Player Roster</h2>
 
             <div class="tabs" data-role="tablist" data-tab-desc="Player roster">
@@ -69,18 +112,21 @@
 
                         <div class="row">
                             <div class="col-md-6">
-                                callsign: {{ player.callsign }}
+                                <dl>
+                                    <dt>Callsign</dt>
+                                    <dd>{{ player.callsign }}</dd>
+                                </dl>
                             </div>
                             <div class="col-md-6">
-                                <h3>
+                                <h3 class="h4">
                                     <abbr title="Kills and deaths">K/D</abbr>
                                     Stats Against
                                 </h3>
 
-                                <table class="table--skinny">
+                                <table class="table--skinny w-100">
                                     <thead>
                                         <tr>
-                                            <th>Callsign</th>
+                                            <th class="w-100">Callsign</th>
                                             <th>Kills</th>
                                             <th>Deaths</th>
                                         </tr>
@@ -89,8 +135,8 @@
                                         {% for j, stats in player.against %}
                                             <tr>
                                                 <td>{{ players[j].callsign }}</td>
-                                                <td>{{ stats.kills }}</td>
-                                                <td>{{ stats.deaths }}</td>
+                                                <td class="text-center">{{ stats.kills }}</td>
+                                                <td class="text-center">{{ stats.deaths }}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>

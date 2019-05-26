@@ -63,8 +63,8 @@ class ReplayController extends AbstractController
             $replaySummary = [
                 'id' => $replay->getId(),
                 'filename' => $replay->getFileName(),
-                'start' => $replay->getStartTime()->format(DATE_ATOM),
-                'end' => $replay->getEndTime()->format(DATE_ATOM),
+                'start' => $replay->getStartTime(),
+                'end' => $replay->getEndTime(),
                 'duration' => $summaryService->getDuration(),
                 'winner' => $summaryService->getWinner(),
                 'winner_score' => $summaryService->getWinnerScore(),
@@ -77,6 +77,9 @@ class ReplayController extends AbstractController
         }
 
         if ($_format === 'json') {
+            $replaySummary['start'] = $replaySummary['start']->format(DATE_ATOM);
+            $replaySummary['end'] = $replaySummary['end']->format(DATE_ATOM);
+
             return $this->json($replaySummary);
         }
 

@@ -1,0 +1,53 @@
+.score-card {
+    @include font-size(h4);
+    @include margin(b, 4);
+    @include padding(y, 4);
+
+    border-bottom: $border-default;
+
+    @include respond-up(md) {
+        @include font-size(h3);
+    }
+}
+
+.team-card {
+    align-items: center;
+    display: flex;
+
+    &:nth-child(even) {
+        @include respond-up(md) {
+            .team-card__icon {
+                order: 3;
+            }
+
+            .team-card__name {
+                text-align: right;
+            }
+
+            .team-card__score {
+                order: -1;
+            }
+        }
+    }
+}
+
+.team-card__name,
+.team-card__score {
+    @include padding(x, 3);
+}
+
+.team-card__icon {
+    img {
+        height: 50px;
+        width: 50px;
+
+        @include respond-up(md) {
+            height: 100px;
+            width: 100px;
+        }
+    }
+}
+
+.team-card__name {
+    flex: 1;
+}
