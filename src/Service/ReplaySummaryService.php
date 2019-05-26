@@ -101,9 +101,11 @@ class ReplaySummaryService
     {
         $this->throwUnsummarizedException();
 
-        $loser = array_keys($this->teamScores->getAsArray(), min($this->teamScores->getAsArray()));
+        $winner = $this->getWinner();
+        $teams = $this->teamScores->getAsArray();
+        unset($teams[$winner]);
 
-        return $loser[0];
+        return array_keys($teams)[0];
     }
 
     /**
