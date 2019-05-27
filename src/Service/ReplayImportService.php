@@ -137,11 +137,13 @@ class ReplayImportService
 
         $this->initInstanceVariables();
         $replay = new BZFlagReplay($filename);
+        $sha1 = sha1_file($filename);
 
         $this->currReplay = new Replay();
         $this->currReplay
             ->setDuration($replay->getHeader()->getFileTimeAsSeconds())
             ->setFileName(basename($filename))
+            ->setFileHash($sha1)
             ->setStartTime($replay->getStartTime())
             ->setEndTime($replay->getEndTime())
         ;

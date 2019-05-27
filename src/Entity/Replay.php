@@ -80,6 +80,11 @@ class Replay
      */
     private $partEvents;
 
+    /**
+     * @ORM\Column(type="string", length=40, nullable=true)
+     */
+    private $file_hash;
+
     public function __construct()
     {
         $this->players = new ArrayCollection();
@@ -357,6 +362,18 @@ class Replay
                 $partEvent->setReplay(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFileHash(): ?string
+    {
+        return $this->file_hash;
+    }
+
+    public function setFileHash(?string $file_hash): self
+    {
+        $this->file_hash = $file_hash;
 
         return $this;
     }
