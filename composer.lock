@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "allejo/bzflag-networking.php",
-            "version": "v1.0.1",
+            "version": "v1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/allejo/bzflag-networking.php.git",
-                "reference": "2d4aaa6af180d136ea36805e8946b2428f4c0a98"
+                "reference": "aa57df7eef944dcaff9b8de88ffabda26811867a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/allejo/bzflag-networking.php/zipball/2d4aaa6af180d136ea36805e8946b2428f4c0a98",
-                "reference": "2d4aaa6af180d136ea36805e8946b2428f4c0a98",
+                "url": "https://api.github.com/repos/allejo/bzflag-networking.php/zipball/aa57df7eef944dcaff9b8de88ffabda26811867a",
+                "reference": "aa57df7eef944dcaff9b8de88ffabda26811867a",
                 "shasum": ""
             },
             "require": {
@@ -45,7 +45,7 @@
                 }
             ],
             "description": "A library for unpacking BZFlag network packets",
-            "time": "2019-05-27T03:26:56+00:00"
+            "time": "2019-05-27T09:05:01+00:00"
         },
         {
             "name": "doctrine/annotations",
