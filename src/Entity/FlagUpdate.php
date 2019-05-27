@@ -9,12 +9,13 @@
 
 namespace App\Entity;
 
+use App\Utility\IMatchTimeEvent;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\FlagUpdateRepository")
  */
-class FlagUpdate
+class FlagUpdate implements IMatchTimeEvent
 {
     /**
      * @ORM\Id()

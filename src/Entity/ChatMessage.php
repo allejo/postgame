@@ -9,12 +9,13 @@
 
 namespace App\Entity;
 
+use App\Utility\IMatchTimeEvent;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ChatMessageRepository")
  */
-class ChatMessage
+class ChatMessage implements IMatchTimeEvent
 {
     /**
      * @ORM\Id()

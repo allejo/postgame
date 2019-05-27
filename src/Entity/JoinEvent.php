@@ -9,12 +9,13 @@
 
 namespace App\Entity;
 
+use App\Utility\IMatchTimeEvent;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\JoinEventRepository")
  */
-class JoinEvent
+class JoinEvent implements IMatchTimeEvent
 {
     /**
      * @ORM\Id()

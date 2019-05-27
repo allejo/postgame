@@ -14,6 +14,9 @@ class SummaryDeathRecord
     /** @var int */
     public $killedBy;
 
+    /** @var string */
+    public $matchTime;
+
     /** @var \DateTime */
     public $timestamp;
 }

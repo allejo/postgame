@@ -21,6 +21,9 @@ class SummaryCaptureRecord
      */
     public $team;
 
+    /** @var string */
+    public $matchTime;
+
     /** @var \DateTime */
     public $timestamp;
 }

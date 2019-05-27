@@ -2,12 +2,13 @@
 
 namespace App\Entity;
 
+use App\Utility\IMatchTimeEvent;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ResumeEventRepository")
  */
-class ResumeEvent
+class ResumeEvent implements IMatchTimeEvent
 {
     /**
      * @ORM\Id()

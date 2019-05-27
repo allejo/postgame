@@ -17,6 +17,7 @@ use App\Entity\Player;
 use App\Entity\Replay;
 use App\Utility\BZTeamType;
 use App\Utility\DefaultArray;
+use App\Utility\IMatchTimeEvent;
 use App\Utility\SummaryCaptureRecord;
 use App\Utility\SummaryDeathRecord;
 use App\Utility\SummaryKillRecord;
@@ -32,6 +33,9 @@ class ReplaySummaryService
 
     /** @var SummaryPlayerRecord[] */
     private $playerRecords;
+
+    /** @var SummaryCaptureRecord[] */
+    private $flagCaptures;
 
     /** @var int[] */
     private $teamScores;
@@ -255,8 +259,10 @@ class ReplaySummaryService
             $record = new SummaryCaptureRecord();
             $record->playerId = $capperId;
             $record->team = $cap->getCapperTeam();
+            $record->matchTime = $this->calculateMatchTime($cap);
             $record->timestamp = $cap->getTimestamp();
 
+            $this->flagCaptures[] = $record;
             $this->playerRecords[$capperId]->flagCaptures[] = $record;
 
             ++$this->teamScores[$cap->getCapperTeam()];
@@ -309,6 +315,21 @@ class ReplaySummaryService
         }
 
         return $key;
+    }
+
+    /**
+     * @param IMatchTimeEvent $event
+     *
+     * @return string
+     */
+    private function calculateMatchTime(IMatchTimeEvent $event)
+    {
+        $secSinceStart = $event->getMatchSeconds();
+        $totalDuration = $event->getReplay()->getDuration();
+
+        $seconds = $totalDuration - $secSinceStart;
+
+        return sprintf('[%d:%d]', (int)($seconds / 60), (int)($seconds % 60));
     }
 
     /**

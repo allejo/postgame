@@ -14,6 +14,9 @@ class SummaryKillRecord
     /** @var int */
     public $victim;
 
+    /** @var string */
+    public $matchTime;
+
     /** @var \DateTime */
     public $timestamp;
 }

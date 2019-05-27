@@ -2,12 +2,13 @@
 
 namespace App\Entity;
 
+use App\Utility\IMatchTimeEvent;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\PauseEventRepository")
  */
-class PauseEvent
+class PauseEvent implements IMatchTimeEvent
 {
     /**
      * @ORM\Id()

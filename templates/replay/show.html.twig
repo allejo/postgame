@@ -125,7 +125,7 @@
                                     <ul>
                                         {% for cap in player.flagCaptures %}
                                             <li>
-                                                ({{ cap.timestamp | date('c') }}) {{ cap.team | team_literal | upper | slice(0, 1) }}*
+                                                {{ cap.matchTime }} Captured {{ cap.team | team_literal | upper | slice(0, 1) }}*
                                             </li>
                                         {% else %}
                                             <li>No caps this match</li>
