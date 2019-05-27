@@ -77,19 +77,21 @@
                         </thead>
 
                         <tbody>
-                            {% for player in players if player.score.kills != 0 and player.score.deaths != 0 %}
-                                <tr>
-                                    <td>{{ player.callsign }}</td>
-                                    <td class="text-center" data-sort-value="{{ player.team }}">
-                                        <abbr title="{{ player.teamLiteral | title }} team">
-                                            ({{ player.teamLiteral | upper | split('') | first }})
-                                        </abbr>
-                                    </td>
-                                    <td class="text-center">{{ player.score.kills - player.score.deaths }}</td>
-                                    <td class="text-center">{{ player.score.kills }}</td>
-                                    <td class="text-center">{{ player.score.deaths }}</td>
-                                    <td class="text-center">{{ player.score.teamKills }}</td>
-                                </tr>
+                            {% for player in players %}
+                                {% if player.score.kills != 0 and player.score.deaths != 0  %}
+                                    <tr>
+                                        <td>{{ player.callsign }}</td>
+                                        <td class="text-center" data-sort-value="{{ player.team }}">
+                                            <abbr title="{{ player.teamLiteral | title }} team">
+                                                ({{ player.teamLiteral | upper | split('') | first }})
+                                            </abbr>
+                                        </td>
+                                        <td class="text-center">{{ player.score.kills - player.score.deaths }}</td>
+                                        <td class="text-center">{{ player.score.kills }}</td>
+                                        <td class="text-center">{{ player.score.deaths }}</td>
+                                        <td class="text-center">{{ player.score.teamKills }}</td>
+                                    </tr>
+                                {% endif %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -101,37 +103,50 @@
             <h2>Player Roster</h2>
 
             <div class="tabs" data-role="tablist" data-tab-desc="Player roster">
-                {% for i, player in players if player.score.kills != 0 and player.score.deaths != 0 %}
-                    <article
-                        id="{{ player.callsign | slug }}"
-                        class="tabs__tab"
-                        data-role="tab"
-                        data-tab-heading="{{ player.callsign }} ({{ player.teamLiteral | title }})"
-                    >
-                        <h2 class="sr-only">{{ player.callsign }}</h2>
+                {% for i, player in players %}
+                    {% if player.score.kills != 0 and player.score.deaths != 0 %}
+                        <article
+                            id="{{ player.callsign | slug }}"
+                            class="tabs__tab"
+                            data-role="tab"
+                            data-tab-heading="{{ player.callsign }} ({{ player.teamLiteral | title }})"
+                        >
+                            <h2 class="sr-only">{{ player.callsign }}</h2>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <dl>
-                                    <dt>Callsign</dt>
-                                    <dd>{{ player.callsign }}</dd>
-                                </dl>
-                            </div>
-                            <div class="col-md-6">
-                                <h3 class="h4">
-                                    <abbr title="Kills and deaths">K/D</abbr>
-                                    Stats Against
-                                </h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <dl>
+                                        <dt>Callsign</dt>
+                                        <dd>{{ player.callsign }}</dd>
+                                    </dl>
 
-                                <table class="table--skinny w-100">
-                                    <thead>
+                                    <h3>Flag Captures</h3>
+
+                                    <ul>
+                                        {% for cap in player.flagCaptures %}
+                                            <li>
+                                                ({{ cap.timestamp | date('c') }}) {{ cap.team | team_literal | upper | slice(0, 1) }}*
+                                            </li>
+                                        {% else %}
+                                            <li>No caps this match</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h3 class="h4">
+                                        <abbr title="Kills and deaths">K/D</abbr>
+                                        Stats Against
+                                    </h3>
+
+                                    <table class="table--skinny w-100">
+                                        <thead>
                                         <tr>
                                             <th class="w-100">Callsign</th>
                                             <th>Kills</th>
                                             <th>Deaths</th>
                                         </tr>
-                                    </thead>
-                                    <tbody>
+                                        </thead>
+                                        <tbody>
                                         {% for j, stats in player.against %}
                                             <tr>
                                                 <td>{{ players[j].callsign }}</td>
@@ -139,11 +154,12 @@
                                                 <td class="text-center">{{ stats.deaths }}</td>
                                             </tr>
                                         {% endfor %}
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    {% endif %}
                 {% endfor %}
             </div>
         </section>
