@@ -135,6 +135,9 @@ class ReplayImportService
      */
     private $lastPausePacket;
 
+    /** @var int The duration the current match is scheduled to be in seconds. */
+    private $duration;
+
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
@@ -165,7 +168,6 @@ class ReplayImportService
 
         $this->currReplay = new Replay();
         $this->currReplay
-            ->setDuration($replay->getHeader()->getFileTimeAsSeconds())
             ->setFileName(basename($filename))
             ->setFileHash($sha1)
             ->setStartTime($replay->getStartTime())
@@ -198,6 +200,7 @@ class ReplayImportService
         $this->currFuturePlayers = [];
         $this->currPartialJoins = [];
         $this->lastPausePacket = null;
+        $this->duration = null;
     }
 
     /**
@@ -448,6 +451,30 @@ class ReplayImportService
 
     private function handleMsgTimeUpdate(MsgTimeUpdate $packet): void
     {
+        // This is the first MsgTimeUpdate we got, so let's estimate the duration
+        // of the match.
+        if ($this->duration === null) {
+            // BZFS sends a MsgTimeUpdate packet when a timed match starts
+            // (https://git.io/fjRrK), which contains the expected duration of
+            // the timed match. However, replays do not see this initial packet
+            // because the bz_GameStartEndEventData_V2 is fired after
+            // (https://git.io/fjRr6) the MsgTimeUpdate packet has been sent.
+            //
+            // The recording will only have the *second* MsgTimeUpdate packet
+            // sent in an actual timed match. For this reason, we'll use this
+            // hack to calculate the duration of a match in minutes and round up
+            // to the nearest minute to get the value the first MsgTimeUpdate
+            // packet would have had.
+            //
+            // e.g. 1169 / 60 = ciel(19.48) = 20 minutes
+
+            $this->duration = (int)(ceil($packet->getTimeLeft() / 60) * 60);
+
+            $this->currReplay->setDuration($this->duration);
+
+            return;
+        }
+
         // The countdown of a match was paused
         if ($packet->getTimeLeft() < 0) {
             $this->lastPausePacket = $packet;
