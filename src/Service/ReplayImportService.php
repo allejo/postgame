@@ -148,8 +148,7 @@ class ReplayImportService
 
         $this->em->persist($this->currReplay);
 
-        $packets = $replay->getPackets();
-        foreach ($packets as $packet) {
+        foreach ($replay->getPacketsIterable() as $packet) {
             $this->handlePacket($packet);
         }
 
