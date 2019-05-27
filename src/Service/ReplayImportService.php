@@ -18,6 +18,7 @@ use allejo\bzflag\networking\Packets\MsgFlagGrab;
 use allejo\bzflag\networking\Packets\MsgKilled;
 use allejo\bzflag\networking\Packets\MsgMessage;
 use allejo\bzflag\networking\Packets\MsgRemovePlayer;
+use allejo\bzflag\networking\Packets\MsgTimeUpdate;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
 use allejo\bzflag\networking\Replay as BZFlagReplay;
 use App\Entity\CaptureEvent;
@@ -26,8 +27,10 @@ use App\Entity\FlagUpdate;
 use App\Entity\JoinEvent;
 use App\Entity\KillEvent;
 use App\Entity\PartEvent;
+use App\Entity\PauseEvent;
 use App\Entity\Player;
 use App\Entity\Replay;
+use App\Entity\ResumeEvent;
 use App\Utility\BZChatTarget;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -111,6 +114,27 @@ class ReplayImportService
      */
     private $currPartialJoins;
 
+    /**
+     * The relative epoch timestamp of when this match has started. This epoch
+     * timestamp will be updated each time a match pauses and resumes so we can
+     * accurately get the amount of time left in a match by offsetting this
+     * value by the amount of time we were paused.
+     *
+     * @var int
+     */
+    private $relativeStartTime;
+
+    /**
+     * A MsgTimeUpdate packet with a nagetive `timeLeft` value means the
+     * countdown in a replay was paused. This variable will store the last time
+     * the match was paused so we can offset the countdown time.
+     *
+     * This value should only have a value when a match has been "paused."
+     *
+     * @var MsgTimeUpdate|null
+     */
+    private $lastPausePacket;
+
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
@@ -150,6 +174,8 @@ class ReplayImportService
 
         $this->em->persist($this->currReplay);
 
+        $this->relativeStartTime = $this->currReplay->getStartTime()->getTimestamp();
+
         foreach ($replay->getPacketsIterable() as $packet) {
             $this->handlePacket($packet);
         }
@@ -171,6 +197,7 @@ class ReplayImportService
         $this->currPlayersJoinRecord = [];
         $this->currFuturePlayers = [];
         $this->currPartialJoins = [];
+        $this->lastPausePacket = null;
     }
 
     /**
@@ -212,6 +239,10 @@ class ReplayImportService
 
             case MsgRemovePlayer::PACKET_TYPE:
                 $this->handleMsgRemovePlayer($packet);
+                break;
+
+            case MsgTimeUpdate::PACKET_TYPE:
+                $this->handleMsgTimeUpdate($packet);
                 break;
 
             default:
@@ -267,6 +298,7 @@ class ReplayImportService
                 ->setPlayer($player)
                 ->setMotto($packet->getMotto())
                 ->setTimestamp($packet->getTimestampAsDateTime())
+                ->setMatchSeconds($this->calculateRealMatchTime($packet))
             ;
 
             $this->currPlayersJoinRecord[$packet->getPlayerIndex()] = $joinEvent;
@@ -303,6 +335,7 @@ class ReplayImportService
             ->setCapperTeam($this->currPlayersCurrentTeam[$packet->getPlayerId()])
             ->setCappedTeam($packet->getTeam())
             ->setTimestamp($packet->getTimestampAsDateTime())
+            ->setMatchSeconds($this->calculateRealMatchTime($packet))
         ;
 
         $this->em->persist($captureEvent);
@@ -324,6 +357,7 @@ class ReplayImportService
             ->setPosY($packet->getFlag()->position[1])
             ->setPosZ($packet->getFlag()->position[2])
             ->setTimestamp($packet->getTimestampAsDateTime())
+            ->setMatchSeconds($this->calculateRealMatchTime($packet))
         ;
 
         $this->em->persist($flagEvent);
@@ -339,6 +373,7 @@ class ReplayImportService
             ->setKiller($this->currPlayersByIndex[$packet->getKillerId()])
             ->setKillerTeam($this->currPlayersCurrentTeam[$packet->getKillerId()])
             ->setTimestamp($packet->getTimestampAsDateTime())
+            ->setMatchSeconds($this->calculateRealMatchTime($packet))
         ;
 
         $this->em->persist($killEvent);
@@ -354,6 +389,7 @@ class ReplayImportService
             ->setReplay($this->currReplay)
             ->setMessage($packet->getMessage())
             ->setTimestamp($packet->getTimestampAsDateTime())
+            ->setMatchSeconds($this->calculateRealMatchTime($packet))
         ;
 
         if ($pFrom <= BZChatTarget::LAST_PLAYER) {
@@ -396,6 +432,7 @@ class ReplayImportService
             ->setPlayer($player)
             ->setTimestamp($packet->getTimestampAsDateTime())
             ->setJoinEvent($this->currPlayersJoinRecord[$playerId])
+            ->setMatchSeconds($this->calculateRealMatchTime($packet))
         ;
 
         $this->em->persist($partEvent);
@@ -407,6 +444,58 @@ class ReplayImportService
         if (in_array($playerId, $this->currFuturePlayers)) {
             unset($this->currFuturePlayers[$playerId]);
         }
+    }
+
+    private function handleMsgTimeUpdate(MsgTimeUpdate $packet): void
+    {
+        // The countdown of a match was paused
+        if ($packet->getTimeLeft() < 0) {
+            $this->lastPausePacket = $packet;
+
+            $event = new PauseEvent();
+            $event
+                ->setReplay($this->currReplay)
+                ->setTimestamp($packet->getTimestampAsDateTime())
+                ->setMatchSeconds($this->calculateRealMatchTime($packet))
+            ;
+
+            $this->em->persist($event);
+
+            return;
+        }
+
+        // The match was paused and now we're continuing the countdown
+        if ($this->lastPausePacket !== null) {
+            $packetTime = $packet->getTimestampAsDateTime()->getTimestamp();
+            $pausedTime = $this->lastPausePacket->getTimestampAsDateTime()->getTimestamp();
+
+            // See how long we've been paused for so we can offset our "start time"
+            $offset = $packetTime - $pausedTime;
+            $this->relativeStartTime += $offset;
+
+            $this->lastPausePacket = null;
+
+            $event = new ResumeEvent();
+            $event
+                ->setReplay($this->currReplay)
+                ->setTimestamp($packet->getTimestampAsDateTime())
+                ->setMatchSeconds($this->calculateRealMatchTime($packet))
+            ;
+
+            $this->em->persist($event);
+        }
+    }
+
+    /**
+     * Get the number of seconds *into* a match we're currently in.
+     *
+     * @param GamePacket $packet
+     *
+     * @return int
+     */
+    private function calculateRealMatchTime(GamePacket $packet): int
+    {
+        return $packet->getTimestampAsDateTime()->getTimestamp() - $this->relativeStartTime;
     }
 
     /**

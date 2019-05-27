@@ -50,6 +50,11 @@ class CaptureEvent
      */
     private $timestamp;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $matchSeconds;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -111,6 +116,18 @@ class CaptureEvent
     public function setTimestamp(\DateTimeInterface $timestamp): self
     {
         $this->timestamp = $timestamp;
+
+        return $this;
+    }
+
+    public function getMatchSeconds(): ?int
+    {
+        return $this->matchSeconds;
+    }
+
+    public function setMatchSeconds(?int $matchSeconds): self
+    {
+        $this->matchSeconds = $matchSeconds;
 
         return $this;
     }

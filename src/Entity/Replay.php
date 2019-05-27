@@ -83,7 +83,7 @@ class Replay
     /**
      * @ORM\Column(type="string", length=40, nullable=true)
      */
-    private $file_hash;
+    private $fileHash;
 
     public function __construct()
     {
@@ -368,12 +368,12 @@ class Replay
 
     public function getFileHash(): ?string
     {
-        return $this->file_hash;
+        return $this->fileHash;
     }
 
-    public function setFileHash(?string $file_hash): self
+    public function setFileHash(?string $fileHash): self
     {
-        $this->file_hash = $file_hash;
+        $this->fileHash = $fileHash;
 
         return $this;
     }

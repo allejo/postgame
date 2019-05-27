@@ -60,6 +60,11 @@ class JoinEvent
      */
     private $partEvent;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $matchSeconds;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -150,6 +155,18 @@ class JoinEvent
         if ($this !== $partEvent->getJoinEvent()) {
             $partEvent->setJoinEvent($this);
         }
+
+        return $this;
+    }
+
+    public function getMatchSeconds(): ?int
+    {
+        return $this->matchSeconds;
+    }
+
+    public function setMatchSeconds(?int $matchSeconds): self
+    {
+        $this->matchSeconds = $matchSeconds;
 
         return $this;
     }
