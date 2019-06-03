@@ -32,6 +32,7 @@ use App\Entity\Player;
 use App\Entity\Replay;
 use App\Entity\ResumeEvent;
 use App\Utility\BZChatTarget;
+use App\Utility\BZTeamType;
 use Doctrine\ORM\EntityManagerInterface;
 
 class ReplayImportService
@@ -137,6 +138,9 @@ class ReplayImportService
 
     /** @var int The duration the current match is scheduled to be in seconds. */
     private $duration;
+
+    /** @var array<int, string> A map of flag IDs to flag abbreviations */
+    private $flagIDs;
 
     public function __construct(EntityManagerInterface $em)
     {
@@ -336,7 +340,7 @@ class ReplayImportService
             ->setReplay($this->currReplay)
             ->setCapper($this->currPlayersByIndex[$packet->getPlayerId()])
             ->setCapperTeam($this->currPlayersCurrentTeam[$packet->getPlayerId()])
-            ->setCappedTeam($packet->getTeam())
+            ->setCappedTeam($this->getTeamFromFlagId($packet->getFlagId()))
             ->setTimestamp($packet->getTimestampAsDateTime())
             ->setMatchSeconds($this->calculateRealMatchTime($packet))
         ;
@@ -350,6 +354,12 @@ class ReplayImportService
      */
     private function handleMsgFlagUpdate(GamePacket $packet, bool $isGrab): void
     {
+        // A flag grab event by definition will always happen before a flag
+        // capture, so it's a cheating way of getting team values from flag IDs.
+        //
+        // Flag IDs don't change, so it's safe to always overwrite the values
+        $this->flagIDs[$packet->getFlag()->index] = $packet->getFlag()->abbv;
+
         $flagEvent = new FlagUpdate();
         $flagEvent
             ->setReplay($this->currReplay)
@@ -562,5 +572,29 @@ class ReplayImportService
         foreach ($packets as $packet) {
             $this->handlePacket($packet);
         }
+    }
+
+    /**
+     * Get the team from a flag abbreviation.
+     *
+     * **Warning:** This is not safe for flag IDs that are not tied to team flags.
+     *
+     * @see BZTeamType
+     *
+     * @param int $flagId
+     *
+     * @return int The numerical representation of a team color.
+     */
+    private function getTeamFromFlagId(int $flagId): int
+    {
+        $flagAbbv = $this->flagIDs[$flagId];
+        $teams = [
+            'R*' => BZTeamType::RED,
+            'G*' => BZTeamType::GREEN,
+            'B*' => BZTeamType::BLUE,
+            'P*' => BZTeamType::PURPLE,
+        ];
+
+        return $teams[$flagAbbv];
     }
 }
