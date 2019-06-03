@@ -15,11 +15,36 @@ class SummaryCaptureRecord
     public $playerId;
 
     /**
+     * The int value of the team that captured the flag.
+     *
      * @see BZTeamType
      *
      * @var int
      */
-    public $team;
+    public $cappingTeam;
+
+    /**
+     * The new score of the team tha capped this flag.
+     *
+     * @var int
+     */
+    public $cappingTeamScore;
+
+    /**
+     * The int value of the team that had their flag captured.
+     *
+     * @see BZTeamType
+     *
+     * @var int
+     */
+    public $cappedTeam;
+
+    /**
+     * The score of the team that had their flag captured.
+     *
+     * @var int
+     */
+    public $cappedTeamScore;
 
     /** @var string */
     public $matchTime;

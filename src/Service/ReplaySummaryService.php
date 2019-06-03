@@ -258,14 +258,15 @@ class ReplaySummaryService
 
             $record = new SummaryCaptureRecord();
             $record->playerId = $capperId;
-            $record->team = $cap->getCapperTeam();
+            $record->cappingTeam = $cap->getCapperTeam();
+            $record->cappingTeamScore = ++$this->teamScores[$cap->getCapperTeam()];
+            $record->cappedTeam = $cap->getCappedTeam();
+            $record->cappedTeamScore = $this->teamScores[$record->cappedTeam];
             $record->matchTime = $this->calculateMatchTime($cap);
             $record->timestamp = $cap->getTimestamp();
 
             $this->flagCaptures[] = $record;
             $this->playerRecords[$capperId]->flagCaptures[] = $record;
-
-            ++$this->teamScores[$cap->getCapperTeam()];
         }
     }
 
