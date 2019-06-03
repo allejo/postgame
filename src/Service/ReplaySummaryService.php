@@ -280,6 +280,10 @@ class ReplaySummaryService
 
         foreach ($this->playerRecords as $id => $record) {
             foreach ($record->sessions as $session) {
+                if ($session->team === BZTeamType::OBSERVER) {
+                    continue;
+                }
+
                 if ($session->totalTime === null) {
                     $teamLoyalty[$id][$session->team] += $replay->getEndTime()->getTimestamp() - $session->joinTime->getTimestamp();
                 } else {
@@ -289,7 +293,7 @@ class ReplaySummaryService
         }
 
         foreach ($this->playerRecords as $id => $record) {
-            $record->team = $this->reduceMax($teamLoyalty[$id]);
+            $record->team = $this->reduceMax($teamLoyalty[$id]) ?? BZTeamType::OBSERVER;
             $record->teamLiteral = BZTeamType::toString($record->team);
         }
     }
@@ -299,7 +303,7 @@ class ReplaySummaryService
      *
      * @return int
      */
-    private function reduceMax(iterable $arr): int
+    private function reduceMax(iterable $arr): ?int
     {
         $key = null;
         $max = null;
