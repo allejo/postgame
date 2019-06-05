@@ -104,6 +104,41 @@
         </div>
 
         <section class="border-t my-4 py-4">
+            <h2>Flag Capture Timeline</h2>
+
+            <ul class="mb-0">
+                {% for flag_cap in flag_caps %}
+                    {% set playerId = flag_cap.playerId %}
+                    <li>
+                        <time
+                            datetime="{{ flag_cap.timestamp | date('c') }}"
+                            title="{{ flag_cap.timestamp | date('F d, Y G:i e') }}"
+                        >
+                            {{ flag_cap.matchTime }}
+                        </time>
+
+                        <span class="color-{{ flag_cap.cappingTeam | team_literal }}-team">
+                            {{ players[playerId].callsign }}
+                        </span>
+
+                        captured the
+
+                        <span class="color-{{ flag_cap.cappedTeam | team_literal }}-team">
+                            {{ flag_cap.cappedTeam | team_literal | title }}
+                        </span>
+
+                        team flag
+
+                        (
+                        {{ flag_cap.cappingTeam | team_literal | title }} ({{ flag_cap.cappingTeamScore }}) -
+                        ({{ flag_cap.cappedTeamScore }}) {{ flag_cap.cappedTeam | team_literal | title }}
+                        )
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="border-t my-4 py-4">
             <h2>Player Roster</h2>
 
             <div class="tabs" data-role="tablist" data-tab-desc="Player roster">
@@ -129,7 +164,8 @@
                                     <ul>
                                         {% for cap in player.flagCaptures %}
                                             <li>
-                                                {{ cap.matchTime }} Captured {{ cap.team | team_literal | upper | slice(0, 1) }}*
+                                                {{ cap.matchTime }} Captured {{ cap.cappingTeam | team_literal | upper | slice(0, 1) }}*
+                                                (Score: {{ cap.cappingTeamScore }} - {{ cap.cappedTeamScore }})
                                             </li>
                                         {% else %}
                                             <li>No caps this match</li>

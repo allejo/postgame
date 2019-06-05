@@ -71,6 +71,7 @@ class ReplayController extends AbstractController
                 'loser' => $summaryService->getLoser(),
                 'loser_score' => $summaryService->getLoserScore(),
                 'players' => $summaryService->getPlayerRecords(),
+                'flag_caps' => $summaryService->getFlagCaps(),
             ];
         } catch (UnsummarizedException $e) {
             throw new HttpException(500, 'Replay summarizing failed');

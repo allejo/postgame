@@ -69,6 +69,16 @@ class ReplaySummaryService
     }
 
     /**
+     * Get a list of all the flag captures that happened in this match.
+     *
+     * @return SummaryCaptureRecord[]
+     */
+    public function getFlagCaps(): array
+    {
+        return $this->flagCaptures;
+    }
+
+    /**
      * @see BZTeamType
      *
      * @throws UnsummarizedException
