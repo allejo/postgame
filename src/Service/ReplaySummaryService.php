@@ -24,10 +24,40 @@ use App\Utility\SummaryKillRecord;
 use App\Utility\SummaryPlayerRecord;
 use App\Utility\SummarySession;
 use App\Utility\UnsummarizedException;
+use App\Utility\WrongSummarizationException;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Service for creating summaries of Replays.
+ *
+ * This service supports two methods of summarizing: quick and full.
+ *
+ * **Quick Summary Contents**
+ *
+ * - Match duration total
+ * - Team colors
+ * - Final team score
+ * - Capture records
+ *
+ * **Full Summary Contents**
+ *
+ * - Everything from a quick summary
+ * - Player kill, death, team kill records
+ * - Player versus records
+ * - Player sessions + loyalty
+ * - Player IP addresses
+ */
 class ReplaySummaryService
 {
+    /** @var int Default state for this service, where nothing has been summarized. */
+    const UNSUMMARIZED = 0;
+
+    /** @var int This service has summarized a replay in a quick manner. */
+    const SUMMARIZED_QUICK = 10;
+
+    /** @var int This service has summarized a replay completely. */
+    const SUMMARIZED_FULL = 20;
+
     /** @var EntityManagerInterface */
     private $em;
 
@@ -49,21 +79,32 @@ class ReplaySummaryService
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
-        $this->summarized = false;
+        $this->summarized = self::UNSUMMARIZED;
         $this->teamScores = new DefaultArray(0);
         $this->playerRecords = [];
     }
 
     /**
+     * Get the type of summary this service has built.
+     *
+     * @return int
+     */
+    public function getSummaryType(): int
+    {
+        return $this->summarized;
+    }
+
+    /**
      * Get the duration of the replay in minutes.
      *
+     * @throws WrongSummarizationException
      * @throws UnsummarizedException
      *
      * @return int
      */
     public function getDuration(): int
     {
-        $this->throwUnsummarizedException();
+        $this->requiresQuickSummary();
 
         return $this->duration;
     }
@@ -71,23 +112,29 @@ class ReplaySummaryService
     /**
      * Get a list of all the flag captures that happened in this match.
      *
+     * @throws UnsummarizedException
+     * @throws WrongSummarizationException
+     *
      * @return SummaryCaptureRecord[]
      */
     public function getFlagCaps(): array
     {
+        $this->requiresQuickSummary();
+
         return $this->flagCaptures;
     }
 
     /**
      * @see BZTeamType
      *
+     * @throws WrongSummarizationException
      * @throws UnsummarizedException
      *
      * @return int
      */
     public function getWinner(): int
     {
-        $this->throwUnsummarizedException();
+        $this->requiresQuickSummary();
 
         $winner = array_keys($this->teamScores->getAsArray(), max($this->teamScores->getAsArray()));
 
@@ -95,25 +142,29 @@ class ReplaySummaryService
     }
 
     /**
+     * @throws WrongSummarizationException
      * @throws UnsummarizedException
      *
      * @return int
      */
     public function getWinnerScore(): int
     {
+        $this->requiresQuickSummary();
+
         return $this->teamScores[$this->getWinner()];
     }
 
     /**
      * @see BZTeamType
      *
+     * @throws WrongSummarizationException
      * @throws UnsummarizedException
      *
      * @return int
      */
     public function getLoser(): int
     {
-        $this->throwUnsummarizedException();
+        $this->requiresQuickSummary();
 
         $winner = $this->getWinner();
         $teams = $this->teamScores->getAsArray();
@@ -123,38 +174,60 @@ class ReplaySummaryService
     }
 
     /**
+     * @throws WrongSummarizationException
      * @throws UnsummarizedException
      *
      * @return int
      */
     public function getLoserScore(): int
     {
+        $this->requiresQuickSummary();
+
         return $this->teamScores[$this->getLoser()];
     }
 
     /**
+     * @throws WrongSummarizationException
      * @throws UnsummarizedException
      *
      * @return SummaryPlayerRecord[]
      */
     public function getPlayerRecords(): array
     {
-        $this->throwUnsummarizedException();
+        $this->requiresFullSummary();
 
         return $this->playerRecords;
     }
 
     /**
+     * Get a quick summary for a replay.
+     *
      * @param Replay $replay
      */
-    public function summarize(Replay $replay): void
+    public function summarizeQuick(Replay $replay): void
     {
-        $this->duration = (int)ceil($replay->getDuration() / 60);
-
         $findByFilter = [
             'replay' => $replay,
         ];
 
+        $this->handleDuration($replay);
+        $this->handleCaps($findByFilter);
+
+        $this->summarized = self::SUMMARIZED_QUICK;
+    }
+
+    /**
+     * Get a full summary for a replay.
+     *
+     * @param Replay $replay
+     */
+    public function summarizeFull(Replay $replay): void
+    {
+        $findByFilter = [
+            'replay' => $replay,
+        ];
+
+        $this->handleDuration($replay);
         $this->handlePlayers($findByFilter);
         $this->handleKillRecords($findByFilter);
         $this->handleJoins($findByFilter);
@@ -162,7 +235,7 @@ class ReplaySummaryService
         $this->handleCaps($findByFilter);
         $this->handleTeamLoyalty($replay);
 
-        $this->summarized = true;
+        $this->summarized = self::SUMMARIZED_FULL;
     }
 
     /**
@@ -283,7 +356,7 @@ class ReplaySummaryService
     /**
      * @param Replay $replay
      */
-    private function handleTeamLoyalty(Replay $replay)
+    private function handleTeamLoyalty(Replay $replay): void
     {
         $teamLoyalty = new DefaultArray(function () {
             return new DefaultArray(0);
@@ -307,6 +380,14 @@ class ReplaySummaryService
             $record->team = $this->reduceMax($teamLoyalty[$id]) ?? BZTeamType::OBSERVER;
             $record->teamLiteral = BZTeamType::toString($record->team);
         }
+    }
+
+    /**
+     * @param Replay $replay
+     */
+    private function handleDuration(Replay $replay): void
+    {
+        $this->duration = (int)ceil($replay->getDuration() / 60);
     }
 
     /**
@@ -350,10 +431,36 @@ class ReplaySummaryService
     /**
      * @throws UnsummarizedException
      */
-    private function throwUnsummarizedException(): void
+    private function requiresSummary(): void
     {
-        if (!$this->summarized) {
-            throw new UnsummarizedException('No replay has been summarized; be sure to call summarize() first.');
+        if ($this->summarized === self::UNSUMMARIZED) {
+            throw new UnsummarizedException('No replay has been summarized; be sure to call summarizeFull() or summarizeQuick() first.');
+        }
+    }
+
+    /**
+     * @throws WrongSummarizationException
+     * @throws UnsummarizedException
+     */
+    private function requiresQuickSummary(): void
+    {
+        $this->requiresSummary();
+
+        if ($this->summarized < self::SUMMARIZED_QUICK) {
+            throw new WrongSummarizationException('This methods requires a quick summary; be sure to call summarizeQuick().');
+        }
+    }
+
+    /**
+     * @throws WrongSummarizationException
+     * @throws UnsummarizedException
+     */
+    private function requiresFullSummary(): void
+    {
+        $this->requiresSummary();
+
+        if ($this->summarized < self::SUMMARIZED_FULL) {
+            throw new WrongSummarizationException('This methods requires a full summary; be sure to call summarizeFull().');
         }
     }
 }
