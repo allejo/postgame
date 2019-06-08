@@ -583,7 +583,7 @@ class ReplayImportService
      *
      * @param int $flagId
      *
-     * @return int The numerical representation of a team color.
+     * @return int the numerical representation of a team color
      */
     private function getTeamFromFlagId(int $flagId): int
     {
