@@ -10,6 +10,7 @@
 namespace App\Repository;
 
 use App\Entity\Replay;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -26,32 +27,35 @@ class ReplayRepository extends ServiceEntityRepository
         parent::__construct($registry, Replay::class);
     }
 
-    // /**
-    //  * @return Replay[] Returns an array of Replay objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @param DateTime|null $start
+     * @param DateTime|null $end
+     *
+     * @return Replay[]
+     */
+    public function findByTimeRange(?DateTime $start, ?DateTime $end = null): array
     {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('r.id', 'ASC')
-            ->setMaxResults(10)
+        $qb = $this->createQueryBuilder('r');
+
+        if ($start !== null) {
+            $qb
+                ->andWhere('r.startTime < :start')
+                ->setParameter('start', $start)
+            ;
+        }
+
+        if ($end !== null) {
+            $qb
+                ->andWhere('r.startTime < :end')
+                ->setParameter('end', $end)
+            ;
+        }
+
+        return $qb
+            ->orderBy('r.startTime', 'DESC')
+            ->setMaxResults(20)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Replay
-    {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

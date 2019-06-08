@@ -11,6 +11,7 @@ namespace App\Controller;
 
 use App\Entity\Replay;
 use App\Service\ReplaySummaryService;
+use App\Utility\QuickReplaySummary;
 use App\Utility\UnsummarizedException;
 use App\Utility\WrongSummarizationException;
 use Psr\Log\LoggerInterface;
@@ -24,11 +25,45 @@ class ReplayController extends AbstractController
 {
     /**
      * @Route("/replays", name="replay")
+     *
+     * @param Request              $request
+     * @param ReplaySummaryService $summaryService
+     * @param LoggerInterface      $logger
+     *
+     * @return Response
      */
-    public function index(): Response
+    public function index(Request $request, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {
+        $timestamp = $request->get('after');
+
+        $em = $this->getDoctrine()->getManager();
+        $replays = $em->getRepository(Replay::class)->findByTimeRange($timestamp);
+
+        /** @var QuickReplaySummary[] $summaries */
+        $summaries = [];
+
+        foreach ($replays as $replay) {
+            $summaryService->summarizeQuick($replay);
+
+            try {
+                $summary = new QuickReplaySummary();
+                $summary->duration = $summaryService->getDuration();
+                $summary->winner = $summaryService->getWinner();
+                $summary->winnerScore = $summaryService->getWinnerScore();
+                $summary->loser = $summaryService->getLoser();
+                $summary->loserScore = $summaryService->getLoserScore();
+
+                $summaries[$replay->getId()] = $summary;
+            } catch (UnsummarizedException | WrongSummarizationException $e) {
+                $logger->warning('Replay ID {id} could not be summarized correctly', [
+                    'id' => $replay->getId(),
+                ]);
+            }
+        }
+
         return $this->render('replay/index.html.twig', [
-            'controller_name' => 'ReplayController',
+            'replays' => $replays,
+            'summaries' => $summaries,
         ]);
     }
 
