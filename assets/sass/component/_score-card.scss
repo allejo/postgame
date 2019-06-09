@@ -1,12 +1,17 @@
 .score-card {
     @include font-size(h4);
-    @include margin(b, 4);
-    @include padding(y, 4);
-
-    border-bottom: $border-default;
 
     @include respond-up(md) {
         @include font-size(h3);
+    }
+}
+
+.score-card--compact {
+    font-size: 1rem;
+
+    .team-card__icon img {
+        height: 50px;
+        width: 50px;
     }
 }
 

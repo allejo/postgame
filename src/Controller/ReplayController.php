@@ -11,6 +11,7 @@ namespace App\Controller;
 
 use App\Entity\Replay;
 use App\Service\ReplaySummaryService;
+use App\Utility\DefaultArray;
 use App\Utility\QuickReplaySummary;
 use App\Utility\UnsummarizedException;
 use App\Utility\WrongSummarizationException;
@@ -39,10 +40,15 @@ class ReplayController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $replays = $em->getRepository(Replay::class)->findByTimeRange($timestamp);
 
+        /** @var array<string, Replay[]> $replaysByDay */
+        $replaysByDay = new DefaultArray([]);
+
         /** @var QuickReplaySummary[] $summaries */
         $summaries = [];
 
         foreach ($replays as $replay) {
+            $replaysByDay[$replay->getStartTime()->format('Y-m-d')][] = $replay;
+
             $summaryService->summarizeQuick($replay);
 
             try {
@@ -62,7 +68,7 @@ class ReplayController extends AbstractController
         }
 
         return $this->render('replay/index.html.twig', [
-            'replays' => $replays,
+            'replays' => $replaysByDay,
             'summaries' => $summaries,
         ]);
     }

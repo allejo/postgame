@@ -1,36 +1,62 @@
 {% extends 'base.html.twig' %}
 
+{% from '_macros/versus-card.html.twig' import team_card %}
+
 {% block title %}Replay Index{% endblock %}
 
 {% block body %}
     <div class="container">
-        <section>
-            {% for replay in replays %}
-                {# @var summary \App\Utility\QuickReplaySummary #}
-                {% set summary = summaries[replay.id] %}
+        <div>
+            {% set curr_year = 'now' | date('Y') %}
+            {% for datetime, replay_list in replays %}
+                {% set replay_year = datetime | date('Y') %}
+                {% set date_fmt = (curr_year == replay_year) ? 'M d' : 'M d, Y' %}
 
-                <div class="d-flex">
-                    <div>
-                        <time datetime="{{ replay.startTime | date('c') }}">
-                            {{ replay.startTime | date('M d, Y') }}
-                        </time>
-                    </div>
+                <section>
+                    <h2 class="border-b py-2">
+                        {{ datetime | date(date_fmt) }}
+                    </h2>
 
-                    <div>
-                        {{ summary.winner | team_literal }} ({{ summary.winnerScore }}) vs ({{ summary.loserScore }}) {{ summary.loser | team_literal }}
-                    </div>
+                    {% for replay in replay_list %}
+                        {# @var summary \App\Utility\QuickReplaySummary #}
+                        {% set summary = summaries[replay.id] %}
 
-                    <div>
-                        {{ summary.duration }} minutes
-                    </div>
+                        <article class="border-b py-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div>
+                                    <time datetime="{{ replay.startTime | date('c') }}">
+                                        {{ replay.startTime | date('h:ia') }}
+                                    </time>
+                                </div>
 
-                    <div>
-                        <a href="{{ url('replay_show', { id: replay.id, filename: replay.fileName }) }}">
-                            View Replay
-                        </a>
-                    </div>
-                </div>
+                                <div class="score-card score-card--compact row flex-grow-1 px-3">
+                                    {{ team_card(summary.winner, summary.winnerScore ) }}
+                                    {{ team_card(summary.loser, summary.loserScore) }}
+                                </div>
+
+                                <div class="px-3">
+                                    <a
+                                        href="{{ url('replay_show', { id: replay.id, filename: replay.fileName }) }}"
+                                        title="View replay"
+                                    >
+                                        <i aria-hidden="true" class="fa fa-fw fa-angle-double-right"></i>
+                                        <span class="sr-only">View replay</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <small>Filename: <i>{{ replay.fileName }}</i></small>
+                                </div>
+
+                                <div class="col">
+                                    <small>Duration: <i>{{ summary.duration }} minutes</i></small>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </section>
             {% endfor %}
-        </section>
+        </div>
     </div>
 {% endblock %}
