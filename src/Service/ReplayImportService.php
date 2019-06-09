@@ -150,29 +150,41 @@ class ReplayImportService
     /**
      * Import a replay file into the database.
      *
-     * @param string $filename The filename or filepath to the replay to import
+     * @param string $filepath The filename or filepath to the replay to import
      * @param bool   $dryRun   Whether or not to actually write to the database
      *
      * @throws \InvalidArgumentException when a non-existent file is given or a directory is given
      * @throws PacketInvalidException    when an invalid replay is given
      */
-    public function importReplay(string $filename, bool $dryRun): void
+    public function importReplay(string $filepath, bool $dryRun): void
     {
-        if (!file_exists($filename)) {
-            throw new \InvalidArgumentException(sprintf('File not found: %s', $filename));
+        if (!file_exists($filepath)) {
+            throw new \InvalidArgumentException(sprintf('File not found: %s', $filepath));
         }
 
-        if (!is_file($filename)) {
+        if (!is_file($filepath)) {
             throw new \InvalidArgumentException(sprintf('A file must be given as a value for $filename'));
         }
 
         $this->initInstanceVariables();
-        $replay = new BZFlagReplay($filename);
-        $sha1 = sha1_file($filename);
+        $replay = new BZFlagReplay($filepath);
+        $filename = basename($filepath);
+        $sha1 = sha1_file($filepath);
+
+        $existing = $this->em->getRepository(Replay::class)->findBy([
+            'fileName' => $filename,
+            'fileHash' => $sha1,
+        ]);
+
+        // @TODO Possibly add support for reimporting the data, but not creating a new Replay entity
+        // Don't import duplicate replays
+        if (!empty($existing)) {
+            return;
+        }
 
         $this->currReplay = new Replay();
         $this->currReplay
-            ->setFileName(basename($filename))
+            ->setFileName($filename)
             ->setFileHash($sha1)
             ->setStartTime($replay->getStartTime())
             ->setEndTime($replay->getEndTime())
