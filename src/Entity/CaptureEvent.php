@@ -26,13 +26,13 @@ class CaptureEvent implements IMatchTimeEvent
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Replay", inversedBy="captureEvents")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $replay;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Player", inversedBy="captureEvents")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $capper;
 

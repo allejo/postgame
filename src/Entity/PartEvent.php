@@ -26,19 +26,19 @@ class PartEvent implements IMatchTimeEvent
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Replay", inversedBy="partEvents")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $replay;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Player", inversedBy="partEvents")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $player;
 
     /**
      * @ORM\OneToOne(targetEntity="App\Entity\JoinEvent", inversedBy="partEvent", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $joinEvent;
 

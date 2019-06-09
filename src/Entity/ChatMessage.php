@@ -26,7 +26,7 @@ class ChatMessage implements IMatchTimeEvent
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Replay", inversedBy="chatMessages")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $replay;
 

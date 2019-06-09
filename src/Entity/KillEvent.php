@@ -26,13 +26,13 @@ class KillEvent implements IMatchTimeEvent
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Replay", inversedBy="killEvents")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $replay;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Player", inversedBy="deathEvents")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $victim;
 

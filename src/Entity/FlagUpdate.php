@@ -26,13 +26,13 @@ class FlagUpdate implements IMatchTimeEvent
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Replay", inversedBy="flagUpdates")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $replay;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Player", inversedBy="flagUpdates")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $player;
 
