@@ -67,10 +67,10 @@ class ReplaySummaryService
     /** @var SummaryCaptureRecord[] */
     private $flagCaptures;
 
-    /** @var int[] */
+    /** @var DefaultArray */
     private $teamScores;
 
-    /** @var bool */
+    /** @var int */
     private $summarized;
 
     /** @var int */
