@@ -79,9 +79,8 @@ class ReplaySummaryService
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
-        $this->summarized = self::UNSUMMARIZED;
-        $this->teamScores = new DefaultArray(0);
-        $this->playerRecords = [];
+
+        $this->resetService();
     }
 
     /**
@@ -206,6 +205,8 @@ class ReplaySummaryService
      */
     public function summarizeQuick(Replay $replay): void
     {
+        $this->resetService();
+
         $findByFilter = [
             'replay' => $replay,
         ];
@@ -223,6 +224,8 @@ class ReplaySummaryService
      */
     public function summarizeFull(Replay $replay): void
     {
+        $this->resetService();
+
         $findByFilter = [
             'replay' => $replay,
         ];
@@ -462,5 +465,15 @@ class ReplaySummaryService
         if ($this->summarized < self::SUMMARIZED_FULL) {
             throw new WrongSummarizationException('This methods requires a full summary; be sure to call summarizeFull().');
         }
+    }
+
+    /**
+     * Reset the state of this service so it can be reused for other replays.
+     */
+    private function resetService(): void
+    {
+        $this->summarized = self::UNSUMMARIZED;
+        $this->teamScores = new DefaultArray(0);
+        $this->playerRecords = [];
     }
 }
