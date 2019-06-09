@@ -37,6 +37,24 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ReplayImportService
 {
+    /**
+     * The maximum number of replays that should be imported in a single batch.
+     * After this number, the entity manager should be cleared to avoid storing
+     * too much in memory and triggering OOM errors.
+     *
+     * @var int
+     */
+    private const BATCH_SIZE = 10;
+
+    /**
+     * The internal count of how many replays have been imported in the current
+     * batch. This number is reset to 0 each time the entity manager cache is
+     * cleared.
+     *
+     * @var int
+     */
+    private static $BATCH_COUNT = 0;
+
     /** @var EntityManagerInterface */
     private $em;
 
@@ -199,7 +217,15 @@ class ReplayImportService
         }
 
         if (!$dryRun) {
+            ++self::$BATCH_COUNT;
+
             $this->em->flush();
+
+            if (self::$BATCH_COUNT >= self::BATCH_SIZE) {
+                self::$BATCH_COUNT = 0;
+
+                $this->em->clear();
+            }
         }
     }
 
