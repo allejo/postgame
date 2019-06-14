@@ -499,9 +499,17 @@ class ReplayImportService
 
     private function handleMsgTimeUpdate(MsgTimeUpdate $packet): void
     {
-        // This is the first MsgTimeUpdate we got, so let's estimate the duration
-        // of the match.
-        if ($this->duration === null) {
+        // We have not been able to determine the duration of the match yet. This
+        // can occur for a number of reasons:
+        //
+        // 1. This is the first MsgTimeUpdate packet we've received
+        // 2. The first MsgTimeUpdate packet we've received had a remaining time
+        //    of -1, which means that the match was paused before the first real
+        //    MsgTimeUpdate could be sent.
+        //
+        // Keeping these facts in mind, let's do our best to grab the first
+        // MsgTimeUpdate packet that looks to have a valid value.
+        if ($this->duration === null && $packet->getTimeLeft() >= 0) {
             // BZFS sends a MsgTimeUpdate packet when a timed match starts
             // (https://git.io/fjRrK), which contains the expected duration of
             // the timed match. However, replays do not see this initial packet
