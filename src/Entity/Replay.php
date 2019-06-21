@@ -85,6 +85,11 @@ class Replay
      */
     private $fileHash;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true, options={"default": false})
+     */
+    private $canceled;
+
     public function __construct()
     {
         $this->players = new ArrayCollection();
@@ -374,6 +379,18 @@ class Replay
     public function setFileHash(?string $fileHash): self
     {
         $this->fileHash = $fileHash;
+
+        return $this;
+    }
+
+    public function getCanceled(): ?bool
+    {
+        return $this->canceled;
+    }
+
+    public function setCanceled(bool $canceled): self
+    {
+        $this->canceled = $canceled;
 
         return $this;
     }

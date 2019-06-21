@@ -194,6 +194,8 @@ class ReplayImportService
 
         $this->initInstanceVariables();
         $replay = new BZFlagReplay($filepath);
+        $rawDuration = $replay->getHeader()->getFileTimeAsSeconds();
+        $wasCanceled = false;
         $filename = basename($filepath);
         $sha1 = sha1_file($filepath);
 
@@ -235,6 +237,23 @@ class ReplayImportService
         foreach ($replay->getPacketsIterable() as $packet) {
             $this->handlePacket($packet);
         }
+
+        // We haven't had a change to calculate the duration of the match because it was canceled before we could get
+        // our first real MsgTimeUpdate packet
+        if ($this->duration === null) {
+            $this->duration = $rawDuration;
+            $this->currReplay->setDuration($rawDuration);
+
+            $wasCanceled = true;
+        }
+
+        // If we detected the match to be canceled explicitly or if the duration of the match is less than the estimated
+        // replay length.
+        if ($rawDuration < $this->duration) {
+            $wasCanceled = true;
+        }
+
+        $this->currReplay->setCanceled($wasCanceled);
 
         if (!$dryRun) {
             ++self::$BATCH_COUNT;
