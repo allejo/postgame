@@ -34,6 +34,7 @@ use App\Entity\ResumeEvent;
 use App\Utility\BZChatTarget;
 use App\Utility\BZTeamType;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class ReplayImportService
 {
@@ -57,6 +58,9 @@ class ReplayImportService
 
     /** @var EntityManagerInterface */
     private $em;
+
+    /** @var LoggerInterface */
+    private $logger;
 
     /**
      * The current Replay object we're working with.
@@ -160,21 +164,25 @@ class ReplayImportService
     /** @var array<int, string> A map of flag IDs to flag abbreviations */
     private $flagIDs;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger)
     {
         $this->em = $em;
+        $this->logger = $logger;
     }
 
     /**
      * Import a replay file into the database.
      *
      * @param string $filepath The filename or filepath to the replay to import
-     * @param bool   $dryRun   Whether or not to actually write to the database
+     * @param bool $dryRun Whether or not to actually write to the database
+     * @param bool $doUpgrade Keep the replay ID but reimport all other information about the replay
      *
      * @throws \InvalidArgumentException when a non-existent file is given or a directory is given
      * @throws PacketInvalidException    when an invalid replay is given
+     *
+     * @return bool Returns true if the import was successful
      */
-    public function importReplay(string $filepath, bool $dryRun): void
+    public function importReplay(string $filepath, bool $dryRun, bool $doUpgrade): bool
     {
         if (!file_exists($filepath)) {
             throw new \InvalidArgumentException(sprintf('File not found: %s', $filepath));
@@ -189,26 +197,38 @@ class ReplayImportService
         $filename = basename($filepath);
         $sha1 = sha1_file($filepath);
 
-        $existing = $this->em->getRepository(Replay::class)->findBy([
-            'fileName' => $filename,
+        $existing = $this->em->getRepository(Replay::class)->findOneBy([
             'fileHash' => $sha1,
         ]);
 
-        // @TODO Possibly add support for reimporting the data, but not creating a new Replay entity
         // Don't import duplicate replays
         if (!empty($existing)) {
-            return;
+            if (!$doUpgrade) {
+                return false;
+            }
+
+            $this->currReplay = $existing;
+            $this->performUpgrade($dryRun);
+
+            $this->logger->notice('Replay ID #{id} is being upgraded (hash: {hash})', [
+                'id' => $this->currReplay->getId(),
+                'hash' => substr($sha1, 0, 7),
+            ]);
+        } else {
+            $this->currReplay = new Replay();
+
+            // The hash should only ever be set on new imports and never changed after that
+            $this->currReplay->setFileHash($sha1);
+
+            // Only persist newly created replays
+            $this->em->persist($this->currReplay);
         }
 
-        $this->currReplay = new Replay();
         $this->currReplay
             ->setFileName($filename)
-            ->setFileHash($sha1)
             ->setStartTime($replay->getStartTime())
             ->setEndTime($replay->getEndTime())
         ;
-
-        $this->em->persist($this->currReplay);
 
         $this->relativeStartTime = $this->currReplay->getStartTime()->getTimestamp();
 
@@ -227,6 +247,8 @@ class ReplayImportService
                 $this->em->clear();
             }
         }
+
+        return true;
     }
 
     private function initInstanceVariables(): void
@@ -243,6 +265,44 @@ class ReplayImportService
         $this->currPartialJoins = [];
         $this->lastPausePacket = null;
         $this->duration = null;
+    }
+
+    private function performUpgrade(bool $dryRun): void
+    {
+        $findQuery = [
+            'replay' => $this->currReplay->getId(),
+        ];
+
+        $caps = $this->em->getRepository(CaptureEvent::class)->findBy($findQuery);
+        $messages = $this->em->getRepository(ChatMessage::class)->findBy($findQuery);
+        $flagUpdates = $this->em->getRepository(FlagUpdate::class)->findBy($findQuery);
+        $joinEvents = $this->em->getRepository(JoinEvent::class)->findBy($findQuery);
+        $killEvents = $this->em->getRepository(KillEvent::class)->findBy($findQuery);
+        $partEvents = $this->em->getRepository(PartEvent::class)->findBy($findQuery);
+        $pauseEvents = $this->em->getRepository(PauseEvent::class)->findBy($findQuery);
+        $players = $this->em->getRepository(Player::class)->findBy($findQuery);
+        $resumeEvents = $this->em->getRepository(ResumeEvent::class)->findBy($findQuery);
+
+        $deletedEntities = array_merge(
+            $caps,
+            $messages,
+            $flagUpdates,
+            $joinEvents,
+            $killEvents,
+            $partEvents,
+            $pauseEvents,
+            $players,
+            $resumeEvents
+        );
+
+        foreach ($deletedEntities as $entity) {
+            $this->em->remove($entity);
+            $this->em->detach($entity);
+        }
+
+        if (!$dryRun) {
+            $this->em->flush();
+        }
     }
 
     /**
