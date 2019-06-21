@@ -87,6 +87,7 @@ class ImportReplayCommand extends Command
             ;
 
             $modifiedCount = 0;
+            $errorExit = false;
 
             ProgressBar::setFormatDefinition('custom', ' %current%/%max% [%bar%] -- %message% %filename%');
 
@@ -114,18 +115,27 @@ class ImportReplayCommand extends Command
                 } catch (\InvalidArgumentException $e) {
                     $output->writeln(sprintf('An invalid filepath was given (%s)', $replayFile));
                     $output->writeln(sprintf('  %s', $e->getMessage()));
+                } catch (\Exception $e) {
+                    $output->writeln('');
+                    $output->writeln(sprintf('An unknown exception occurred with the given replay (%s)', $replayFile));
+                    $output->writeln(sprintf('  %s: %s', get_class($e), $e->getMessage()));
+
+                    $errorExit = true;
+                    break;
                 }
 
                 $progressBar->advance();
             }
 
-            $progressBar->setMessage('Done!');
-            $progressBar->setMessage('', 'filename');
-            $progressBar->finish();
+            if (!$errorExit) {
+                $progressBar->setMessage('Done!');
+                $progressBar->setMessage('', 'filename');
+                $progressBar->finish();
 
-            $output->writeln("");
-            $output->writeln(sprintf("%d new replays were imported/upgraded.", $modifiedCount));
-            $output->writeln("Finished.");
+                $output->writeln("");
+                $output->writeln(sprintf("%d new replays were imported/upgraded.", $modifiedCount));
+                $output->writeln("Finished.");
+            }
         }
     }
 }
