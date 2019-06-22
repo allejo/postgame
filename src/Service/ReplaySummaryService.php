@@ -421,14 +421,14 @@ class ReplaySummaryService
      *
      * @return string
      */
-    private function calculateMatchTime(IMatchTimeEvent $event)
+    private function calculateMatchTime(IMatchTimeEvent $event): string
     {
         $secSinceStart = $event->getMatchSeconds();
         $totalDuration = $event->getReplay()->getDuration();
 
         $seconds = $totalDuration - $secSinceStart;
 
-        return sprintf('[%d:%d]', (int)($seconds / 60), (int)($seconds % 60));
+        return sprintf('%02d:%02d', (int)($seconds / 60), (int)($seconds % 60));
     }
 
     /**

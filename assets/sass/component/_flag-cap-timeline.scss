@@ -1,0 +1,62 @@
+.flag-capture-timeline {
+    display: table;
+    margin: 0;
+    padding: 0;
+}
+
+.flag-capture-event {
+    display: table-row;
+}
+
+.flag-capture-timestamp {
+    @include padding(r, 2);
+
+    display: table-cell;
+}
+
+.flag-capture-description {
+    @include padding(r, 3);
+
+    display: table-cell;
+    flex-grow: 1;
+}
+
+.flag-capture-score {
+    @include text-muted();
+
+    display: table-cell;
+
+    .team-score {
+        display: flex;
+
+        .flag-capture-score__team {
+            @include padding(x, 1);
+
+            flex-grow: 1;
+        }
+
+        .flag-capture-score__points {
+            @include padding(x, 1);
+        }
+    }
+
+    &.capped {
+        .team-score {
+            flex-direction: row-reverse;
+
+            &::before {
+                content: ')';
+            }
+        }
+
+        .flag-capture-score__team {
+            text-align: right;
+        }
+    }
+
+    &.capping {
+        .team-score::before {
+            content: '(';
+        }
+    }
+}

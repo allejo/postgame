@@ -91,33 +91,61 @@
         <section class="border-t my-4 py-4">
             <h2>Flag Capture Timeline</h2>
 
-            <ul class="mb-0">
+            <ul class="flag-capture-timeline">
                 {% for flag_cap in flag_caps %}
                     {% set playerId = flag_cap.playerId %}
-                    <li>
-                        <time
-                            datetime="{{ flag_cap.timestamp | date('c') }}"
-                            title="{{ flag_cap.timestamp | date('F d, Y G:i e') }}"
-                        >
-                            {{ flag_cap.matchTime }}
-                        </time>
 
-                        <span class="color-{{ flag_cap.cappingTeam | team_literal }}-team">
-                            {{ players[playerId].callsign }}
-                        </span>
+                    <li class="flag-capture-event">
+                        <div class="flag-capture-timestamp">
+                            <time
+                                class="small text-monospace"
+                                datetime="{{ flag_cap.timestamp | date('c') }}"
+                                title="{{ flag_cap.timestamp | date('F d, Y G:i e') }}"
+                            >
+                                <span class="sr-only">Minute</span>
+                                <span class="wrap-brackets">{{- flag_cap.matchTime -}}</span>
+                            </time>
+                        </div>
 
-                        captured the
+                        <div class="flag-capture-description">
+                            <span class="color-{{ flag_cap.cappingTeam | team_literal }}-team">
+                                {{- players[playerId].callsign -}}
+                            </span>
 
-                        <span class="color-{{ flag_cap.cappedTeam | team_literal }}-team">
-                            {{ flag_cap.cappedTeam | team_literal | title }}
-                        </span>
+                            captured the
 
-                        team flag
+                            <span class="color-{{ flag_cap.cappedTeam | team_literal }}-team">
+                                {{- flag_cap.cappedTeam | team_literal | title -}}
+                            </span>
 
-                        (
-                        {{ flag_cap.cappingTeam | team_literal | title }} ({{ flag_cap.cappingTeamScore }}) -
-                        ({{ flag_cap.cappedTeamScore }}) {{ flag_cap.cappedTeam | team_literal | title }}
-                        )
+                            team flag
+                        </div>
+
+                        <span class="sr-only">Score is now</span>
+
+                        <div class="flag-capture-score capping">
+                            <span class="team-score">
+                                <span class="flag-capture-score__team">
+                                    {{- flag_cap.cappingTeam | team_literal | title -}} <span class="sr-only">team</span>
+                                </span>
+
+                                <span class="flag-capture-score__points">
+                                    <span class="wrap-brackets">{{ flag_cap.cappingTeamScore }}</span> <span class="sr-only">points</span>
+                                </span>
+                            </span>
+                        </div>
+
+                        <div class="flag-capture-score capped">
+                            <span class="team-score">
+                                <span class="flag-capture-score__team">
+                                    {{- flag_cap.cappedTeam | team_literal | title -}} <span class="sr-only">team</span>
+                                </span>
+
+                                <span class="flag-capture-score__points">
+                                    <span class="wrap-brackets">{{ flag_cap.cappedTeamScore }}</span> <span class="sr-only">points</span>
+                                </span>
+                            </span>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>
