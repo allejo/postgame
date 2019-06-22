@@ -21,37 +21,10 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class CaptureEventRepository extends ServiceEntityRepository
 {
+    use DeletableReplayTrait;
+
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, CaptureEvent::class);
     }
-
-    // /**
-    //  * @return CaptureEvent[] Returns an array of CaptureEvent objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?CaptureEvent
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

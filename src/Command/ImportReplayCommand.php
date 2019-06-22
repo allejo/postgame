@@ -39,6 +39,7 @@ class ImportReplayCommand extends Command
             ->addArgument('file', InputArgument::REQUIRED, 'Replay file to import')
             ->addOption('extension', null, InputOption::VALUE_REQUIRED, 'The extension of replays to load in.', 'rec')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not actually import the replay into the database, just make sure it runs without errors.')
+            ->addOption('upgrade', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, keep the replay ID but reimport all other information.')
             ->setDescription('Import a replay file')
             ->setHelp('This command allows you to import a replay file into the database')
         ;
@@ -47,10 +48,15 @@ class ImportReplayCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $dryRun = $input->getOption('dry-run');
+        $doUpgrade = $input->getOption('upgrade');
         $replayFilePath = $input->getArgument('file');
 
         if ($dryRun) {
             $output->writeln('This command is running in "dry mode" meaning nothing will be persisted to the database');
+        }
+
+        if ($doUpgrade) {
+            $output->writeln('This command will upgrade existing Replays by re-importing their data');
         }
 
         $isDir = is_dir($replayFilePath);
@@ -59,8 +65,8 @@ class ImportReplayCommand extends Command
             $output->writeln(sprintf('Reading replay file: %s', $replayFilePath));
 
             try {
-                $this->replayService->importReplay($replayFilePath, $dryRun);
-                $output->writeln(sprintf('Finished.'));
+                $this->replayService->importReplay($replayFilePath, $dryRun, $doUpgrade);
+                $output->writeln('Finished.');
             } catch (PacketInvalidException $e) {
                 $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFilePath));
                 $output->writeln(sprintf('  %s', $e->getMessage()));
@@ -80,28 +86,56 @@ class ImportReplayCommand extends Command
                 ->files()
             ;
 
+            $modifiedCount = 0;
+            $errorExit = false;
+
+            ProgressBar::setFormatDefinition('custom', ' %current%/%max% [%bar%] -- %message% %filename%');
+
             $progressBar = new ProgressBar($output, $replayFiles->count());
+            $progressBar->setFormat('custom');
+            $progressBar->setMessage('Starting...');
+            $progressBar->setMessage('', 'filename');
             $progressBar->start();
 
             foreach ($replayFiles as $replay) {
                 $replayFile = $replay->getRealPath();
 
                 try {
-                    $this->replayService->importReplay($replayFile, $dryRun);
+                    $progressBar->setMessage('Importing replay...');
+                    $progressBar->setMessage(sprintf('(%s)', basename($replayFile)), 'filename');
+
+                    $didImport = $this->replayService->importReplay($replayFile, $dryRun, $doUpgrade);
+
+                    if ($didImport) {
+                        ++$modifiedCount;
+                    }
                 } catch (PacketInvalidException $e) {
                     $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFile));
                     $output->writeln(sprintf('  %s', $e->getMessage()));
                 } catch (\InvalidArgumentException $e) {
                     $output->writeln(sprintf('An invalid filepath was given (%s)', $replayFile));
                     $output->writeln(sprintf('  %s', $e->getMessage()));
+                } catch (\Exception $e) {
+                    $output->writeln('');
+                    $output->writeln(sprintf('An unknown exception occurred with the given replay (%s)', $replayFile));
+                    $output->writeln(sprintf('  %s: %s', get_class($e), $e->getMessage()));
+
+                    $errorExit = true;
+                    break;
                 }
 
                 $progressBar->advance();
             }
 
-            $progressBar->finish();
+            if (!$errorExit) {
+                $progressBar->setMessage('Done!');
+                $progressBar->setMessage('', 'filename');
+                $progressBar->finish();
 
-            $output->writeln('Finished.');
+                $output->writeln('');
+                $output->writeln(sprintf('%d new replays were imported/upgraded.', $modifiedCount));
+                $output->writeln('Finished.');
+            }
         }
     }
 }

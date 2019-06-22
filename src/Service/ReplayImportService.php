@@ -34,6 +34,7 @@ use App\Entity\ResumeEvent;
 use App\Utility\BZChatTarget;
 use App\Utility\BZTeamType;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class ReplayImportService
 {
@@ -57,6 +58,9 @@ class ReplayImportService
 
     /** @var EntityManagerInterface */
     private $em;
+
+    /** @var LoggerInterface */
+    private $logger;
 
     /**
      * The current Replay object we're working with.
@@ -160,21 +164,25 @@ class ReplayImportService
     /** @var array<int, string> A map of flag IDs to flag abbreviations */
     private $flagIDs;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger)
     {
         $this->em = $em;
+        $this->logger = $logger;
     }
 
     /**
      * Import a replay file into the database.
      *
-     * @param string $filepath The filename or filepath to the replay to import
-     * @param bool   $dryRun   Whether or not to actually write to the database
+     * @param string $filepath  The filename or filepath to the replay to import
+     * @param bool   $dryRun    Whether or not to actually write to the database
+     * @param bool   $doUpgrade Keep the replay ID but reimport all other information about the replay
      *
      * @throws \InvalidArgumentException when a non-existent file is given or a directory is given
      * @throws PacketInvalidException    when an invalid replay is given
+     *
+     * @return bool Returns true if the import was successful
      */
-    public function importReplay(string $filepath, bool $dryRun): void
+    public function importReplay(string $filepath, bool $dryRun, bool $doUpgrade): bool
     {
         if (!file_exists($filepath)) {
             throw new \InvalidArgumentException(sprintf('File not found: %s', $filepath));
@@ -184,37 +192,72 @@ class ReplayImportService
             throw new \InvalidArgumentException(sprintf('A file must be given as a value for $filename'));
         }
 
+        $sqlConfig = $this->em->getConnection()->getConfiguration();
+        $sqlLogger = $sqlConfig->getSQLLogger();
+        $sqlConfig->setSQLLogger(null);
+
         $this->initInstanceVariables();
         $replay = new BZFlagReplay($filepath);
+        $rawDuration = $replay->getHeader()->getFileTimeAsSeconds();
+        $wasCanceled = false;
         $filename = basename($filepath);
         $sha1 = sha1_file($filepath);
 
-        $existing = $this->em->getRepository(Replay::class)->findBy([
-            'fileName' => $filename,
+        $existing = $this->em->getRepository(Replay::class)->findOneBy([
             'fileHash' => $sha1,
         ]);
 
-        // @TODO Possibly add support for reimporting the data, but not creating a new Replay entity
         // Don't import duplicate replays
         if (!empty($existing)) {
-            return;
+            if (!$doUpgrade) {
+                return false;
+            }
+
+            $this->currReplay = $existing;
+            $this->performUpgrade($dryRun);
+
+            $this->logger->notice('Replay ID #{id} is being upgraded (hash: {hash})', [
+                'id' => $this->currReplay->getId(),
+                'hash' => substr($sha1, 0, 7),
+            ]);
+        } else {
+            $this->currReplay = new Replay();
+
+            // The hash should only ever be set on new imports and never changed after that
+            $this->currReplay->setFileHash($sha1);
+
+            // Only persist newly created replays
+            $this->em->persist($this->currReplay);
         }
 
-        $this->currReplay = new Replay();
         $this->currReplay
             ->setFileName($filename)
-            ->setFileHash($sha1)
             ->setStartTime($replay->getStartTime())
             ->setEndTime($replay->getEndTime())
         ;
-
-        $this->em->persist($this->currReplay);
 
         $this->relativeStartTime = $this->currReplay->getStartTime()->getTimestamp();
 
         foreach ($replay->getPacketsIterable() as $packet) {
             $this->handlePacket($packet);
         }
+
+        // We haven't had a change to calculate the duration of the match because it was canceled before we could get
+        // our first real MsgTimeUpdate packet
+        if ($this->duration === null) {
+            $this->duration = $rawDuration;
+            $this->currReplay->setDuration($rawDuration);
+
+            $wasCanceled = true;
+        }
+
+        // If we detected the match to be canceled explicitly or if the duration of the match is less than the estimated
+        // replay length.
+        if ($rawDuration < $this->duration) {
+            $wasCanceled = true;
+        }
+
+        $this->currReplay->setCanceled($wasCanceled);
 
         if (!$dryRun) {
             ++self::$BATCH_COUNT;
@@ -227,6 +270,10 @@ class ReplayImportService
                 $this->em->clear();
             }
         }
+
+        $sqlConfig->setSQLLogger($sqlLogger);
+
+        return true;
     }
 
     private function initInstanceVariables(): void
@@ -243,6 +290,24 @@ class ReplayImportService
         $this->currPartialJoins = [];
         $this->lastPausePacket = null;
         $this->duration = null;
+    }
+
+    private function performUpgrade(bool $dryRun): void
+    {
+        if ($dryRun) {
+            return;
+        }
+
+        // Delete all existing records with this replay as a foreign key
+        $this->em->getRepository(CaptureEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(ChatMessage::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(FlagUpdate::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(JoinEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(KillEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(PartEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(PauseEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(Player::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(ResumeEvent::class)->deleteByReplay($this->currReplay);
     }
 
     /**
