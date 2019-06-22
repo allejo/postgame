@@ -16,6 +16,7 @@ use App\Entity\KillEvent;
 use App\Entity\PartEvent;
 use App\Entity\Player;
 use App\Entity\Replay;
+use App\Utility\BZChatTarget;
 use App\Utility\BZTeamType;
 use App\Utility\DefaultArray;
 use App\Utility\IMatchTimeEvent;
@@ -382,7 +383,13 @@ class ReplaySummaryService
         $messages = $this->em->getRepository(ChatMessage::class)->findPublicChatMessages($replay);
 
         foreach ($messages as $message) {
-            $senderId = $message->getSender()->getId();
+            // Ignore slash commands sent to public chat
+            if (substr($message->getMessage(), 0, 1) === '/') {
+                continue;
+            }
+
+            $sender = $message->getSender();
+            $senderId = $sender ? $sender->getId() : -1;
 
             $record = new SummaryChatMessage();
             $record->sender = $senderId;
@@ -514,6 +521,28 @@ class ReplaySummaryService
     {
         $this->summarized = self::UNSUMMARIZED;
         $this->teamScores = new DefaultArray(0);
-        $this->playerRecords = [];
+        $this->playerRecords = [
+            -1 => $this->createServerPlayerRecord(),
+        ];
+    }
+
+    /**
+     * Create a mock player record for the SERVER player.
+     *
+     * @return SummaryPlayerRecord
+     */
+    private function createServerPlayerRecord(): SummaryPlayerRecord
+    {
+        $serverPlayer = new SummaryPlayerRecord();
+        $serverPlayer->callsign = 'SERVER';
+
+        // Create a dummy session so it can be assigned to the Rogue team
+        $session = new SummarySession();
+        $session->team = BZTeamType::ROGUE;
+        $session->totalTime = 1;
+
+        $serverPlayer->sessions[] = $session;
+
+        return $serverPlayer;
     }
 }
