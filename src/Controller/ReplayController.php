@@ -117,6 +117,7 @@ class ReplayController extends AbstractController
                 'loser_score' => $summaryService->getLoserScore(),
                 'players' => $summaryService->getPlayerRecords(),
                 'flag_caps' => $summaryService->getFlagCaps(),
+                'messages' => $summaryService->getChatMessages(),
             ];
         } catch (UnsummarizedException | WrongSummarizationException $e) {
             $logger->warning($e->getMessage());

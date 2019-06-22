@@ -10,6 +10,7 @@
 namespace App\Service;
 
 use App\Entity\CaptureEvent;
+use App\Entity\ChatMessage;
 use App\Entity\JoinEvent;
 use App\Entity\KillEvent;
 use App\Entity\PartEvent;
@@ -19,6 +20,7 @@ use App\Utility\BZTeamType;
 use App\Utility\DefaultArray;
 use App\Utility\IMatchTimeEvent;
 use App\Utility\SummaryCaptureRecord;
+use App\Utility\SummaryChatMessage;
 use App\Utility\SummaryDeathRecord;
 use App\Utility\SummaryKillRecord;
 use App\Utility\SummaryPlayerRecord;
@@ -67,6 +69,9 @@ class ReplaySummaryService
     /** @var SummaryCaptureRecord[] */
     private $flagCaptures;
 
+    /** @var SummaryChatMessage[] */
+    private $chatMessages;
+
     /** @var DefaultArray */
     private $teamScores;
 
@@ -91,6 +96,21 @@ class ReplaySummaryService
     public function getSummaryType(): int
     {
         return $this->summarized;
+    }
+
+    /**
+     * Get all of the public chat messages sent in a replay.
+     *
+     * @throws WrongSummarizationException
+     * @throws UnsummarizedException
+     *
+     * @return SummaryChatMessage[]
+     */
+    public function getChatMessages(): array
+    {
+        $this->requiresFullSummary();
+
+        return $this->chatMessages;
     }
 
     /**
@@ -237,6 +257,7 @@ class ReplaySummaryService
         $this->handleParts($findByFilter);
         $this->handleCaps($findByFilter);
         $this->handleTeamLoyalty($replay);
+        $this->handleMessages($replay);
 
         $this->summarized = self::SUMMARIZED_FULL;
     }
@@ -353,6 +374,25 @@ class ReplaySummaryService
 
             $this->flagCaptures[] = $record;
             $this->playerRecords[$capperId]->flagCaptures[] = $record;
+        }
+    }
+
+    private function handleMessages(Replay $replay): void
+    {
+        $messages = $this->em->getRepository(ChatMessage::class)->findPublicChatMessages($replay);
+
+        foreach ($messages as $message) {
+            $senderId = $message->getSender()->getId();
+
+            $record = new SummaryChatMessage();
+            $record->sender = $senderId;
+            $record->senderTeam = $this->playerRecords[$senderId]->team;
+            $record->recipient = $message->getRecipient();
+            $record->message = $message->getMessage();
+            $record->matchTime = $this->calculateMatchTime($message);
+            $record->timestamp = $message->getTimestamp();
+
+            $this->chatMessages[] = $record;
         }
     }
 

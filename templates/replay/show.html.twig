@@ -176,6 +176,35 @@
         </section>
 
         <section class="border-t my-4 py-4">
+            <h2>Public Chat</h2>
+
+            <div>
+                {% for message in messages %}
+                    <p class="m-0">
+                        <time
+                            class="small text-monospace"
+                            datetime="{{ message.timestamp | date('c') }}"
+                            title="{{ message.timestamp | date('F d, Y G:i e') }}"
+                        >
+                            <span class="sr-only">Minute</span>
+                            <span class="wrap-brackets">{{- message.matchTime -}}</span>
+                        </time>
+
+                        <span class="color-{{ players[message.sender].teamLiteral }}-team">
+                            {{ players[message.sender].callsign }}
+                        </span>
+
+                        :
+
+                        <span>
+                            {{ message.message }}
+                        </span>
+                    </p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="border-t my-4 py-4">
             <h2>Player Roster</h2>
 
             <div class="tabs" data-role="tablist" data-tab-desc="Player roster">

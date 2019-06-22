@@ -10,6 +10,8 @@
 namespace App\Repository;
 
 use App\Entity\ChatMessage;
+use App\Entity\Replay;
+use App\Utility\BZChatTarget;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -26,5 +28,22 @@ class ChatMessageRepository extends ServiceEntityRepository
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, ChatMessage::class);
+    }
+
+    /**
+     * @param Replay $replay
+     *
+     * @return ChatMessage[]
+     */
+    public function findPublicChatMessages(Replay $replay)
+    {
+        return $this->createQueryBuilder('cm')
+            ->where('cm.replay = :replay')
+            ->andWhere('cm.teamTo = :target')
+            ->setParameter('replay', $replay)
+            ->setParameter('target', BZChatTarget::PUBLIC)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 }
