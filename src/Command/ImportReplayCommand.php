@@ -107,7 +107,7 @@ class ImportReplayCommand extends Command
                     $didImport = $this->replayService->importReplay($replayFile, $dryRun, $doUpgrade);
 
                     if ($didImport) {
-                        $modifiedCount++;
+                        ++$modifiedCount;
                     }
                 } catch (PacketInvalidException $e) {
                     $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFile));
@@ -132,9 +132,9 @@ class ImportReplayCommand extends Command
                 $progressBar->setMessage('', 'filename');
                 $progressBar->finish();
 
-                $output->writeln("");
-                $output->writeln(sprintf("%d new replays were imported/upgraded.", $modifiedCount));
-                $output->writeln("Finished.");
+                $output->writeln('');
+                $output->writeln(sprintf('%d new replays were imported/upgraded.', $modifiedCount));
+                $output->writeln('Finished.');
             }
         }
     }
