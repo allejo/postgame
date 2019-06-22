@@ -39,7 +39,7 @@
                                 <th class="w-100" data-sort-case-insensitive="true">
                                     Callsign
                                 </th>
-                                <th data-sort-cast="number">
+                                <th class="hide-xs show-md" data-sort-cast="number">
                                     Team
                                 </th>
                                 <th
@@ -47,16 +47,20 @@
                                     data-sort-default
                                     data-sort="DESC"
                                 >
-                                    Score
+                                    <abbr aria-hidden="true" class="hide-md" title="Score">S</abbr>
+                                    <span aria-hidden="true" class="hide-xs show-md">Score</span>
                                 </th>
                                 <th data-sort-cast="number">
-                                    Kills
+                                    <abbr aria-hidden="true" class="hide-md" title="Kills">K</abbr>
+                                    <span aria-hidden="true" class="hide-xs show-md">Kills</span>
                                 </th>
                                 <th data-sort-cast="number">
-                                    Deaths
+                                    <abbr aria-hidden="true" class="hide-md" title="Deaths">D</abbr>
+                                    <span aria-hidden="true" class="hide-xs show-md">Deaths</span>
                                 </th>
                                 <th data-sort-cast="number">
-                                    Team Kills
+                                    <abbr aria-hidden="true" class="hide-md" title="Team kills">TK</abbr>
+                                    <span aria-hidden="true" class="hide-xs show-md">Team Kills</span>
                                 </th>
                             </tr>
                         </thead>
@@ -70,7 +74,7 @@
                                                 {{ player.callsign }}
                                             </span>
                                         </td>
-                                        <td class="text-center" data-sort-value="{{ player.team }}">
+                                        <td class="hide-xs show-md text-center" data-sort-value="{{ player.team }}">
                                             <abbr title="{{ player.teamLiteral | title }} team">
                                                 ({{ player.teamLiteral | upper | split('') | first }})
                                             </abbr>
@@ -83,6 +87,25 @@
                                 {% endif %}
                             {% endfor %}
                         </tbody>
+
+                        <caption>
+                            <p class="m-0">The final scores of all the participants of this match.</p>
+
+                            <ul class="hide-md mt-3 mb-0" aria-hidden="true">
+                                <li>
+                                    <strong>S</strong> - Score
+                                </li>
+                                <li>
+                                    <strong>K</strong> - Kills
+                                </li>
+                                <li>
+                                    <strong>D</strong> - Deaths
+                                </li>
+                                <li>
+                                    <strong>TK</strong> - Team Kills
+                                </li>
+                            </ul>
+                        </caption>
                     </table>
                 </section>
             </div>
