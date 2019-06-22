@@ -68,7 +68,7 @@
 
                         <tbody>
                             {% for player in players %}
-                                {% if player.score.kills != 0 and player.score.deaths != 0  %}
+                                {% if player.score.kills != 0 or player.score.deaths != 0  %}
                                     <tr>
                                         <td>
                                             <span class="color-{{ player.teamLiteral }}-team">
