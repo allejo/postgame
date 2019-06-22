@@ -21,37 +21,10 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class KillEventRepository extends ServiceEntityRepository
 {
+    use DeletableReplayTrait;
+
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, KillEvent::class);
     }
-
-    // /**
-    //  * @return KillEvent[] Returns an array of KillEvent objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('k')
-            ->andWhere('k.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('k.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?KillEvent
-    {
-        return $this->createQueryBuilder('k')
-            ->andWhere('k.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

@@ -173,9 +173,9 @@ class ReplayImportService
     /**
      * Import a replay file into the database.
      *
-     * @param string $filepath The filename or filepath to the replay to import
-     * @param bool $dryRun Whether or not to actually write to the database
-     * @param bool $doUpgrade Keep the replay ID but reimport all other information about the replay
+     * @param string $filepath  The filename or filepath to the replay to import
+     * @param bool   $dryRun    Whether or not to actually write to the database
+     * @param bool   $doUpgrade Keep the replay ID but reimport all other information about the replay
      *
      * @throws \InvalidArgumentException when a non-existent file is given or a directory is given
      * @throws PacketInvalidException    when an invalid replay is given
@@ -191,6 +191,10 @@ class ReplayImportService
         if (!is_file($filepath)) {
             throw new \InvalidArgumentException(sprintf('A file must be given as a value for $filename'));
         }
+
+        $sqlConfig = $this->em->getConnection()->getConfiguration();
+        $sqlLogger = $sqlConfig->getSQLLogger();
+        $sqlConfig->setSQLLogger(null);
 
         $this->initInstanceVariables();
         $replay = new BZFlagReplay($filepath);
@@ -267,6 +271,8 @@ class ReplayImportService
             }
         }
 
+        $sqlConfig->setSQLLogger($sqlLogger);
+
         return true;
     }
 
@@ -288,40 +294,20 @@ class ReplayImportService
 
     private function performUpgrade(bool $dryRun): void
     {
-        $findQuery = [
-            'replay' => $this->currReplay->getId(),
-        ];
-
-        $caps = $this->em->getRepository(CaptureEvent::class)->findBy($findQuery);
-        $messages = $this->em->getRepository(ChatMessage::class)->findBy($findQuery);
-        $flagUpdates = $this->em->getRepository(FlagUpdate::class)->findBy($findQuery);
-        $joinEvents = $this->em->getRepository(JoinEvent::class)->findBy($findQuery);
-        $killEvents = $this->em->getRepository(KillEvent::class)->findBy($findQuery);
-        $partEvents = $this->em->getRepository(PartEvent::class)->findBy($findQuery);
-        $pauseEvents = $this->em->getRepository(PauseEvent::class)->findBy($findQuery);
-        $players = $this->em->getRepository(Player::class)->findBy($findQuery);
-        $resumeEvents = $this->em->getRepository(ResumeEvent::class)->findBy($findQuery);
-
-        $deletedEntities = array_merge(
-            $caps,
-            $messages,
-            $flagUpdates,
-            $joinEvents,
-            $killEvents,
-            $partEvents,
-            $pauseEvents,
-            $players,
-            $resumeEvents
-        );
-
-        foreach ($deletedEntities as $entity) {
-            $this->em->remove($entity);
-            $this->em->detach($entity);
+        if ($dryRun) {
+            return;
         }
 
-        if (!$dryRun) {
-            $this->em->flush();
-        }
+        // Delete all existing records with this replay as a foreign key
+        $this->em->getRepository(CaptureEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(ChatMessage::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(FlagUpdate::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(JoinEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(KillEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(PartEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(PauseEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(Player::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(ResumeEvent::class)->deleteByReplay($this->currReplay);
     }
 
     /**
