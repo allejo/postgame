@@ -209,7 +209,7 @@
 
             <div class="tabs" data-role="tablist" data-tab-desc="Player roster">
                 {% for i, player in players %}
-                    {% if player.score.kills != 0 and player.score.deaths != 0 %}
+                    {% if player.score.kills != 0 or player.score.deaths != 0 %}
                         <article
                             id="{{ player.callsign | slug }}"
                             class="tabs__tab"
