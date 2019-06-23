@@ -17,7 +17,7 @@
                     <dt>Timestamp</dt>
                     <dd>
                         <time datetime="{{ start | date('c') }}">
-                            {{ start | date('F d, Y G:i e') }}
+                            {{ start | date('F d, Y G:i e', 'UTC') }}
                         </time>
                     </dd>
 
