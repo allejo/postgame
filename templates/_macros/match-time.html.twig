@@ -1,0 +1,15 @@
+{% macro match_time(matchTime, timestamp) %}
+    <span
+        class="small text-monospace"
+        data-datetime="{{ timestamp | date('c', false) }}"
+    >
+        <span class="sr-only">
+            Minute {{ matchTime.minutes }} with {{ matchTime.seconds }} seconds
+            &nbsp;
+        </span>
+
+        <span class="wrap-brackets" aria-hidden="true">
+            {{- matchTime -}}
+        </span>
+    </span>
+{% endmacro %}

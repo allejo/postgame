@@ -9,7 +9,6 @@
 
 namespace App\Tests\Utility;
 
-use App\Tests\CustomErrorHandler;
 use App\Utility\DateTimeFormatTranslator;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;

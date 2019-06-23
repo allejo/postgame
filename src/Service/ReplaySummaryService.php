@@ -23,6 +23,7 @@ use App\Utility\SummaryCaptureRecord;
 use App\Utility\SummaryChatMessage;
 use App\Utility\SummaryDeathRecord;
 use App\Utility\SummaryKillRecord;
+use App\Utility\MatchTime;
 use App\Utility\SummaryPlayerRecord;
 use App\Utility\SummarySession;
 use App\Utility\UnsummarizedException;
@@ -467,14 +468,14 @@ class ReplaySummaryService
      *
      * @return string
      */
-    private function calculateMatchTime(IMatchTimeEvent $event): string
+    private function calculateMatchTime(IMatchTimeEvent $event): MatchTime
     {
         $secSinceStart = $event->getMatchSeconds();
         $totalDuration = $event->getReplay()->getDuration();
 
         $seconds = $totalDuration - $secSinceStart;
 
-        return sprintf('%02d:%02d', (int)($seconds / 60), (int)($seconds % 60));
+        return new MatchTime($seconds);
     }
 
     /**

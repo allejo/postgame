@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
 
+{% from '_macros/match-time.html.twig' import match_time %}
 {% from '_macros/versus-card.html.twig' import team_card %}
 
 {% set date_fmt = 'F d, Y g:i a' %}
@@ -126,14 +127,7 @@
 
                     <li class="flag-capture-event">
                         <div class="flag-capture-timestamp">
-                            <time
-                                class="small text-monospace"
-                                datetime="{{ flag_cap.timestamp | date('c') }}"
-                                title="{{ flag_cap.timestamp | date('F d, Y G:i e') }}"
-                            >
-                                <span class="sr-only">Minute</span>
-                                <span class="wrap-brackets">{{- flag_cap.matchTime -}}</span>
-                            </time>
+                            {{ match_time(flag_cap.matchTime, flag_cap.timestamp) }}
                         </div>
 
                         <div class="flag-capture-description">
@@ -186,20 +180,14 @@
             <div>
                 {% for message in messages %}
                     <p class="m-0">
-                        <time
-                            class="small text-monospace"
-                            datetime="{{ message.timestamp | date('c') }}"
-                            title="{{ message.timestamp | date('F d, Y G:i e') }}"
-                        >
-                            <span class="sr-only">Minute</span>
-                            <span class="wrap-brackets">{{- message.matchTime -}}</span>
-                        </time>
+                        {{ match_time(message.matchTime, message.timestamp) }}
 
                         <span class="color-{{ players[message.sender].teamLiteral }}-team">
-                            {{ players[message.sender].callsign }}
-                        </span>
+                            {{- players[message.sender].callsign -}}
 
-                        :
+                            <span aria-hidden="true">:</span>
+                            <span class="sr-only">said &nbsp;</span>
+                        </span>
 
                         <span>
                             {{ message.message }}
