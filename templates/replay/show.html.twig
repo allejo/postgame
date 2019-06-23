@@ -216,7 +216,7 @@
                             <h2 class="sr-only">{{ player.callsign }}</h2>
 
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-lg-6">
                                     <dl>
                                         <dt>Callsign</dt>
                                         <dd>{{ player.callsign }}</dd>
@@ -235,20 +235,34 @@
                                         {% endfor %}
                                     </ul>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-lg-6">
                                     <h3 class="h4">
                                         <abbr title="Kills and deaths">K/D</abbr>
                                         Stats Against
                                     </h3>
 
-                                    <table class="table--skinny w-100">
+                                    <table class="table--skinny w-100" data-sortable="true">
                                         <thead>
                                             <tr>
-                                                <th class="w-100">Callsign</th>
-                                                <th>Kills</th>
-                                                <th>Deaths</th>
+                                                <th
+                                                    class="w-100"
+                                                    data-sort-case-insensitive="true"
+                                                    data-sort-default
+                                                    data-sort="ASC"
+                                                >
+                                                    Callsign
+                                                </th>
+                                                <th data-sort-cast="number">
+                                                    <abbr title="Kills against" class="hide-md">K</abbr>
+                                                    <span class="hide-xs show-md">Kill against</span>
+                                                </th>
+                                                <th data-sort-cast="number">
+                                                    <abbr title="Deaths by" class="hide-md">D</abbr>
+                                                    <span class="hide-xs show-md">Deaths by</span>
+                                                </th>
                                             </tr>
                                         </thead>
+
                                         <tbody>
                                             {% for j, stats in player.against %}
                                                 <tr>
@@ -262,6 +276,19 @@
                                                 </tr>
                                             {% endfor %}
                                         </tbody>
+
+                                        <caption>
+                                            <p class="m-0">The kill to death ratios of {{ player.callsign }} against the rest of the players.</p>
+
+                                            <ul class="hide-md mt-3 mb-0" aria-hidden="true">
+                                                <li>
+                                                    <strong>K</strong> - Number of times {{ player.callsign }} killed said player
+                                                </li>
+                                                <li>
+                                                    <strong>D</strong> - Number of times {{ player.callsign }} was killed by said player
+                                                </li>
+                                            </ul>
+                                        </caption>
                                     </table>
                                 </div>
                             </div>
