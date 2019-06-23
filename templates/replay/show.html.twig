@@ -2,6 +2,8 @@
 
 {% from '_macros/versus-card.html.twig' import team_card %}
 
+{% set date_fmt = 'F d, Y g:i a' %}
+
 {% block body %}
     <div class="container">
         <div class="score-card row mb-4 py-4 border-b">
@@ -16,8 +18,11 @@
                 <dl>
                     <dt>Timestamp</dt>
                     <dd>
-                        <time datetime="{{ start | date('c') }}">
-                            {{ start | date('F d, Y G:i e', 'UTC') }}
+                        <time
+                            datetime="{{ start | date('c', false) }}"
+                            data-format="{{ date_fmt | dayjs_fmt }}"
+                        >
+                            {{ start | date(date_fmt, false) }}
                         </time>
                     </dd>
 

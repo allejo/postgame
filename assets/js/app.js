@@ -16,3 +16,5 @@ require('../sass/app.scss');
 require('../vendor/style-guide/src/js/common');
 require('../vendor/style-guide/src/js/table');
 require('../vendor/style-guide/src/js/tablist');
+
+require('./lib/timestamps');
