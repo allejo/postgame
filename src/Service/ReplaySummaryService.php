@@ -16,7 +16,6 @@ use App\Entity\KillEvent;
 use App\Entity\PartEvent;
 use App\Entity\Player;
 use App\Entity\Replay;
-use App\Utility\BZChatTarget;
 use App\Utility\BZTeamType;
 use App\Utility\DefaultArray;
 use App\Utility\IMatchTimeEvent;

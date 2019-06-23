@@ -1,4 +1,11 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * (c) Vladimir "allejo" Jimenez <me@allejo.io>
+ *
+ * For the full copyright and license information, please view the
+ * LICENSE.md file that was distributed with this source code.
+ */
 
 namespace App\Doctrine\DBAL\Types;
 
@@ -13,7 +20,7 @@ use Doctrine\DBAL\Types\DateTimeType;
  */
 class UTCDateTimeType extends DateTimeType
 {
-    static private $utc;
+    private static $utc;
 
     /**
      * @param $value
@@ -42,7 +49,7 @@ class UTCDateTimeType extends DateTimeType
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
-        if (null === $value || $value instanceof \DateTime) {
+        if ($value === null || $value instanceof \DateTime) {
             return $value;
         }
 
@@ -52,7 +59,7 @@ class UTCDateTimeType extends DateTimeType
             self::$utc ? self::$utc : self::$utc = new \DateTimeZone('UTC')
         );
 
-        if (! $converted) {
+        if (!$converted) {
             throw ConversionException::conversionFailedFormat(
                 $value,
                 $this->getName(),
