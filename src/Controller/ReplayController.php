@@ -25,7 +25,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ReplayController extends AbstractController
 {
     /**
-     * @Route("/replays", name="replay")
+     * @Route("/replays", name="replay_list")
      *
      * @param Request              $request
      * @param ReplaySummaryService $summaryService
@@ -33,7 +33,7 @@ class ReplayController extends AbstractController
      *
      * @return Response
      */
-    public function index(Request $request, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
+    public function list(Request $request, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {
         $timestamp = $request->get('after');
 
