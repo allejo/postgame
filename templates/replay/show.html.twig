@@ -124,51 +124,55 @@
             <ul class="flag-capture-timeline">
                 {% for flag_cap in flag_caps %}
                     {% set playerId = flag_cap.playerId %}
+                    {% set isTied = flag_cap.cappedTeamScore == flag_cap.cappingTeamScore %}
 
                     <li class="flag-capture-event">
-                        <div class="flag-capture-timestamp">
+                        <span class="flag-capture-timestamp">
                             {{ match_time(flag_cap.matchTime, flag_cap.timestamp) }}
-                        </div>
+                        </span>
 
-                        <div class="flag-capture-description">
+                        <span class="flag-capture-description">
                             <span class="color-{{ flag_cap.cappingTeam | team_literal }}-team">
                                 {{- players[playerId].callsign -}}
                             </span>
 
                             captured the
 
-                            <span class="color-{{ flag_cap.cappedTeam | team_literal }}-team">
+                            <span class="color-{{ flag_cap.cappedTeam | team_literal }}-team no-cb-translation">
                                 {{- flag_cap.cappedTeam | team_literal | title -}}
                             </span>
 
                             team flag
-                        </div>
 
-                        <span class="sr-only">Score is now</span>
+                            <span class="sr-only">. Score is now {{ isTied ? 'tied at' }},
+                                {{ flag_cap.cappingTeam | team_literal }} team, {{ flag_cap.cappingTeamScore }},
+                                {{ flag_cap.cappedTeam | team_literal }} team, {{ flag_cap.cappedTeamScore }}.
+                            </span>
+                        </span>
 
-                        <div class="flag-capture-score capping">
+                        <span class="flag-capture-score capping" aria-hidden="true">
                             <span class="team-score">
                                 <span class="flag-capture-score__team">
-                                    {{- flag_cap.cappingTeam | team_literal | title -}} <span class="sr-only">team</span>
+                                    {{ flag_cap.cappingTeam | team_literal | title }}
                                 </span>
 
                                 <span class="flag-capture-score__points">
-                                    <span class="wrap-brackets">{{ flag_cap.cappingTeamScore }}</span> <span class="sr-only">points</span>
+                                    [{{ flag_cap.cappingTeamScore }}]
                                 </span>
                             </span>
-                        </div>
+                        </span>
 
-                        <div class="flag-capture-score capped">
+                        <span class="flag-capture-score capped" aria-hidden="true">
                             <span class="team-score">
                                 <span class="flag-capture-score__team">
-                                    {{- flag_cap.cappedTeam | team_literal | title -}} <span class="sr-only">team</span>
+                                    {{ flag_cap.cappedTeam | team_literal | title }}
                                 </span>
 
                                 <span class="flag-capture-score__points">
-                                    <span class="wrap-brackets">{{ flag_cap.cappedTeamScore }}</span> <span class="sr-only">points</span>
+                                    [{{ flag_cap.cappedTeamScore }}]
                                 </span>
                             </span>
-                        </div>
+                        </span>
                     </li>
                 {% endfor %}
             </ul>
