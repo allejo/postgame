@@ -10,7 +10,10 @@
 
         {% block stylesheets %}{% endblock %}
     </head>
+
     <body>
+        {% include '_includes/navigation.html.twig' %}
+
         {% block body %}{% endblock %}
 
         {{ encore_entry_script_tags('app') }}

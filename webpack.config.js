@@ -60,15 +60,11 @@ Encore
 
     .copyFiles({
         from: './assets/images',
-
-        // optional target path, relative to the output dir
-        //to: 'images/[path][name].[ext]',
-
-        // if versioning is enabled, add the file hash too
-        //to: 'images/[path][name].[hash:8].[ext]',
-
-        // only copy files matching this pattern
-        //pattern: /\.(png|jpg|jpeg)$/
+        to: 'images/[name].[hash:8].[ext]',
+    })
+    .copyFiles({
+        from: './assets/vendor/style-guide/src/assets',
+        to: 'images/[name].[hash:8].[ext]',
     })
 
     // uncomment if you're having problems with a jQuery plugin
