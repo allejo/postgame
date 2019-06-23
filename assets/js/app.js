@@ -13,7 +13,8 @@ require('../sass/app.scss');
 // Need jQuery? Install it with "yarn add jquery", then uncomment to require it.
 // const $ = require('jquery');
 
-require('../vendor/style-guide/src/js/common');
+require('../vendor/style-guide/src/js/bootstrap');
+require('../vendor/style-guide/src/js/navigation');
 require('../vendor/style-guide/src/js/table');
 require('../vendor/style-guide/src/js/tablist');
 
