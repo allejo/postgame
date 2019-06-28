@@ -1,18 +1,33 @@
 {% macro team_card(team, score) %}
     {%- set team_str = team | team_literal -%}
 
-    <div class="team-card col-12 col-md-6">
-        <div class="team-card__icon">
-            <img
-                src="{{ asset('build/images/team_' ~ (team_str | lower) ~ '.png') }}"
-                alt="{{ team_str | title }} team icon"
-            >
+    <div class="team-card">
+        <div class="team-card__profile">
+            <div class="team-card__icon">
+                <img
+                    src="{{ asset('build/images/team_' ~ (team_str | lower) ~ '.png') }}"
+                    alt="{{ team_str | title }} team icon"
+                >
+            </div>
+            <div class="team-card__name">
+                {{ team_str | title }}
+            </div>
         </div>
-        <div class="team-card__name">
-            {{ team_str | title }} Team
-        </div>
+
         <div class="team-card__score">
             {{ score }}
         </div>
+    </div>
+{% endmacro %}
+
+{% macro match_team_summary(winner_num, winner_score, loser_num, loser_score) %}
+    {% from _self import team_card %}
+
+    <div class="score-card">
+        {{ team_card(winner_num, winner_score) }}
+
+        <span aria-hidden="true">:</span>
+
+        {{ team_card(loser_num, loser_score) }}
     </div>
 {% endmacro %}

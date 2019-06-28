@@ -1,39 +1,28 @@
 .score-card {
-    @include font-size(h4);
-
-    @include respond-up(md) {
-        @include font-size(h3);
-    }
+    align-items: center;
+    display: flex;
 }
 
 .score-card--compact {
     font-size: 1rem;
-
-    .team-card__icon img {
-        height: 50px;
-        width: 50px;
-    }
 }
 
 .team-card {
     align-items: center;
     display: flex;
+    flex: 1;
+    flex-direction: row;
+    text-align: center;
 
-    &:nth-child(even) {
-        @include respond-up(md) {
-            .team-card__icon {
-                order: 3;
-            }
-
-            .team-card__name {
-                text-align: right;
-            }
-
-            .team-card__score {
-                order: -1;
-            }
+    &:nth-of-type(even) {
+        .team-card__profile {
+            order: 2;
         }
     }
+}
+
+.team-card__profile {
+    flex: 1;
 }
 
 .team-card__name,
@@ -43,8 +32,12 @@
 
 .team-card__icon {
     img {
-        height: 50px;
-        width: 50px;
+        @include margin(x, auto);
+        @include margin(b, 2);
+
+        display: block;
+        height: 60px;
+        width: 60px;
 
         @include respond-up(md) {
             height: 100px;
@@ -54,5 +47,8 @@
 }
 
 .team-card__name {
-    flex: 1;
+}
+
+.team-card__score {
+    @include font-size(h3);
 }
