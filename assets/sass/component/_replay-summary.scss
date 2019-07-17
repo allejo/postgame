@@ -1,0 +1,40 @@
+.replay-summary {
+    @include respond-up(lg) {
+        display: grid;
+        grid-template-columns: 4fr 1fr;
+        grid-template-rows: min-content 1fr;
+    }
+}
+
+.replay-summary__timing,
+.replay-summary__actions {
+    @include padding(x, 3);
+
+    text-align: center;
+}
+
+.replay-summary__timing {
+    @include margin(b, 2);
+
+    p {
+        @include margin(b, 1);
+
+        display: inline-block;
+
+        &:not(:last-child)::after {
+            content: '\2022';
+        }
+    }
+}
+
+.replay-summary__actions {
+
+}
+
+.replay-summary__card {
+    @include respond-up(lg) {
+        border-right: $border-default;
+        grid-column: 1;
+        grid-row: 1 / span 2;
+    }
+}
