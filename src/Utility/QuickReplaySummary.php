@@ -11,9 +11,42 @@ namespace App\Utility;
 
 class QuickReplaySummary
 {
+    /**
+     * The duration of the replay in minutes.
+     *
+     * @var int
+     */
     public $duration;
+
+    /**
+     * The numerical representation of the winning team.
+     *
+     * @var int
+     *
+     * @see BZTeamType
+     */
     public $winner;
+
+    /**
+     * The score of the winning team.
+     *
+     * @var int
+     */
     public $winnerScore;
+
+    /**
+     * The numerical representation of the losing team.
+     *
+     * @var int
+     *
+     * @see BZTeamType
+     */
     public $loser;
+
+    /**
+     * The score of the losing team.
+     *
+     * @var int
+     */
     public $loserScore;
 }
