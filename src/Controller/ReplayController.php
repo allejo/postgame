@@ -37,6 +37,15 @@ class ReplayController extends AbstractController
     {
         $timestamp = $request->get('after');
 
+        if ($timestamp !== null) {
+            try {
+                $timestamp = new \DateTime($timestamp);
+            }
+            catch (\Exception) {
+                $timestamp = null;
+            }
+        }
+
         $em = $this->getDoctrine()->getManager();
         $replays = $em->getRepository(Replay::class)->findByTimeRange($timestamp);
 
