@@ -41,7 +41,7 @@ class ReplayController extends AbstractController
             try {
                 $timestamp = new \DateTime($timestamp);
             }
-            catch (\Exception) {
+            catch (\Exception $e) {
                 $timestamp = null;
             }
         }
