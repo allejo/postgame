@@ -33,7 +33,7 @@ class UTCDateTimeType extends DateTimeType
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         if ($value instanceof \DateTime) {
-            $value->setTimezone(new \DateTimeZone(\DateTimeZone::UTC));
+            $value->setTimezone(new \DateTimeZone('UTC'));
         }
 
         return parent::convertToDatabaseValue($value, $platform);
