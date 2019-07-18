@@ -376,6 +376,31 @@ class ReplaySummaryService
             $this->flagCaptures[] = $record;
             $this->playerRecords[$capperId]->flagCaptures[] = $record;
         }
+
+        // If there were no flag captures this match, that means we need to get
+        // the teams from player joins instead.
+        if (empty($this->flagCaptures)) {
+            if (count($this->playerRecords) === 1) {
+                $this->handlePlayers($findByFilter);
+                $this->handleJoins($findByFilter);
+            }
+
+            foreach ($this->playerRecords as $id => $pr) {
+                // Skip the special SERVER player with id of -1 and players with
+                // no sessions
+                if ($id === -1 || count($pr->sessions) === 0) {
+                    continue;
+                }
+
+                $session = $pr->sessions[0];
+
+                if ($session->team === BZTeamType::OBSERVER) {
+                    continue;
+                }
+
+                $this->teamScores[$session->team] = 0;
+            }
+        }
     }
 
     private function handleMessages(Replay $replay): void
