@@ -521,6 +521,8 @@ class ReplaySummaryService
     {
         $this->summarized = self::UNSUMMARIZED;
         $this->teamScores = new DefaultArray(0);
+        $this->chatMessages = [];
+        $this->flagCaptures = [];
         $this->playerRecords = [
             -1 => $this->createServerPlayerRecord(),
         ];
