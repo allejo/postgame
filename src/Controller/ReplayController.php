@@ -35,21 +35,17 @@ class ReplayController extends AbstractController
      */
     public function list(Request $request, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {
-        $timestamp = $request->get('after');
-
-        if ($timestamp !== null) {
-            try {
-                $timestamp = new \DateTime($timestamp);
-            }
-            catch (\Exception $e) {
-                $timestamp = null;
-            }
-        }
+        $after = $this->safeGetTimestamp($request, 'after');
+        $before = $this->safeGetTimestamp($request, 'before');
 
         $em = $this->getDoctrine()->getManager();
-        $replays = $em->getRepository(Replay::class)->findByTimeRange($timestamp);
+        $repo = $em->getRepository(Replay::class);
 
-        /** @var array<string, Replay[]> $replaysByDay */
+        $oldest = $repo->findOldest();
+        $newest = $repo->findNewest();
+        $replays = $repo->findByTimeRange($after, $before);
+
+        /** @var DefaultArray<string, array<Replay>> $replaysByDay */
         $replaysByDay = new DefaultArray([]);
 
         /** @var QuickReplaySummary[] $summaries */
@@ -77,8 +73,10 @@ class ReplayController extends AbstractController
         }
 
         return $this->render('replay/index.html.twig', [
-            'replays' => $replaysByDay,
+            'replays' => $replaysByDay->getAsArray(),
             'summaries' => $summaries,
+            'oldest_replay' => $oldest,
+            'newest_replay' => $newest,
         ]);
     }
 
@@ -142,5 +140,28 @@ class ReplayController extends AbstractController
         }
 
         return $this->render('replay/show.html.twig', $replaySummary);
+    }
+
+    /**
+     * Safely get an upper or lower bound \DateTime from a query parameter.
+     *
+     * @param Request $request The incoming HTTP request
+     * @param string  $param   The name of the query parameter
+     *
+     * @return \DateTime|null Null is returned if there is no valid timestamp
+     */
+    private function safeGetTimestamp(Request $request, string $param): ?\DateTime
+    {
+        $timestamp = $request->get($param);
+
+        if ($timestamp !== null) {
+            try {
+                $timestamp = new \DateTime($timestamp);
+            } catch (\Exception $e) {
+                $timestamp = null;
+            }
+        }
+
+        return $timestamp;
     }
 }

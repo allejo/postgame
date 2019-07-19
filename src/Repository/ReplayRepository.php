@@ -12,6 +12,7 @@ namespace App\Repository;
 use App\Entity\Replay;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -27,35 +28,74 @@ class ReplayRepository extends ServiceEntityRepository
         parent::__construct($registry, Replay::class);
     }
 
+    public function findNewest(): ?Replay
+    {
+        try {
+            return $this->createQueryBuilder('r')
+                ->orderBy('r.startTime', 'DESC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult()
+            ;
+        } catch (NonUniqueResultException $e) {
+            return null;
+        }
+    }
+
+    public function findOldest(): ?Replay
+    {
+        try {
+            return $this->createQueryBuilder('r')
+                ->orderBy('r.startTime', 'ASC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult()
+            ;
+        } catch (NonUniqueResultException $e) {
+            return null;
+        }
+    }
+
     /**
-     * @param DateTime|null $start
-     * @param DateTime|null $end
+     * @param DateTime|null $after
+     * @param DateTime|null $before
      *
      * @return Replay[]
      */
-    public function findByTimeRange(?DateTime $start, ?DateTime $end = null): array
+    public function findByTimeRange(?DateTime $after = null, ?DateTime $before = null): array
     {
+        $flipRequired = false;
         $qb = $this->createQueryBuilder('r');
+        $qb->orderBy('r.startTime', 'DESC');
 
-        if ($start !== null) {
+        if ($after !== null) {
             $qb
-                ->andWhere('r.startTime < :start')
-                ->setParameter('start', $start)
+                ->andWhere('r.startTime < :after')
+                ->setParameter('after', $after->format(DATE_ATOM))
             ;
         }
 
-        if ($end !== null) {
+        if ($before !== null) {
             $qb
-                ->andWhere('r.startTime < :end')
-                ->setParameter('end', $end)
+                ->andWhere('r.startTime > :before')
+                ->setParameter('before', $before->format(DATE_ATOM))
+                ->orderBy('r.startTime', 'ASC')
             ;
+
+            $flipRequired = true;
         }
 
-        return $qb
-            ->orderBy('r.startTime', 'DESC')
-            ->setMaxResults(20)
-            ->getQuery()
-            ->getResult()
-        ;
+        $qb->setMaxResults(20);
+
+        $result = $qb->getQuery()->getResult();
+
+        // We need to manually flip the results via PHP when using the `before`
+        // value because we need to get our results as close as possible to the
+        // given datetime, which we must do in ASC order.
+        if ($flipRequired) {
+            $result = array_reverse($result);
+        }
+
+        return $result;
     }
 }

@@ -13,7 +13,7 @@
                 {% set date_fmt = (curr_year == replay_year) ? 'F d' : 'F d, Y' %}
 
                 <section>
-                    <h2 class="border-b h4 py-2">
+                    <h2 class="border-b h4 mb-3 py-2">
                         {{ datetime | date(date_fmt) }}
                     </h2>
 
@@ -63,7 +63,48 @@
                         </article>
                     {% endfor %}
                 </section>
+            {% else %}
+                <section>
+                    <h2>No Replays Found</h2>
+                    <p>There were not any replays found matching this search criteria.</p>
+                </section>
             {% endfor %}
+        </div>
+
+        <div class="text-center">
+            <div class="c-button-group d-inline-block">
+                {% if replays is not empty %}
+                    {% set date_query_fmt = 'Y-m-d\\TH:i:s' %}
+                    {% set first_replay = replays | first | first %}
+                    {% set last_replay = replays | last | last %}
+
+                    {% if newest_replay.id != first_replay.id %}
+                        <a
+                            class="c-button py-2"
+                            href="{{ url('replay_list', { 'before': first_replay.startTime | date(date_query_fmt, false) }) }}"
+                        >
+                            Older
+                        </a>
+                    {% else %}
+                        <button class="c-button py-2" disabled>
+                            Older
+                        </button>
+                    {% endif %}
+
+                    {% if oldest_replay.id != last_replay.id %}
+                        <a
+                            class="c-button py-2"
+                            href="{{ url('replay_list', { 'after': last_replay.startTime | date(date_query_fmt, false) }) }}"
+                        >
+                            Newer
+                        </a>
+                    {% else %}
+                        <button class="c-button py-2" disabled>
+                            Newer
+                        </button>
+                    {% endif %}
+                {% endif %}
+            </div>
         </div>
     </div>
 {% endblock %}

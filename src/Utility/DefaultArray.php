@@ -12,9 +12,13 @@ namespace App\Utility;
 /**
  * An array that has a default values automatically set for it whenever a key
  * that does not exist is accessed.
+ *
+ * @template TKey
+ * @template TValue
  */
 class DefaultArray implements \ArrayAccess, \IteratorAggregate, \JsonSerializable
 {
+    /** @var array<TKey, TValue> */
     private $store = [];
     private $defaultValue;
 
