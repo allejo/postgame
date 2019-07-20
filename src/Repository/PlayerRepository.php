@@ -28,7 +28,7 @@ class PlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, Player::class);
     }
 
-    public function findMostActive(int $count = 15, ?\DateTime $start = null, ?\DateTime $end = null): array
+    public function findMostActive(int $count = 10, ?\DateTime $start = null, ?\DateTime $end = null): array
     {
         $start = $start ?? new \DateTime('now');
 
