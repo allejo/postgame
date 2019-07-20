@@ -9,6 +9,8 @@
 
 namespace App\Controller;
 
+use App\Entity\CaptureEvent;
+use App\Entity\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +27,14 @@ class IndexController extends AbstractController
      */
     public function index(Request $request): Response
     {
-        return $this->render('index.html.twig');
+        $em = $this->getDoctrine()->getManager();
+
+        $player_activity = $em->getRepository(Player::class)->findMostActive();
+        $player_captures = $em->getRepository(CaptureEvent::class)->findTopCappers();
+
+        return $this->render('index.html.twig', [
+            'top_players' => $player_activity,
+            'top_cappers' => $player_captures,
+        ]);
     }
 }

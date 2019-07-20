@@ -1,5 +1,69 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}BZFlag Postgame :: Activity Dashboard{% endblock %}
+
 {% block body %}
-    Hello world
+    <div class="container">
+        <h1 class="mt-3">Activity Dashboard</h1>
+
+        <div class="row">
+            <div class="col-md-6">
+                <section>
+                    <h2>Most Active Players</h2>
+
+                    <table class="table--skinny w-100">
+                        <thead>
+                            <tr>
+                                <th class="w-100">Callsign</th>
+                                <th class="text-center">Match Count</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for player in top_players %}
+                                <tr>
+                                    <td>{{ player.callsign }}</td>
+                                    <td class="text-center">{{ player.match_count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                        <caption>
+                            The top {{ top_players | length }} players who have participated in the most matches in the
+                            past 90 days.
+                        </caption>
+                    </table>
+                </section>
+            </div>
+
+            <div class="col-md-6">
+                <section>
+                    <h2>Most Flag Captures</h2>
+
+                    <table class="table--skinny w-100">
+                        <thead>
+                            <tr>
+                                <th class="w-100">Callsign</th>
+                                <th class="text-center">Cap Count</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for player in top_cappers %}
+                                <tr>
+                                    <td>{{ player.callsign }}</td>
+                                    <td class="text-center">{{ player.cap_count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                        <caption>
+                            The {{ top_cappers | length }} players who have captured the enemy flag the most in the past
+                            90 days.
+                        </caption>
+                    </table>
+                </section>
+            </div>
+        </div>
+    </div>
 {% endblock %}
