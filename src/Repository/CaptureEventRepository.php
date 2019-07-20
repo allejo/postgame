@@ -21,6 +21,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class CaptureEventRepository extends ServiceEntityRepository
 {
+    use DateRangeTrait;
     use DeletableReplayTrait;
 
     public function __construct(RegistryInterface $registry)
@@ -30,29 +31,17 @@ class CaptureEventRepository extends ServiceEntityRepository
 
     public function findTopCappers(int $count = 10, ?\DateTime $start = null, ?\DateTime $end = null): array
     {
-        $start = $start ?? new \DateTime('now');
-
-        if ($end === null) {
-            $end = new \DateTime('now');
-            $end->modify('-90 days');
-        }
-
         $qb = $this->createQueryBuilder('ce');
         $qb
             ->select('p.callsign, COUNT(ce.id) AS cap_count')
             ->join('ce.capper', 'p')
             ->join('ce.replay', 'r')
-
             ->groupBy('p.callsign')
-
-            ->andWhere('r.startTime <= :start')
-            ->setParameter('start', $start->format(DATE_ATOM))
-            ->andWhere('r.startTime >= :end')
-            ->setParameter('end', $end->format(DATE_ATOM))
-
             ->orderBy('cap_count', 'DESC')
             ->setMaxResults($count)
         ;
+
+        $this->applyDateRangeToQueryBuilder($qb, 'r', $start, $end);
 
         return $qb->getQuery()->getResult();
     }
