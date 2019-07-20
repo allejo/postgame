@@ -27,4 +27,32 @@ class PlayerRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Player::class);
     }
+
+    public function findMostActive(int $count = 15, ?\DateTime $start = null, ?\DateTime $end = null): array
+    {
+        $start = $start ?? new \DateTime('now');
+
+        if ($end === null) {
+            $end = new \DateTime('now');
+            $end->modify('-90 days');
+        }
+
+        $qb = $this->createQueryBuilder('p');
+        $qb
+            ->select('p.callsign, COUNT(p.replay) AS match_count')
+            ->join('p.replay', 'r')
+
+            ->groupBy('p.callsign')
+
+            ->andWhere('r.startTime <= :start')
+            ->setParameter('start', $start->format(DATE_ATOM))
+            ->andWhere('r.startTime >= :end')
+            ->setParameter('end', $end->format(DATE_ATOM))
+
+            ->orderBy('match_count', 'DESC')
+            ->setMaxResults($count)
+        ;
+
+        return $qb->getQuery()->getResult();
+    }
 }
