@@ -21,10 +21,47 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class KillEventRepository extends ServiceEntityRepository
 {
+    use DateRangeTrait;
     use DeletableReplayTrait;
 
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, KillEvent::class);
+    }
+
+    public function findTopKillers(int $count = 10, ?\DateTime $start = null, ?\DateTime $end = null): array
+    {
+        $qb = $this->createQueryBuilder('ke');
+        $qb
+            ->select('k.callsign, COUNT(ke.victim) as kill_count')
+            ->join('ke.killer', 'k')
+            ->join('ke.replay', 'r')
+            ->where('ke.killer != ke.victim')
+            ->orderBy('kill_count', 'DESC')
+            ->groupBy('k.callsign')
+            ->setMaxResults($count)
+        ;
+
+        $this->applyDateRangeToQueryBuilder($qb, 'r', $start, $end);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findTopVictims(int $count = 10, ?\DateTime $start = null, ?\DateTime $end = null): array
+    {
+        $qb = $this->createQueryBuilder('ke');
+        $qb
+            ->select('v.callsign, COUNT(ke.killer) AS death_count')
+            ->join('ke.victim', 'v')
+            ->join('ke.replay', 'r')
+            ->where('ke.killer != ke.victim')
+            ->orderBy('death_count', 'DESC')
+            ->groupBy('v.callsign')
+            ->setMaxResults($count)
+        ;
+
+        $this->applyDateRangeToQueryBuilder($qb, 'r', $start, $end);
+
+        return $qb->getQuery()->getResult();
     }
 }

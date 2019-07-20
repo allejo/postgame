@@ -64,6 +64,62 @@
                     </table>
                 </section>
             </div>
+
+            <div class="col-md-6">
+                <section>
+                    <h2>Top Killers</h2>
+
+                    <table class="table--skinny w-100">
+                        <thead>
+                            <tr>
+                                <th class="w-100">Callsign</th>
+                                <th class="text-center">Kill Count</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for player in top_killers %}
+                                <tr>
+                                    <td>{{ player.callsign }}</td>
+                                    <td class="text-center">{{ player.kill_count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                        <caption>
+                            The top {{ top_killers | length }} players who have killed the most players in the past 90 days.
+                        </caption>
+                    </table>
+                </section>
+            </div>
+
+            <div class="col-md-6">
+                <section>
+                    <h2>Top Victims</h2>
+
+                    <table class="table--skinny w-100">
+                        <thead>
+                            <tr>
+                                <th class="w-100">Callsign</th>
+                                <th class="text-center">Death Count</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for player in top_victims %}
+                                <tr>
+                                    <td>{{ player.callsign }}</td>
+                                    <td class="text-center">{{ player.death_count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                        <caption>
+                            The top {{ top_victims | length }} players who have been killed the most in the past 90 days.
+                        </caption>
+                    </table>
+                </section>
+            </div>
         </div>
     </div>
 {% endblock %}

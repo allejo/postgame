@@ -10,6 +10,7 @@
 namespace App\Controller;
 
 use App\Entity\CaptureEvent;
+use App\Entity\KillEvent;
 use App\Entity\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,10 +32,14 @@ class IndexController extends AbstractController
 
         $player_activity = $em->getRepository(Player::class)->findMostActive();
         $player_captures = $em->getRepository(CaptureEvent::class)->findTopCappers();
+        $top_killers = $em->getRepository(KillEvent::class)->findTopKillers();
+        $top_victims = $em->getRepository(KillEvent::class)->findTopVictims();
 
         return $this->render('index.html.twig', [
             'top_players' => $player_activity,
             'top_cappers' => $player_captures,
+            'top_killers' => $top_killers,
+            'top_victims' => $top_victims,
         ]);
     }
 }
