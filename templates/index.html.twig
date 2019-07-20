@@ -2,123 +2,83 @@
 
 {% block title %}BZFlag Postgame :: Activity Dashboard{% endblock %}
 
+{% macro render_table(title, headers, data, caption, classes) %}
+    <section>
+        <h2>{{ title }}</h2>
+
+        <table class="table--skinny w-100">
+            <thead>
+                <tr>
+                    {% for header in headers %}
+                        <th class="{{ classes[loop.index0] }}">{{ header }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in data %}
+                    <tr>
+                        {% for column in row %}
+                            <td class="{{ classes[loop.index0] }}">{{ column }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+
+            <caption>
+                {{ caption }}
+            </caption>
+        </table>
+    </section>
+{% endmacro %}
+
 {% block body %}
+    {% from _self import render_table %}
+
+    {% set classes = ['w-100', 'text-center'] %}
+
     <div class="container">
         <h1 class="mt-3">Activity Dashboard</h1>
 
         <div class="row">
             <div class="col-md-6">
-                <section>
-                    <h2>Most Active Players</h2>
-
-                    <table class="table--skinny w-100">
-                        <thead>
-                            <tr>
-                                <th class="w-100">Callsign</th>
-                                <th class="text-center">Match Count</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {% for player in top_players %}
-                                <tr>
-                                    <td>{{ player.callsign }}</td>
-                                    <td class="text-center">{{ player.match_count }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-
-                        <caption>
-                            The top {{ top_players | length }} players who have participated in the most matches in the
-                            past 90 days.
-                        </caption>
-                    </table>
-                </section>
+                {{ render_table(
+                    'Most Active Players',
+                    ['Callsign', 'Match Count'],
+                    top_players,
+                    'The top ' ~ top_players | length ~ ' players who have participated in the most matches in the past 90 days.',
+                    classes
+                ) }}
             </div>
 
             <div class="col-md-6">
-                <section>
-                    <h2>Most Flag Captures</h2>
-
-                    <table class="table--skinny w-100">
-                        <thead>
-                            <tr>
-                                <th class="w-100">Callsign</th>
-                                <th class="text-center">Cap Count</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {% for player in top_cappers %}
-                                <tr>
-                                    <td>{{ player.callsign }}</td>
-                                    <td class="text-center">{{ player.cap_count }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-
-                        <caption>
-                            The {{ top_cappers | length }} players who have captured the enemy flag the most in the past
-                            90 days.
-                        </caption>
-                    </table>
-                </section>
+                {{ render_table(
+                    'Most Flag Captures',
+                    ['Callsign', 'Cap Count'],
+                    top_cappers,
+                    'The ' ~ top_cappers | length ~ ' players who have captured the enemy flag the most in the past 90 days.',
+                    classes
+                ) }}
             </div>
 
             <div class="col-md-6">
-                <section>
-                    <h2>Top Killers</h2>
-
-                    <table class="table--skinny w-100">
-                        <thead>
-                            <tr>
-                                <th class="w-100">Callsign</th>
-                                <th class="text-center">Kill Count</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {% for player in top_killers %}
-                                <tr>
-                                    <td>{{ player.callsign }}</td>
-                                    <td class="text-center">{{ player.kill_count }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-
-                        <caption>
-                            The top {{ top_killers | length }} players who have killed the most players in the past 90 days.
-                        </caption>
-                    </table>
-                </section>
+                {{ render_table(
+                    'Top Killers',
+                    ['Callsign', 'Kill Count'],
+                    top_killers,
+                    'The top ' ~ top_killers | length ~ ' players who have killed the most players in the past 90 days.',
+                    classes
+                ) }}
             </div>
 
             <div class="col-md-6">
-                <section>
-                    <h2>Top Victims</h2>
-
-                    <table class="table--skinny w-100">
-                        <thead>
-                            <tr>
-                                <th class="w-100">Callsign</th>
-                                <th class="text-center">Death Count</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {% for player in top_victims %}
-                                <tr>
-                                    <td>{{ player.callsign }}</td>
-                                    <td class="text-center">{{ player.death_count }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-
-                        <caption>
-                            The top {{ top_victims | length }} players who have been killed the most in the past 90 days.
-                        </caption>
-                    </table>
-                </section>
+                {{ render_table(
+                    'Top Victims',
+                    ['Callsign', 'Death Count'],
+                    top_victims,
+                    'The top ' ~ top_victims | length ~ ' players who have been killed the most in the past 90 days.',
+                    classes
+                ) }}
             </div>
         </div>
     </div>
