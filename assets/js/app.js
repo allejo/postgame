@@ -6,6 +6,7 @@
  */
 
 require('@fortawesome/fontawesome-free/css/all.min.css');
+require('c3/c3.css');
 
 // any CSS you require will output into a single css file (app.css in this case)
 require('../sass/app.scss');
@@ -18,4 +19,5 @@ require('../vendor/style-guide/src/js/navigation');
 require('../vendor/style-guide/src/js/table');
 require('../vendor/style-guide/src/js/tablist');
 
+require('./lib/graphs');
 require('./lib/timestamps');

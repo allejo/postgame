@@ -106,7 +106,7 @@ class ReplayRepository extends ServiceEntityRepository
 
         $qb = $this->createQueryBuilder('r');
         $qb
-            ->select("DATE_FORMAT(r.startTime, '%Y-%U') AS match_date, COUNT(r.id) AS match_count")
+            ->select("DATE_FORMAT(r.startTime, '%Y-%m-%d') AS match_date, COUNT(r.id) AS match_count")
             ->andWhere('r.startTime >= :start')
             ->setParameter('start', $start->format(DATE_ATOM))
             ->andWhere('r.startTime <= :end')

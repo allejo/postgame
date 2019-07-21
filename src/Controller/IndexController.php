@@ -31,11 +31,18 @@ class IndexController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $match_count = $em->getRepository(Replay::class)->getSummaryCount();
         $player_activity = $em->getRepository(Player::class)->findMostActive();
         $player_captures = $em->getRepository(CaptureEvent::class)->findTopCappers();
         $top_killers = $em->getRepository(KillEvent::class)->findTopKillers();
         $top_victims = $em->getRepository(KillEvent::class)->findTopVictims();
+
+        $match_count = $em->getRepository(Replay::class)->getSummaryCount();
+        $match_count = array_column($match_count, 'match_count');
+        array_unshift($match_count, 'Matches/day');
+
+        $match_count = [
+            $match_count,
+        ];
 
         return $this->render('index.html.twig', [
             'match_count' => $match_count,
