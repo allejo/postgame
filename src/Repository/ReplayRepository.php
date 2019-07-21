@@ -98,4 +98,23 @@ class ReplayRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    public function getSummaryCount(?DateTime $start = null, ?DateTime $end = null)
+    {
+        $end = $end ?? new DateTime('now');
+        $start = $start ?? (new DateTime('now'))->modify('-90 days');
+
+        $qb = $this->createQueryBuilder('r');
+        $qb
+            ->select("DATE_FORMAT(r.startTime, '%Y-%U') AS match_date, COUNT(r.id) AS match_count")
+            ->andWhere('r.startTime >= :start')
+            ->setParameter('start', $start->format(DATE_ATOM))
+            ->andWhere('r.startTime <= :end')
+            ->setParameter('end', $end->format(DATE_ATOM))
+            ->orderBy('match_date', 'ASC')
+            ->groupBy('match_date')
+        ;
+
+        return $qb->getQuery()->getResult();
+    }
 }

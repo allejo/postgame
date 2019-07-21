@@ -2,6 +2,9 @@
     "allejo/bzflag-networking.php": {
         "version": "dev-master"
     },
+    "beberlei/doctrineextensions": {
+        "version": "v1.2.2"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {

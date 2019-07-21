@@ -12,6 +12,7 @@ namespace App\Controller;
 use App\Entity\CaptureEvent;
 use App\Entity\KillEvent;
 use App\Entity\Player;
+use App\Entity\Replay;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,12 +31,14 @@ class IndexController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
+        $match_count = $em->getRepository(Replay::class)->getSummaryCount();
         $player_activity = $em->getRepository(Player::class)->findMostActive();
         $player_captures = $em->getRepository(CaptureEvent::class)->findTopCappers();
         $top_killers = $em->getRepository(KillEvent::class)->findTopKillers();
         $top_victims = $em->getRepository(KillEvent::class)->findTopVictims();
 
         return $this->render('index.html.twig', [
+            'match_count' => $match_count,
             'top_players' => $player_activity,
             'top_cappers' => $player_captures,
             'top_killers' => $top_killers,
