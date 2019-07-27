@@ -1,8 +1,7 @@
-{% macro line_graph(id, data) %}
+{% macro make_chart(id, data) %}
     <div
         id="{{ id }}"
         data-role="c3-chart"
-        data-graph="line"
-        data-data="{{ data | json_encode }}"
+        data-url="{{ data }}"
     ></div>
 {% endmacro %}
