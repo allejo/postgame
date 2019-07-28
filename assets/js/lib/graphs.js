@@ -20,8 +20,14 @@ const graphDefs = {
                     tick: {
                         format: '%Y-%m-%d',
                     },
-                }
-            }
+                },
+            },
+            tooltip: {
+                show: false,
+            },
+            legend: {
+                show: false,
+            },
         };
 
         c3.generate(c3_def);
