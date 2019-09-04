@@ -26,7 +26,7 @@ class IndexController extends AbstractController
      *
      * @return Response
      */
-    public function index(Request $request): Response
+    public function indexAction(Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
 

@@ -33,7 +33,7 @@ class ReplayController extends AbstractController
      *
      * @return Response
      */
-    public function list(Request $request, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
+    public function listAction(Request $request, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {
         $after = $this->safeGetTimestamp($request, 'after');
         $before = $this->safeGetTimestamp($request, 'before');
@@ -97,7 +97,7 @@ class ReplayController extends AbstractController
      *
      * @return Response
      */
-    public function show(int $id, string $filename, string $_format, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
+    public function showAction(int $id, string $filename, string $_format, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {
         $em = $this->getDoctrine()->getManager();
         $replay = $em->getRepository(Replay::class)->findOneBy([
