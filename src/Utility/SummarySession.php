@@ -9,7 +9,7 @@
 
 namespace App\Utility;
 
-class SummarySession
+class SummarySession implements \JsonSerializable
 {
     /** @var int */
     public $team;
@@ -25,4 +25,14 @@ class SummarySession
 
     /** @var int Total time of this session in seconds */
     public $totalTime;
+
+    public function jsonSerialize()
+    {
+        return [
+            'team' => $this->team,
+            'joinTime' => $this->joinTime,
+            'partTime' => $this->partTime,
+            'totalTime' => $this->totalTime,
+        ];
+    }
 }
