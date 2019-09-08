@@ -1,0 +1,3 @@
+[submodule "assets/vendor/style-guide"]
+	path = assets/vendor/style-guide
+	url = https://github.com/BZFlag-Dev/style-guide.git
