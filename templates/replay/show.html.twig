@@ -73,8 +73,8 @@
                         </thead>
 
                         <tbody>
-                            {% for player in players %}
-                                {% if player.score.kills != 0 or player.score.deaths != 0  %}
+                            {% for id, player in players %}
+                                {% if (player.score.kills != 0 or player.score.deaths != 0) and id != -1 %}
                                     <tr>
                                         <td>
                                             <span class="color-{{ player.teamLiteral }}-team">
@@ -206,7 +206,7 @@
 
             <div class="tabs" data-role="tablist" data-tab-desc="Player roster">
                 {% for i, player in players %}
-                    {% if player.score.kills != 0 or player.score.deaths != 0 %}
+                    {% if (player.score.kills != 0 or player.score.deaths != 0) and i != -1 %}
                         <article
                             id="{{ player.callsign | slug }}"
                             class="tabs__tab"

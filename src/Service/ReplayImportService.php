@@ -283,7 +283,7 @@ class ReplayImportService
             253 => null,
         ];
         $this->currPlayersCurrentTeam = [
-            253 => 'Observer',
+            253 => null,
         ];
         $this->currPlayersJoinRecord = [];
         $this->currFuturePlayers = [];

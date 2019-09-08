@@ -286,8 +286,17 @@ class ReplaySummaryService
         $kills = $this->em->getRepository(KillEvent::class)->findBy($findByFilter);
 
         foreach ($kills as $kill) {
-            $victimId = $kill->getVictim()->getId();
-            $killerId = $kill->getKiller()->getId();
+            $victim = $kill->getVictim();
+            $killer = $kill->getKiller();
+
+            // Somehow, we have a null victim? This is technically possible but
+            // it should never happen.
+            if (!$victim) {
+                continue;
+            }
+
+            $victimId = $victim->getId();
+            $killerId = $killer ? $killer->getId() : -1;
 
             ++$this->playerRecords[$victimId]->score->deaths;
             ++$this->playerRecords[$killerId]->score->kills;
