@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "910f416ddb8b173e73884f8653346772",
+    "content-hash": "81c72cebdd9b33a40b526be148b5c016",
     "packages": [
         {
             "name": "allejo/bzflag-networking.php",
-            "version": "v1.0.7",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/allejo/bzflag-networking.php.git",
-                "reference": "f155e5adcb55be4a2e3affa29c9bbc1fb628e6fd"
+                "reference": "fdd557fa82fe3807d0cd09a1cf9af824f74bd917"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/allejo/bzflag-networking.php/zipball/f155e5adcb55be4a2e3affa29c9bbc1fb628e6fd",
-                "reference": "f155e5adcb55be4a2e3affa29c9bbc1fb628e6fd",
+                "url": "https://api.github.com/repos/allejo/bzflag-networking.php/zipball/fdd557fa82fe3807d0cd09a1cf9af824f74bd917",
+                "reference": "fdd557fa82fe3807d0cd09a1cf9af824f74bd917",
                 "shasum": ""
             },
             "require": {
@@ -25,10 +25,14 @@
                 "php": ">=7.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "^7.5",
-                "violet/streaming-json-encoder": "^1.1"
+                "phpunit/phpunit": "^7.5"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "allejo\\bzflag\\networking\\": "src/"
@@ -45,7 +49,7 @@
                 }
             ],
             "description": "A library for unpacking BZFlag network packets",
-            "time": "2019-09-01T05:45:05+00:00"
+            "time": "2019-09-08T04:32:44+00:00"
         },
         {
             "name": "beberlei/doctrineextensions",
@@ -6776,7 +6780,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "allejo/bzflag-networking.php": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

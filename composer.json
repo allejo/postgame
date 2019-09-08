@@ -6,7 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
-        "allejo/bzflag-networking.php": "^1.0",
+        "allejo/bzflag-networking.php": "dev-master",
         "beberlei/doctrineextensions": "^1.2",
         "sensio/framework-extra-bundle": "^5.3",
         "symfony/apache-pack": "^1.0",

@@ -9,6 +9,7 @@
 
 namespace App\Service;
 
+use allejo\bzflag\networking\InvalidReplayException;
 use allejo\bzflag\networking\Packets\GamePacket;
 use allejo\bzflag\networking\Packets\MsgAddPlayer;
 use allejo\bzflag\networking\Packets\MsgAdminInfo;
@@ -178,6 +179,7 @@ class ReplayImportService
      * @param bool   $doUpgrade Keep the replay ID but reimport all other information about the replay
      *
      * @throws \InvalidArgumentException when a non-existent file is given or a directory is given
+     * @throws InvalidReplayException    when an invalid replay is given
      * @throws PacketInvalidException    when an invalid replay is given
      *
      * @return bool Returns true if the import was successful

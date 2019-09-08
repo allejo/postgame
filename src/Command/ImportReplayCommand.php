@@ -9,6 +9,7 @@
 
 namespace App\Command;
 
+use allejo\bzflag\networking\InvalidReplayException;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
 use App\Service\ReplayImportService;
 use Symfony\Component\Console\Command\Command;
@@ -67,7 +68,7 @@ class ImportReplayCommand extends Command
             try {
                 $this->replayService->importReplay($replayFilePath, $dryRun, $doUpgrade);
                 $output->writeln('Finished.');
-            } catch (PacketInvalidException $e) {
+            } catch (InvalidReplayException | PacketInvalidException $e) {
                 $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFilePath));
                 $output->writeln(sprintf('  %s', $e->getMessage()));
             } catch (\InvalidArgumentException $e) {
@@ -109,7 +110,7 @@ class ImportReplayCommand extends Command
                     if ($didImport) {
                         ++$modifiedCount;
                     }
-                } catch (PacketInvalidException $e) {
+                } catch (InvalidReplayException | PacketInvalidException $e) {
                     $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFile));
                     $output->writeln(sprintf('  %s', $e->getMessage()));
                 } catch (\InvalidArgumentException $e) {
