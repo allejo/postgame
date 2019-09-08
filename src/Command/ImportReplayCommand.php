@@ -115,7 +115,7 @@ class ImportReplayCommand extends Command
                 } catch (\InvalidArgumentException $e) {
                     $output->writeln(sprintf('An invalid filepath was given (%s)', $replayFile));
                     $output->writeln(sprintf('  %s', $e->getMessage()));
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $output->writeln('');
                     $output->writeln(sprintf('An unknown exception occurred with the given replay (%s)', $replayFile));
                     $output->writeln(sprintf('  %s: %s', get_class($e), $e->getMessage()));
