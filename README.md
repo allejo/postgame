@@ -7,9 +7,9 @@ A Symfony 4 website for summarizing BZFlag replay files.
 
 <table>
 <tr>
-<td><img src="./github/assets/postgame-homepage.jpg" alt="Homepage of this application"></td>
-<td><img src="./github/assets/postgame-replay-list.jpg" alt="List view of available replays"></td>
-<td><img src="./github/assets/postgame-replay-show.jpg" alt="Summary view of single replay"></td>
+<td><img src=".github/assets/postgame-homepage.jpg" alt="Homepage of this application"></td>
+<td><img src=".github/assets/postgame-replay-list.jpg" alt="List view of available replays"></td>
+<td><img src=".github/assets/postgame-replay-show.jpg" alt="Summary view of single replay"></td>
 </tr>
 </table>
 
