@@ -81,6 +81,7 @@ class ImportReplayCommand extends Command
 
             if ($afterTs !== null && strtotime($afterTs) === false) {
                 $output->writeln("The --after flag does support the following date/time string: $afterTs");
+
                 return 1;
             }
 
