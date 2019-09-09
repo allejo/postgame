@@ -39,6 +39,7 @@ class ImportReplayCommand extends Command
         $this
             ->addArgument('file', InputArgument::REQUIRED, 'Replay file to import')
             ->addOption('extension', null, InputOption::VALUE_REQUIRED, 'The extension of replays to load in.', 'rec')
+            ->addOption('after', null, InputOption::VALUE_REQUIRED, 'Only import replays after this date/time string. This value can be anything supported by `strtotime()`', null)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not actually import the replay into the database, just make sure it runs without errors.')
             ->addOption('upgrade', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, keep the replay ID but reimport all other information.')
             ->setDescription('Import a replay file')
@@ -76,6 +77,13 @@ class ImportReplayCommand extends Command
                 $output->writeln(sprintf('  %s', $e->getMessage()));
             }
         } else {
+            $afterTs = $input->getOption('after');
+
+            if ($afterTs !== null && strtotime($afterTs) === false) {
+                $output->writeln("The --after flag does support the following date/time string: $afterTs");
+                return 1;
+            }
+
             $output->writeln(sprintf('Reading replay directory: %s', $replayFilePath));
 
             $replayExtension = $input->getOption('extension');
@@ -86,6 +94,10 @@ class ImportReplayCommand extends Command
                 ->name(sprintf('*.%s', $replayExtension))
                 ->files()
             ;
+
+            if ($afterTs !== null) {
+                $replayFiles->date(">= $afterTs");
+            }
 
             $modifiedCount = 0;
             $errorExit = false;
