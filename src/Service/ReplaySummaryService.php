@@ -308,6 +308,7 @@ class ReplaySummaryService
 
             $deathRecord = new SummaryDeathRecord();
             $deathRecord->killedBy = $killerId;
+            $deathRecord->matchTime = $this->calculateMatchTime($kill);
             $deathRecord->timestamp = $kill->getTimestamp();
 
             $this->playerRecords[$victimId]->deaths[] = $deathRecord;
@@ -315,6 +316,7 @@ class ReplaySummaryService
 
             $killRecord = new SummaryKillRecord();
             $killRecord->victim = $victimId;
+            $killRecord->matchTime = $this->calculateMatchTime($kill);
             $killRecord->timestamp = $kill->getTimestamp();
 
             $this->playerRecords[$killerId]->kills[] = $killRecord;

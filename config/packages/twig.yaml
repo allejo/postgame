@@ -4,3 +4,4 @@ twig:
     strict_variables: '%kernel.debug%'
     globals:
         github_url: https://github.com/allejo/postgame
+        google_analytics_id: '%env(GOOGLE_ANALYTICS_ID)%'
