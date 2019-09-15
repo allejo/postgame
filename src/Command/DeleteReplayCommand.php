@@ -32,9 +32,18 @@ class DeleteReplayCommand extends Command
 
     protected function configure()
     {
+        $desc = <<<DESC
+Delete a replay file
+
+This operation performs a hard delete and cannot be undone. This will
+cause the URL for the replay to break. If there was a mistake or bug in
+the initial import of the replay, consider using the `--upgrade` option
+of the import command instead.
+DESC;
+
         $this
             ->addArgument('id', InputArgument::REQUIRED, 'Replay ID to delete')
-            ->setDescription('Delete a replay file')
+            ->setDescription($desc)
             ->setHelp('This commands hard deletes a replay from the database')
         ;
     }
