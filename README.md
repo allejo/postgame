@@ -38,10 +38,10 @@ yarn install --production
 yarn build
 
 # Setup Symfony cache
-APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
+APP_ENV=prod APP_DEBUG=0 bin/console cache:clear
 
 # Migrate database schemas
-php bin/console doctrine:migrations:migrate
+bin/console doctrine:migrations:migrate
 ```
 
 Once you've built everything, point your web server to the `public/` folder.
@@ -56,7 +56,7 @@ composer install
 yarn install
 
 # Migrate database schemas
-php bin/console doctrine:migrations:migrate
+bin/console doctrine:migrations:migrate
 
 # Run the CSS + JS build script in one terminal
 yarn encore dev --watch
