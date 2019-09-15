@@ -17,7 +17,7 @@ A Symfony 4 website for summarizing BZFlag replay files.
 
 This project follows the standard Symfony 4 way of doing things, meaning Yarn + Webpack Encore for front-end assets and Symfony + Twig for back-end.
 
-Additionally, this project is using the experimental [BZFlag style-guide](https://github.com/BZFlag-Dev/style-guide) for it's front-end design.
+Additionally, this project is using the experimental [BZFlag style-guide](https://github.com/BZFlag-Dev/style-guide) for its front-end design.
 
 ### Setup
 
