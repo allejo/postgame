@@ -77,6 +77,10 @@ class ReplayController extends AbstractController
             'summaries' => $summaries,
             'oldest_replay' => $oldest,
             'newest_replay' => $newest,
+            'pagination' => [
+                'after' => $after,
+                'before' => $before,
+            ],
         ]);
     }
 

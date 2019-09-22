@@ -3,7 +3,14 @@
 {% from '_macros/match-time.html.twig' import match_time %}
 {% from '_macros/versus-card.html.twig' import team_card %}
 
-{% set date_fmt = 'F d, Y g:i a' %}
+{% set date_fmt = 'F d, Y g:ia' %}
+
+{% block title %}
+    {{ winner | team_literal | title }} Team vs {{ loser | team_literal | title }} Team
+    [{{ winner_score }} - {{ loser_score }}] on
+    {{ start | date(date_fmt, false) }} UTC
+    :: BZFlag Postgame
+{% endblock %}
 
 {% block body %}
     <div class="container">
@@ -23,7 +30,7 @@
                             datetime="{{ start | date('c', false) }}"
                             data-format="{{ date_fmt | dayjs_fmt }}"
                         >
-                            {{ start | date(date_fmt, false) }}
+                            {{ start | date(date_fmt, false) }} UTC
                         </time>
                     </dd>
 

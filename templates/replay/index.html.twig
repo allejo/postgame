@@ -2,7 +2,25 @@
 
 {% from '_macros/versus-card.html.twig' import team_card, match_team_summary %}
 
-{% block title %}Replay Index{% endblock %}
+{% block title %}
+    {% if not pagination.after and not pagination.before %}
+        Latest Replay Listing
+    {% else %}
+        Replays
+
+        {% if pagination.after %}
+            {% set filter_date = pagination.after %}
+            After
+        {% else %}
+            {% set filter_date = pagination.before %}
+            Before
+        {% endif %}
+
+        {{ filter_date | date('F d, Y h:ia P', false) }}
+    {% endif %}
+
+    :: BZFlag Postgame
+{% endblock %}
 
 {% block body %}
     <div class="container">
@@ -80,7 +98,7 @@
         <div class="text-center">
             <div class="c-button-group">
                 {% if replays is not empty %}
-                    {% set date_query_fmt = 'Y-m-d\\TH:i:s' %}
+                    {% set date_query_fmt = 'Y-m-d\\TH:i:sO' %}
                     {% set first_replay = replays | first | first %}
                     {% set last_replay = replays | last | last %}
 
