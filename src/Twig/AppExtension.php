@@ -23,6 +23,7 @@ class AppExtension extends AbstractExtension
             new TwigFilter('dayjs_fmt', [DateTimeFormatTranslator::class, 'toDayJS']),
             new TwigFilter('slug', [StringUtilities::class, 'slug']),
             new TwigFilter('team_literal', [BZTeamType::class, 'toString']),
+            new TwigFilter('titlize', [StringUtilities::class, 'titlize']),
         ];
     }
 }
