@@ -2,14 +2,32 @@
 
 {% from '_macros/versus-card.html.twig' import team_card, match_team_summary %}
 
-{% block title %}Replay Index{% endblock %}
+{% block title %}
+    {% if not pagination.after and not pagination.before %}
+        Latest Replay Listing
+    {% else %}
+        Replays
+
+        {% if pagination.after %}
+            {% set filter_date = pagination.after %}
+            After
+        {% else %}
+            {% set filter_date = pagination.before %}
+            Before
+        {% endif %}
+
+        {{ filter_date | date('F d, Y h:ia P', false) }}
+    {% endif %}
+
+    :: BZFlag Postgame
+{% endblock %}
 
 {% block body %}
     <div class="container">
         <div>
             {% set curr_year = 'now' | date('Y') %}
             {% for datetime, replay_list in replays %}
-                {% set replay_year = datetime | date('Y') %}
+                {% set replay_year = datetime | date('Y', false) %}
                 {% set date_fmt = (curr_year == replay_year) ? 'F d' : 'F d, Y' %}
 
                 <section>
@@ -17,51 +35,57 @@
                         {{ datetime | date(date_fmt) }}
                     </h2>
 
-                    {% set time_fmt = 'h:ia' %}
-                    {% for replay in replay_list %}
-                        {# @var summary \App\Utility\QuickReplaySummary #}
-                        {% set summary = summaries[replay.id] %}
+                    <div data-day-section="{{ datetime | date('Y-m-d', false) }}">
+                        {% set time_fmt = 'h:ia' %}
+                        {% for replay in replay_list %}
+                            {# @var summary \App\Utility\QuickReplaySummary #}
+                            {% set summary = summaries[replay.id] %}
 
-                        <article class="background-translucent border-rounded mb-3 p-3">
-                            <div class="replay-summary">
-                                <div class="replay-summary__timing small">
-                                    <p>
-                                        <time
-                                            datetime="{{ replay.startTime | date('c', false) }}"
-                                            data-format="{{ time_fmt | dayjs_fmt }}"
+                            <article
+                                class="background-translucent border-rounded mb-3 p-3"
+                                data-replay-date="{{ replay.startTime | date('c', false) }}"
+                            >
+                                <div class="replay-summary">
+                                    <div class="replay-summary__timing small">
+                                        <p>
+                                            <time
+                                                datetime="{{ replay.startTime | date('c', false) }}"
+                                                data-format="{{ time_fmt | dayjs_fmt }}"
+                                                title="{{ replay.startTime | date('F d, Y h:ia T', false) }}"
+                                            >
+                                                {{ replay.startTime | date(time_fmt, false) }} UTC
+                                            </time>
+                                        </p>
+
+                                        <p>
+                                            <strong class="sr-only">Duration:</strong>
+
+                                            {{ summary.duration }} <abbr title="minutes">min</abbr>
+                                        </p>
+                                    </div>
+
+                                    <div class="replay-summary__card">
+                                        {{ match_team_summary(
+                                            summary.winner,
+                                            summary.winnerScore,
+                                            summary.loser,
+                                            summary.loserScore
+                                        ) }}
+                                    </div>
+
+                                    <div class="replay-summary__actions">
+                                        <a
+                                            href="{{ url('replay_show', { id: replay.id, filename: replay.fileName }) }}"
+                                            class="c-button c-button--skinny c-button--no-shadow"
+                                            title="View replay"
                                         >
-                                            {{ replay.startTime | date(time_fmt, false) }}
-                                        </time>
-                                    </p>
-
-                                    <p>
-                                        <strong class="sr-only">Duration:</strong>
-
-                                        {{ summary.duration }} <abbr title="minutes">min</abbr>
-                                    </p>
+                                            <small class="strong">Details</small>
+                                        </a>
+                                    </div>
                                 </div>
-
-                                <div class="replay-summary__card">
-                                    {{ match_team_summary(
-                                        summary.winner,
-                                        summary.winnerScore,
-                                        summary.loser,
-                                        summary.loserScore
-                                    ) }}
-                                </div>
-
-                                <div class="replay-summary__actions">
-                                    <a
-                                        href="{{ url('replay_show', { id: replay.id, filename: replay.fileName }) }}"
-                                        class="c-button c-button--skinny c-button--no-shadow"
-                                        title="View replay"
-                                    >
-                                        <small class="strong">Details</small>
-                                    </a>
-                                </div>
-                            </div>
-                        </article>
-                    {% endfor %}
+                            </article>
+                        {% endfor %}
+                    </div>
                 </section>
             {% else %}
                 <section>
@@ -74,7 +98,7 @@
         <div class="text-center">
             <div class="c-button-group">
                 {% if replays is not empty %}
-                    {% set date_query_fmt = 'Y-m-d\\TH:i:s' %}
+                    {% set date_query_fmt = 'Y-m-d\\TH:i:sO' %}
                     {% set first_replay = replays | first | first %}
                     {% set last_replay = replays | last | last %}
 

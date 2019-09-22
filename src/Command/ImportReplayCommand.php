@@ -37,13 +37,13 @@ class ImportReplayCommand extends Command
     protected function configure()
     {
         $this
-            ->addArgument('file', InputArgument::REQUIRED, 'Replay file to import')
-            ->addOption('extension', null, InputOption::VALUE_REQUIRED, 'The extension of replays to load in.', 'rec')
+            ->addArgument('file', InputArgument::REQUIRED, 'Replay file or folder of replays to import')
+            ->addOption('extension', null, InputOption::VALUE_REQUIRED, 'The extension of replays to load in. This is only used when `file` is a folder.', 'rec')
             ->addOption('after', null, InputOption::VALUE_REQUIRED, 'Only import replays after this date/time string. This value can be anything supported by `strtotime()`', null)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not actually import the replay into the database, just make sure it runs without errors.')
             ->addOption('upgrade', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, keep the replay ID but reimport all other information.')
-            ->setDescription('Import a replay file')
-            ->setHelp('This command allows you to import a replay file into the database')
+            ->setDescription('Import a replay file or a folder of replay files')
+            ->setHelp('This command allows you to import replay files into the database')
         ;
     }
 

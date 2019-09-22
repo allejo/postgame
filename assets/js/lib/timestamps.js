@@ -19,6 +19,8 @@ for (let i = 0; i < timeElements.length; i++) {
 
     const date = new Date(datetime);
     const tzAbbr = timezoneAbbr(date);
+    const dayjsObj = dayjs(date);
 
-    element.innerText = dayjs(date).format(format) + ' ' + tzAbbr;
+    element.innerText = dayjsObj.format(format) + ' ' + tzAbbr;
+    element.setAttribute('title', dayjsObj.format(`MMMM DD, YYYY hh:mma [${tzAbbr}]`));
 }
