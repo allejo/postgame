@@ -20,4 +20,5 @@ require('../vendor/style-guide/src/js/table');
 require('../vendor/style-guide/src/js/tablist');
 
 require('./lib/graphs');
+require('./lib/replay-list');
 require('./lib/timestamps');
