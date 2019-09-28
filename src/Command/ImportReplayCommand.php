@@ -42,6 +42,7 @@ class ImportReplayCommand extends Command
             ->addOption('after', null, InputOption::VALUE_REQUIRED, 'Only import replays after this date/time string. This value can be anything supported by `strtotime()`', null)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not actually import the replay into the database, just make sure it runs without errors.')
             ->addOption('upgrade', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, keep the replay ID but reimport all other information.')
+            ->addOption('filenames', null, InputOption::VALUE_REQUIRED, 'A comma-separated list of file names or the path to a text file of file names (separated by new lines) to import from the directory', null)
             ->setDescription('Import a replay file or a folder of replay files')
             ->setHelp('This command allows you to import replay files into the database')
         ;
@@ -80,7 +81,7 @@ class ImportReplayCommand extends Command
             $afterTs = $input->getOption('after');
 
             if ($afterTs !== null && strtotime($afterTs) === false) {
-                $output->writeln("The --after flag does support the following date/time string: $afterTs");
+                $output->writeln("The --after flag does not support the following date/time string: $afterTs");
 
                 return 1;
             }
@@ -88,11 +89,29 @@ class ImportReplayCommand extends Command
             $output->writeln(sprintf('Reading replay directory: %s', $replayFilePath));
 
             $replayExtension = $input->getOption('extension');
+            $filePattern = sprintf('*.%s', $replayExtension);
+            $explicitFiles = $input->getOption('filenames');
+
+            if ($explicitFiles !== null) {
+                if (file_exists($explicitFiles)) {
+                    $fileNames = @file_get_contents($explicitFiles);
+
+                    if ($fileNames === false) {
+                        $output->writeln("The following file could not be read: $explicitFiles");
+
+                        return 2;
+                    }
+
+                    $filePattern = explode("\n", $fileNames);
+                } else {
+                    $filePattern = explode(',', $explicitFiles);
+                }
+            }
 
             $replayFiles = new Finder();
             $replayFiles
                 ->in($replayFilePath)
-                ->name(sprintf('*.%s', $replayExtension))
+                ->name($filePattern)
                 ->files()
             ;
 
