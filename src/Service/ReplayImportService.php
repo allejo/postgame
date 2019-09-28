@@ -159,6 +159,14 @@ class ReplayImportService
      */
     private $lastPausePacket;
 
+    /**
+     * The epoch timestamp of when the match was paused. This time is used for a
+     * match's seconds until the match is resumed.
+     *
+     * @var int
+     */
+    private $lastPauseMatchTime;
+
     /** @var int The duration the current match is scheduled to be in seconds. */
     private $duration;
 
@@ -601,12 +609,13 @@ class ReplayImportService
         // The countdown of a match was paused
         if ($packet->getTimeLeft() < 0) {
             $this->lastPausePacket = $packet;
+            $this->lastPauseMatchTime = $this->calculateRealMatchTime($packet);
 
             $event = new PauseEvent();
             $event
                 ->setReplay($this->currReplay)
                 ->setTimestamp($packet->getTimestampAsDateTime())
-                ->setMatchSeconds($this->calculateRealMatchTime($packet))
+                ->setMatchSeconds($this->lastPauseMatchTime)
             ;
 
             $this->em->persist($event);
@@ -624,6 +633,7 @@ class ReplayImportService
             $this->relativeStartTime += $offset;
 
             $this->lastPausePacket = null;
+            $this->lastPauseMatchTime = null;
 
             $event = new ResumeEvent();
             $event
@@ -645,6 +655,10 @@ class ReplayImportService
      */
     private function calculateRealMatchTime(GamePacket $packet): int
     {
+        if ($this->lastPauseMatchTime) {
+            return $this->lastPauseMatchTime;
+        }
+
         return $packet->getTimestampAsDateTime()->getTimestamp() - $this->relativeStartTime;
     }
 

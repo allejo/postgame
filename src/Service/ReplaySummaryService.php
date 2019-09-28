@@ -502,7 +502,7 @@ class ReplaySummaryService
     /**
      * @param IMatchTimeEvent $event
      *
-     * @return string
+     * @return MatchTime
      */
     private function calculateMatchTime(IMatchTimeEvent $event): MatchTime
     {
