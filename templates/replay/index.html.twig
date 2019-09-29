@@ -24,18 +24,18 @@
 
 {% block body %}
     <div class="container">
-        <div>
+        <div id="replay-container">
             {% set curr_year = 'now' | date('Y') %}
             {% for datetime, replay_list in replays %}
                 {% set replay_year = datetime | date('Y', false) %}
                 {% set date_fmt = (curr_year == replay_year) ? 'F d' : 'F d, Y' %}
 
-                <section>
+                <section data-day-section="{{ datetime | date('Y-m-d', false) }}">
                     <h2 class="border-b h4 mb-3 py-2">
-                        {{ datetime | date(date_fmt) }}
+                        {{- datetime | date(date_fmt) -}}
                     </h2>
 
-                    <div data-day-section="{{ datetime | date('Y-m-d', false) }}">
+                    <div>
                         {% set time_fmt = 'h:ia' %}
                         {% for replay in replay_list %}
                             {# @var summary \App\Utility\QuickReplaySummary #}
