@@ -1129,6 +1129,16 @@ babel-plugin-dynamic-import-node@^2.3.0:
   dependencies:
     object.assign "^4.1.0"
 
+babel-plugin-jsx-to-dom@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/babel-plugin-jsx-to-dom/-/babel-plugin-jsx-to-dom-0.6.1.tgz#d51f24c4587167d8b178807e15c88669f86e2bd5"
+  integrity sha512-XA+FTaBkhQDGJBlP9hz0o+7MsF/062nRhKj6w0jPyDaRaSFc/pBDlKCeA4ZrizaiISQ81hBOVt4bUdDjqutQ9Q==
+
+babel-plugin-syntax-jsx@^6.18.0:
+  version "6.18.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-syntax-jsx/-/babel-plugin-syntax-jsx-6.18.0.tgz#0af32a9a6e13ca7a3fd5069e62d7b0f58d0d8946"
+  integrity sha1-CvMqmm4Tyno/1QaeYtew9Y0NiUY=
+
 balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
