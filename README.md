@@ -2,10 +2,22 @@
     <img src="./assets/images/logo.svg" width="500" />
 </a></p>
 
-[![GitHub release](https://img.shields.io/github/v/release/allejo/postgame?include_prereleases)](https://github.com/allejo/postgame/releases/latest)
-[![GitHub license](https://img.shields.io/github/license/allejo/postgame)](https://github.com/allejo/postgame/blob/master/LICENSE.md)
+<p align="center">
+    <a href="https://github.com/allejo/postgame/releases/latest">
+        <img
+            src="https://img.shields.io/github/v/release/allejo/postgame?include_prereleases"
+            alt="GitHub release"
+        />
+    </a>
+    <a href="https://github.com/allejo/postgame/blob/master/LICENSE.md">
+        <img
+            src="https://img.shields.io/github/license/allejo/postgame"
+            alt="GitHub license"
+        />
+    </a>
+</p>
 
-A Symfony 4 website for summarizing BZFlag replay files.
+A Symfony 4 website for summarizing BZFlag replay files and aggregating match/player analytics.
 
 <table>
 <tr>
