@@ -1,4 +1,6 @@
-# Postgame
+<p align="center"><a href="http://postgame.allejo.org/" target="_blank">
+    <img src="./assets/images/logo.svg" width="500" />
+</a></p>
 
 [![GitHub release](https://img.shields.io/github/v/release/allejo/postgame?include_prereleases)](https://github.com/allejo/postgame/releases/latest)
 [![GitHub license](https://img.shields.io/github/license/allejo/postgame)](https://github.com/allejo/postgame/blob/master/LICENSE.md)
