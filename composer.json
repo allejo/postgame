@@ -2,7 +2,7 @@
     "type": "project",
     "license": "MIT",
     "require": {
-        "php": "^7.1.3",
+        "php": "^7.2.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
@@ -79,7 +79,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "4.3.*"
+            "require": "4.4.*"
         }
     }
 }

@@ -17,7 +17,6 @@ doctrine:
         types:
             utcdatetime:
                 name: datetime
-                commented: false
                 class: App\Doctrine\DBAL\Types\UTCDateTimeType
         url: '%env(resolve:DATABASE_URL)%'
     orm:

@@ -11,7 +11,7 @@ namespace App\Repository;
 
 use App\Entity\ResumeEvent;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
  * @method ResumeEvent|null find($id, $lockMode = null, $lockVersion = null)
@@ -23,7 +23,7 @@ class ResumeEventRepository extends ServiceEntityRepository
 {
     use DeletableReplayTrait;
 
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ResumeEvent::class);
     }
