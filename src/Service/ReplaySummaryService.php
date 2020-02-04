@@ -158,7 +158,7 @@ class ReplaySummaryService
 
         $winner = array_keys($this->teamScores->getAsArray(), max($this->teamScores->getAsArray()));
 
-        return $winner[0];
+        return $winner[0] ?? -1;
     }
 
     /**
@@ -190,7 +190,7 @@ class ReplaySummaryService
         $teams = $this->teamScores->getAsArray();
         unset($teams[$winner]);
 
-        return array_keys($teams)[0];
+        return array_keys($teams)[0] ?? -1;
     }
 
     /**
