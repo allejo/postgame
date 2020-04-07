@@ -107,11 +107,11 @@
                             class="c-button py-2"
                             href="{{ url('replay_list', { 'before': first_replay.startTime | date(date_query_fmt, false) }) }}"
                         >
-                            Older
+                            Newer
                         </a>
                     {% else %}
                         <button class="c-button py-2" disabled>
-                            Older
+                            Newer
                         </button>
                     {% endif %}
 
@@ -120,11 +120,11 @@
                             class="c-button py-2"
                             href="{{ url('replay_list', { 'after': last_replay.startTime | date(date_query_fmt, false) }) }}"
                         >
-                            Newer
+                            Older
                         </a>
                     {% else %}
                         <button class="c-button py-2" disabled>
-                            Newer
+                            Older
                         </button>
                     {% endif %}
                 {% endif %}
