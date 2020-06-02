@@ -9,7 +9,6 @@
 
 namespace App\Service;
 
-use allejo\bzflag\networking\InvalidReplayException;
 use allejo\bzflag\networking\Packets\GamePacket;
 use allejo\bzflag\networking\Packets\MsgAddPlayer;
 use allejo\bzflag\networking\Packets\MsgAdminInfo;
@@ -21,7 +20,8 @@ use allejo\bzflag\networking\Packets\MsgMessage;
 use allejo\bzflag\networking\Packets\MsgRemovePlayer;
 use allejo\bzflag\networking\Packets\MsgTimeUpdate;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
-use allejo\bzflag\networking\Replay as BZFlagReplay;
+use allejo\bzflag\replays\InvalidReplayException;
+use allejo\bzflag\replays\Replay as BZFlagReplay;
 use App\Entity\CaptureEvent;
 use App\Entity\ChatMessage;
 use App\Entity\FlagUpdate;

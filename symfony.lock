@@ -2,6 +2,9 @@
     "allejo/bzflag-networking.php": {
         "version": "dev-master"
     },
+    "allejo/bzflag-rendering.php": {
+        "version": "v0.1.0"
+    },
     "beberlei/doctrineextensions": {
         "version": "v1.2.2"
     },
@@ -81,23 +84,14 @@
     "doctrine/reflection": {
         "version": "v1.0.0"
     },
-    "easycorp/easy-log-handler": {
-        "version": "1.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "1.0",
-            "ref": "70062abc2cd58794d2a90274502f81b55cd9951b"
-        },
-        "files": [
-            "config/packages/dev/easy_log_handler.yaml"
-        ]
+    "doctrine/sql-formatter": {
+        "version": "1.1.0"
     },
     "egulias/email-validator": {
         "version": "2.1.7"
     },
-    "jdorn/sql-formatter": {
-        "version": "v1.2.17"
+    "meyfa/php-svg": {
+        "version": "v0.9.1"
     },
     "monolog/monolog": {
         "version": "1.24.0"
@@ -109,7 +103,7 @@
         "version": "2.1.1"
     },
     "php": {
-        "version": "7.2"
+        "version": "7.3"
     },
     "phpdocumentor/reflection-common": {
         "version": "1.0.1"
@@ -131,6 +125,9 @@
     },
     "psr/log": {
         "version": "1.1.0"
+    },
+    "roave/security-advisories": {
+        "version": "dev-master"
     },
     "sensio/framework-extra-bundle": {
         "version": "5.2",
@@ -349,6 +346,9 @@
     },
     "symfony/polyfill-php73": {
         "version": "v1.11.0"
+    },
+    "symfony/polyfill-php80": {
+        "version": "v1.17.0"
     },
     "symfony/process": {
         "version": "v4.2.8"

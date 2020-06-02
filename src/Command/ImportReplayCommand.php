@@ -9,8 +9,8 @@
 
 namespace App\Command;
 
-use allejo\bzflag\networking\InvalidReplayException;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
+use allejo\bzflag\replays\InvalidReplayException;
 use App\Service\ReplayImportService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
