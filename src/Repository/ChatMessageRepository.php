@@ -31,8 +31,6 @@ class ChatMessageRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param Replay $replay
-     *
      * @return ChatMessage[]
      */
     public function findPublicChatMessages(Replay $replay)

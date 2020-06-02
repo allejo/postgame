@@ -15,11 +15,6 @@ trait DateRangeTrait
 {
     /**
      * Apply WHERE conditions to the alias for the Replay join table.
-     *
-     * @param QueryBuilder   $qb
-     * @param string         $replayAlias
-     * @param \DateTime|null $start
-     * @param \DateTime|null $end
      */
     protected function applyDateRangeToQueryBuilder(QueryBuilder $qb, string $replayAlias, ?\DateTime $start, ?\DateTime $end): void
     {

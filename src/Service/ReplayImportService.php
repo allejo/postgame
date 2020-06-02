@@ -330,8 +330,6 @@ class ReplayImportService
     /**
      * Given any supported GamePacket, this method will forward on the request
      * to specialized method for that type of GamePacket.
-     *
-     * @param GamePacket $packet
      */
     private function handlePacket(GamePacket $packet): void
     {
@@ -470,7 +468,6 @@ class ReplayImportService
 
     /**
      * @param GamePacket|MsgFlagGrab|MsgFlagDrop $packet
-     * @param bool                               $isGrab
      */
     private function handleMsgFlagUpdate(GamePacket $packet, bool $isGrab): void
     {
@@ -655,10 +652,6 @@ class ReplayImportService
 
     /**
      * Get the number of seconds *into* a match we're currently in.
-     *
-     * @param GamePacket $packet
-     *
-     * @return int
      */
     private function calculateRealMatchTime(GamePacket $packet): int
     {
@@ -672,9 +665,6 @@ class ReplayImportService
     /**
      * Queue a packet for future processing because the specified player ID does
      * not yet exist.
-     *
-     * @param int        $playerId
-     * @param GamePacket $packet
      */
     private function queuePacket(int $playerId, GamePacket $packet): void
     {
@@ -691,8 +681,6 @@ class ReplayImportService
      *
      * This method will safely requeue packets if the player ID still does not
      * exist.
-     *
-     * @param int $playerId
      */
     private function dequeueFuturePlayer(int $playerId): void
     {
@@ -714,8 +702,6 @@ class ReplayImportService
      * **Warning:** This is not safe for flag IDs that are not tied to team flags.
      *
      * @see BZTeamType
-     *
-     * @param int $flagId
      *
      * @return int the numerical representation of a team color
      */

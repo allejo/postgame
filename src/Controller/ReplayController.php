@@ -26,12 +26,6 @@ class ReplayController extends AbstractController
 {
     /**
      * @Route("/replays", name="replay_list")
-     *
-     * @param Request              $request
-     * @param ReplaySummaryService $summaryService
-     * @param LoggerInterface      $logger
-     *
-     * @return Response
      */
     public function listAction(Request $request, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {
@@ -92,14 +86,6 @@ class ReplayController extends AbstractController
      *         "_format": "html"
      *     }
      * )
-     *
-     * @param int                  $id
-     * @param string               $filename
-     * @param string               $_format
-     * @param ReplaySummaryService $summaryService
-     * @param LoggerInterface      $logger
-     *
-     * @return Response
      */
     public function showAction(int $id, string $filename, string $_format, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {

@@ -170,5 +170,7 @@ class ImportReplayCommand extends Command
                 $output->writeln('Finished.');
             }
         }
+
+        return 0;
     }
 }
