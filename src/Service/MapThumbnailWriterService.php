@@ -20,6 +20,8 @@ class MapThumbnailWriterService implements IThumbnailWriter
 {
     use ThumbnailWriterTrait;
 
+    public const FOLDER_NAME = 'map-thumbnails';
+
     /** @var EntityManagerInterface */
     private $em;
 
@@ -66,6 +68,6 @@ class MapThumbnailWriterService implements IThumbnailWriter
 
     private function getFilePath(string $filename): string
     {
-        return sprintf('%s/map-thumbnails/%s', $this->targetDirectory, $filename);
+        return sprintf('%s/%s/%s', $this->targetDirectory, self::FOLDER_NAME, $filename);
     }
 }

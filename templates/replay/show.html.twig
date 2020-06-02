@@ -20,8 +20,19 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-6">
-                <h2>Recording Details</h2>
+            <div class="col-lg-4">
+                {% if thumbnail %}
+                    <h2>Map Preview</h2>
+
+                    <img
+                        class="map-thumbnail"
+                        src="{{ asset(thumbnail) }}"
+                        alt="A bird's-eye view of the map for this match"
+                        aria-hidden="true"
+                    />
+                {% endif %}
+
+                <h2 class="{{ thumbnail ? 'mt-3' : '' }}">Recording Details</h2>
 
                 <dl>
                     <dt>Timestamp</dt>
@@ -42,7 +53,7 @@
                 </dl>
             </div>
 
-            <div class="col-lg-6">
+            <div class="col-lg-8">
                 <section class="mb-3">
                     <h2>Scoreboard</h2>
 
