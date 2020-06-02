@@ -63,6 +63,9 @@ class ReplayImportService
     /** @var LoggerInterface */
     private $logger;
 
+    /** @var MapThumbnailWriterService */
+    private $thumbnailWriterService;
+
     /**
      * The current Replay object we're working with.
      *
@@ -173,10 +176,11 @@ class ReplayImportService
     /** @var array<int, string> A map of flag IDs to flag abbreviations */
     private $flagIDs;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapThumbnailWriterService $thumbnailWriterService)
     {
         $this->em = $em;
         $this->logger = $logger;
+        $this->thumbnailWriterService = $thumbnailWriterService;
     }
 
     /**
@@ -239,6 +243,9 @@ class ReplayImportService
             // Only persist newly created replays
             $this->em->persist($this->currReplay);
         }
+
+        // Create thumbnails for the maps
+        $this->thumbnailWriterService->writeThumbnail($replay->getHeader(), $this->currReplay);
 
         $this->currReplay
             ->setFileName($filename)
