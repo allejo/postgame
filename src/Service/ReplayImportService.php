@@ -22,6 +22,8 @@ use allejo\bzflag\networking\Packets\MsgTimeUpdate;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
 use allejo\bzflag\replays\InvalidReplayException;
 use allejo\bzflag\replays\Replay as BZFlagReplay;
+use allejo\bzflag\world\InvalidWorldCompression;
+use allejo\bzflag\world\InvalidWorldDatabase;
 use App\Entity\CaptureEvent;
 use App\Entity\ChatMessage;
 use App\Entity\FlagUpdate;
@@ -186,17 +188,20 @@ class ReplayImportService
     /**
      * Import a replay file into the database.
      *
-     * @param string $filepath  The filename or filepath to the replay to import
-     * @param bool   $dryRun    Whether or not to actually write to the database
-     * @param bool   $doUpgrade Keep the replay ID but reimport all other information about the replay
+     * @param string $filepath     The filename or filepath to the replay to import
+     * @param bool   $dryRun       Whether or not to actually write to the database
+     * @param bool   $redoAnalysis Keep the replay ID but reimport all other information about the replay
+     * @param bool   $regenAssets  Keep the replay ID but regenerate all of the assets for a replay
      *
-     * @throws \InvalidArgumentException when a non-existent file is given or a directory is given
+     * @throws \InvalidArgumentException when an invalid path to a replay file is given
      * @throws InvalidReplayException    when an invalid replay is given
+     * @throws InvalidWorldCompression   when the world inside of the replay file could not be uncompressed
+     * @throws InvalidWorldDatabase      when the replay file has an invalid world
      * @throws PacketInvalidException    when an invalid replay is given
      *
      * @return bool Returns true if the import was successful
      */
-    public function importReplay(string $filepath, bool $dryRun, bool $doUpgrade): bool
+    public function importReplay(string $filepath, bool $dryRun, bool $redoAnalysis, bool $regenAssets): bool
     {
         if (!file_exists($filepath)) {
             throw new \InvalidArgumentException(sprintf('File not found: %s', $filepath));
@@ -223,12 +228,15 @@ class ReplayImportService
 
         // Don't import duplicate replays
         if (!empty($existing)) {
-            if (!$doUpgrade) {
+            if ($redoAnalysis === false && $regenAssets === false) {
                 return false;
             }
 
             $this->currReplay = $existing;
-            $this->performUpgrade($dryRun);
+
+            if ($redoAnalysis) {
+                $this->performUpgrade($dryRun);
+            }
 
             $this->logger->notice('Replay ID #{id} is being upgraded (hash: {hash})', [
                 'id' => $this->currReplay->getId(),
