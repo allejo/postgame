@@ -36,12 +36,15 @@ class MapThumbnailWriterService implements IThumbnailWriter
 
     public function writeThumbnail(ReplayHeader $replayHeader, Replay $replay): bool
     {
-        $thumbnails = $this->em->getRepository(MapThumbnail::class)->findBy([
+        /** @var MapThumbnail $existingThumbnail */
+        $existingThumbnail = $this->em->getRepository(MapThumbnail::class)->findOneBy([
             'worldHash' => $replayHeader->getWorld()->getWorldHash(),
         ]);
 
-        if (count($thumbnails) >= 1) {
-            return false;
+        if ($existingThumbnail !== null) {
+            $replay->setMapThumbnail($existingThumbnail);
+
+            return true;
         }
 
         $render = new WorldRenderer($replayHeader->getWorld());
