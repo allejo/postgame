@@ -235,13 +235,13 @@ class ReplayImportService
             $this->currReplay = $existing;
 
             if ($redoAnalysis) {
-                $this->performUpgrade($dryRun);
-            }
+                $this->clearReplayData($dryRun);
 
-            $this->logger->notice('Replay ID #{id} is being upgraded (hash: {hash})', [
-                'id' => $this->currReplay->getId(),
-                'hash' => substr($sha1, 0, 7),
-            ]);
+                $this->logger->notice('Replay ID #{id} is being upgraded (hash: {hash})', [
+                    'id' => $this->currReplay->getId(),
+                    'hash' => substr($sha1, 0, 7),
+                ]);
+            }
         } else {
             $this->currReplay = new Replay();
 
@@ -253,7 +253,18 @@ class ReplayImportService
         }
 
         // Create thumbnails for the maps
-        $this->thumbnailWriterService->writeThumbnail($replay->getHeader(), $this->currReplay);
+        if (!$dryRun) {
+            if (($existing && $regenAssets) || !$existing) {
+                $this->thumbnailWriterService->writeThumbnail($replay->getHeader(), $this->currReplay);
+            }
+        }
+
+        // We were only asked to regenerate assets, don't import again
+        if ($existing && !$redoAnalysis) {
+            $this->updateBatchStatus($dryRun);
+
+            return false;
+        }
 
         $this->currReplay
             ->setFileName($filename)
@@ -284,17 +295,7 @@ class ReplayImportService
 
         $this->currReplay->setCanceled($wasCanceled);
 
-        if (!$dryRun) {
-            ++self::$BATCH_COUNT;
-
-            $this->em->flush();
-
-            if (self::$BATCH_COUNT >= self::BATCH_SIZE) {
-                self::$BATCH_COUNT = 0;
-
-                $this->em->clear();
-            }
-        }
+        $this->updateBatchStatus($dryRun);
 
         $sqlConfig->setSQLLogger($sqlLogger);
 
@@ -317,7 +318,7 @@ class ReplayImportService
         $this->duration = null;
     }
 
-    private function performUpgrade(bool $dryRun): void
+    private function clearReplayData(bool $dryRun): void
     {
         if ($dryRun) {
             return;
@@ -333,6 +334,21 @@ class ReplayImportService
         $this->em->getRepository(PauseEvent::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(Player::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(ResumeEvent::class)->deleteByReplay($this->currReplay);
+    }
+
+    private function updateBatchStatus(bool $dryRun): void
+    {
+        if (!$dryRun) {
+            ++self::$BATCH_COUNT;
+
+            $this->em->flush();
+
+            if (self::$BATCH_COUNT >= self::BATCH_SIZE) {
+                self::$BATCH_COUNT = 0;
+
+                $this->em->clear();
+            }
+        }
     }
 
     /**
