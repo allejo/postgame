@@ -77,6 +77,12 @@ class ImportReplayCommand extends Command
             $output->writeln('This command will regenerate all of the assets related to a Replay');
         }
 
+        if (!file_exists($replayFilePath)) {
+            $output->writeln(sprintf('No such file or directory: %s', $replayFilePath));
+
+            return 5;
+        }
+
         $isDir = is_dir($replayFilePath);
 
         if (!$isDir) {
