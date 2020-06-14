@@ -38,7 +38,7 @@ class MapThumbnailWriterService implements IThumbnailWriter
     {
         /** @var MapThumbnail $existingThumbnail */
         $existingThumbnail = $this->em->getRepository(MapThumbnail::class)->findOneBy([
-            'worldHash' => $replayHeader->getWorld()->getWorldHash(),
+            'worldHash' => $replayHeader->getWorldDatabase()->getWorldHash(),
         ]);
 
         if ($existingThumbnail !== null) {
@@ -47,12 +47,12 @@ class MapThumbnailWriterService implements IThumbnailWriter
             return true;
         }
 
-        $render = new WorldRenderer($replayHeader->getWorld());
+        $render = new WorldRenderer($replayHeader->getWorldDatabase());
         $svgOutput = $render->exportStringSVG();
-        $svgFilename = $replayHeader->getWorld()->getWorldHash() . '.svg';
+        $svgFilename = $replayHeader->getWorldDatabase()->getWorldHash() . '.svg';
 
         $thumbnail = new MapThumbnail();
-        $thumbnail->setWorldHash($replayHeader->getWorld()->getWorldHash());
+        $thumbnail->setWorldHash($replayHeader->getWorldDatabase()->getWorldHash());
         $thumbnail->setFilename($svgFilename);
 
         $replay->setMapThumbnail($thumbnail);
