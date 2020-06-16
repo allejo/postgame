@@ -9,8 +9,10 @@
 
 namespace App\Command;
 
-use allejo\bzflag\networking\InvalidReplayException;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
+use allejo\bzflag\replays\InvalidReplayException;
+use allejo\bzflag\world\InvalidWorldCompression;
+use allejo\bzflag\world\InvalidWorldDatabase;
 use App\Service\ReplayImportService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -41,7 +43,9 @@ class ImportReplayCommand extends Command
             ->addOption('extension', null, InputOption::VALUE_REQUIRED, 'The extension of replays to load in. This is only used when `file` is a folder.', 'rec')
             ->addOption('after', null, InputOption::VALUE_REQUIRED, 'Only import replays after this date/time string. This value can be anything supported by `strtotime()`', null)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not actually import the replay into the database, just make sure it runs without errors.')
-            ->addOption('upgrade', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, keep the replay ID but reimport all other information.')
+            ->addOption('upgrade', null, InputOption::VALUE_NONE, '(DEPRECATED) If a duplicate replay file is found, keep the replay ID but reimport all other information.')
+            ->addOption('redo-analysis', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, keep the replay ID but reimport all other information.')
+            ->addOption('regenerate-assets', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, regenerate the assets related to a replay (e.g. map thumbnails, player density maps, etc.)')
             ->addOption('filenames', null, InputOption::VALUE_REQUIRED, 'A comma-separated list of file names or the path to a text file of file names (separated by new lines) to import from the directory', null)
             ->setDescription('Import a replay file or a folder of replay files')
             ->setHelp('This command allows you to import replay files into the database')
@@ -51,15 +55,32 @@ class ImportReplayCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $dryRun = $input->getOption('dry-run');
-        $doUpgrade = $input->getOption('upgrade');
+        $redoAnalysis = $input->getOption('redo-analysis');
+        $regenAssets = $input->getOption('regenerate-assets');
         $replayFilePath = $input->getArgument('file');
+
+        // @TODO 1.1.0 Remove the deprecated --upgrade option
+        if (($doUpgrade = $input->getOption('upgrade')) === true) {
+            $output->writeln('[DEPRECATED] The --upgrade flag has been deprecated. Please use `--redo-analysis` instead.');
+            $redoAnalysis = $doUpgrade;
+        }
 
         if ($dryRun) {
             $output->writeln('This command is running in "dry mode" meaning nothing will be persisted to the database');
         }
 
-        if ($doUpgrade) {
+        if ($redoAnalysis) {
             $output->writeln('This command will upgrade existing Replays by re-importing their data');
+        }
+
+        if ($regenAssets) {
+            $output->writeln('This command will regenerate all of the assets related to a Replay');
+        }
+
+        if (!file_exists($replayFilePath)) {
+            $output->writeln(sprintf('No such file or directory: %s', $replayFilePath));
+
+            return 5;
         }
 
         $isDir = is_dir($replayFilePath);
@@ -68,14 +89,18 @@ class ImportReplayCommand extends Command
             $output->writeln(sprintf('Reading replay file: %s', $replayFilePath));
 
             try {
-                $this->replayService->importReplay($replayFilePath, $dryRun, $doUpgrade);
+                $this->replayService->importReplay($replayFilePath, $dryRun, $redoAnalysis, $regenAssets);
                 $output->writeln('Finished.');
-            } catch (InvalidReplayException | PacketInvalidException $e) {
+            } catch (InvalidWorldCompression | InvalidWorldDatabase | InvalidReplayException | PacketInvalidException $e) {
                 $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFilePath));
                 $output->writeln(sprintf('  %s', $e->getMessage()));
+
+                return 3;
             } catch (\InvalidArgumentException $e) {
                 $output->writeln(sprintf('An invalid filepath was given (%s)', $replayFilePath));
                 $output->writeln(sprintf('  %s', $e->getMessage()));
+
+                return 4;
             }
         } else {
             $afterTs = $input->getOption('after');
@@ -137,7 +162,7 @@ class ImportReplayCommand extends Command
                     $progressBar->setMessage('Importing replay...');
                     $progressBar->setMessage(sprintf('(%s)', basename($replayFile)), 'filename');
 
-                    $didImport = $this->replayService->importReplay($replayFile, $dryRun, $doUpgrade);
+                    $didImport = $this->replayService->importReplay($replayFile, $dryRun, $redoAnalysis, $regenAssets);
 
                     if ($didImport) {
                         ++$modifiedCount;
@@ -170,5 +195,7 @@ class ImportReplayCommand extends Command
                 $output->writeln('Finished.');
             }
         }
+
+        return 0;
     }
 }

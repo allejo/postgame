@@ -91,8 +91,6 @@ class ReplaySummaryService
 
     /**
      * Get the type of summary this service has built.
-     *
-     * @return int
      */
     public function getSummaryType(): int
     {
@@ -119,8 +117,6 @@ class ReplaySummaryService
      *
      * @throws WrongSummarizationException
      * @throws UnsummarizedException
-     *
-     * @return int
      */
     public function getDuration(): int
     {
@@ -149,8 +145,6 @@ class ReplaySummaryService
      *
      * @throws WrongSummarizationException
      * @throws UnsummarizedException
-     *
-     * @return int
      */
     public function getWinner(): int
     {
@@ -164,8 +158,6 @@ class ReplaySummaryService
     /**
      * @throws WrongSummarizationException
      * @throws UnsummarizedException
-     *
-     * @return int
      */
     public function getWinnerScore(): int
     {
@@ -179,8 +171,6 @@ class ReplaySummaryService
      *
      * @throws WrongSummarizationException
      * @throws UnsummarizedException
-     *
-     * @return int
      */
     public function getLoser(): int
     {
@@ -196,8 +186,6 @@ class ReplaySummaryService
     /**
      * @throws WrongSummarizationException
      * @throws UnsummarizedException
-     *
-     * @return int
      */
     public function getLoserScore(): int
     {
@@ -221,8 +209,6 @@ class ReplaySummaryService
 
     /**
      * Get a quick summary for a replay.
-     *
-     * @param Replay $replay
      */
     public function summarizeQuick(Replay $replay): void
     {
@@ -240,8 +226,6 @@ class ReplaySummaryService
 
     /**
      * Get a full summary for a replay.
-     *
-     * @param Replay $replay
      */
     public function summarizeFull(Replay $replay): void
     {
@@ -263,9 +247,6 @@ class ReplaySummaryService
         $this->summarized = self::SUMMARIZED_FULL;
     }
 
-    /**
-     * @param array $findByFilter
-     */
     private function handlePlayers(array $findByFilter): void
     {
         $players = $this->em->getRepository(Player::class)->findBy($findByFilter);
@@ -278,9 +259,6 @@ class ReplaySummaryService
         }
     }
 
-    /**
-     * @param array $findByFilter
-     */
     private function handleKillRecords(array $findByFilter): void
     {
         $kills = $this->em->getRepository(KillEvent::class)->findBy($findByFilter);
@@ -324,9 +302,6 @@ class ReplaySummaryService
         }
     }
 
-    /**
-     * @param array $findByFilter
-     */
     private function handleJoins(array $findByFilter): void
     {
         $joins = $this->em->getRepository(JoinEvent::class)->findBy($findByFilter);
@@ -341,9 +316,6 @@ class ReplaySummaryService
         }
     }
 
-    /**
-     * @param array $findByFilter
-     */
     private function handleParts(array $findByFilter): void
     {
         $parts = $this->em->getRepository(PartEvent::class)->findBy($findByFilter);
@@ -365,9 +337,6 @@ class ReplaySummaryService
         }
     }
 
-    /**
-     * @param array $findByFilter
-     */
     private function handleCaps(array $findByFilter): void
     {
         $caps = $this->em->getRepository(CaptureEvent::class)->findBy($findByFilter);
@@ -439,9 +408,6 @@ class ReplaySummaryService
         }
     }
 
-    /**
-     * @param Replay $replay
-     */
     private function handleTeamLoyalty(Replay $replay): void
     {
         $teamLoyalty = new DefaultArray(function () {
@@ -468,9 +434,6 @@ class ReplaySummaryService
         }
     }
 
-    /**
-     * @param Replay $replay
-     */
     private function handleDuration(Replay $replay): void
     {
         $this->duration = (int)ceil($replay->getDuration() / 60);
@@ -499,11 +462,6 @@ class ReplaySummaryService
         return $key;
     }
 
-    /**
-     * @param IMatchTimeEvent $event
-     *
-     * @return MatchTime
-     */
     private function calculateMatchTime(IMatchTimeEvent $event): MatchTime
     {
         $secSinceStart = $event->getMatchSeconds();
@@ -566,8 +524,6 @@ class ReplaySummaryService
 
     /**
      * Create a mock player record for the SERVER player.
-     *
-     * @return SummaryPlayerRecord
      */
     private function createServerPlayerRecord(): SummaryPlayerRecord
     {

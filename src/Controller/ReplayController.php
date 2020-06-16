@@ -10,6 +10,7 @@
 namespace App\Controller;
 
 use App\Entity\Replay;
+use App\Service\MapThumbnailWriterService;
 use App\Service\ReplaySummaryService;
 use App\Utility\DefaultArray;
 use App\Utility\QuickReplaySummary;
@@ -26,12 +27,6 @@ class ReplayController extends AbstractController
 {
     /**
      * @Route("/replays", name="replay_list")
-     *
-     * @param Request              $request
-     * @param ReplaySummaryService $summaryService
-     * @param LoggerInterface      $logger
-     *
-     * @return Response
      */
     public function listAction(Request $request, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {
@@ -92,14 +87,6 @@ class ReplayController extends AbstractController
      *         "_format": "html"
      *     }
      * )
-     *
-     * @param int                  $id
-     * @param string               $filename
-     * @param string               $_format
-     * @param ReplaySummaryService $summaryService
-     * @param LoggerInterface      $logger
-     *
-     * @return Response
      */
     public function showAction(int $id, string $filename, string $_format, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {
@@ -115,10 +102,21 @@ class ReplayController extends AbstractController
 
         $summaryService->summarizeFull($replay);
 
+        $thumbnail = $replay->getMapThumbnail();
+        $thumbnailURL = null;
+
+        if ($thumbnail !== null) {
+            $thumbnailURL = vsprintf('generated/%s/%s', [
+                MapThumbnailWriterService::FOLDER_NAME,
+                $thumbnail->getFilename(),
+            ]);
+        }
+
         try {
             $replaySummary = [
                 'id' => $replay->getId(),
                 'filename' => $replay->getFileName(),
+                'thumbnail' => $thumbnailURL,
                 'start' => $replay->getStartTime(),
                 'end' => $replay->getEndTime(),
                 'duration' => $summaryService->getDuration(),
