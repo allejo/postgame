@@ -7,7 +7,7 @@
         "ext-iconv": "*",
         "ext-json": "*",
         "allejo/bzflag-networking.php": "^1.1-dev",
-        "allejo/bzflag-rendering.php": "^0.1",
+        "allejo/bzflag-rendering.php": "^0.1.2",
         "beberlei/doctrineextensions": "^1.2",
         "sensio/framework-extra-bundle": "^5.3",
         "symfony/apache-pack": "^1.0",
