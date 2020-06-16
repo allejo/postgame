@@ -21,36 +21,18 @@
 
         <div class="row">
             <div class="col-lg-4">
-                {% if thumbnail %}
-                    <h2>Map Preview</h2>
+                <h2>Map Preview</h2>
 
+                {% if thumbnail %}
                     <img
                         class="map-thumbnail"
                         src="{{ asset(thumbnail) }}"
                         alt="A bird's-eye view of the map for this match"
                         aria-hidden="true"
                     />
+                {% else %}
+                    <p class="my-5 text-center"><em>No preview available</em></p>
                 {% endif %}
-
-                <h2 class="{{ thumbnail ? 'mt-3' : '' }}">Recording Details</h2>
-
-                <dl>
-                    <dt>Timestamp</dt>
-                    <dd>
-                        <time
-                            datetime="{{ start | date('c', false) }}"
-                            data-format="{{ date_fmt | dayjs_fmt }}"
-                        >
-                            {{ start | date(date_fmt, false) }} UTC
-                        </time>
-                    </dd>
-
-                    <dt>Duration</dt>
-                    <dd>{{ duration }} minutes</dd>
-
-                    <dt>Filename</dt>
-                    <dd>{{ filename }}</dd>
-                </dl>
             </div>
 
             <div class="col-lg-8">
@@ -137,63 +119,88 @@
         </div>
 
         <section class="border-t my-4 py-4">
-            <h2>Flag Capture Timeline</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <h2>Recording Details</h2>
 
-            <ul class="flag-capture-timeline">
-                {% for flag_cap in flag_caps %}
-                    {% set playerId = flag_cap.playerId %}
-                    {% set isTied = flag_cap.cappedTeamScore == flag_cap.cappingTeamScore %}
+                    <dl>
+                        <dt>Timestamp</dt>
+                        <dd>
+                            <time
+                                datetime="{{ start | date('c', false) }}"
+                                data-format="{{ date_fmt | dayjs_fmt }}"
+                            >
+                                {{ start | date(date_fmt, false) }} UTC
+                            </time>
+                        </dd>
 
-                    <li class="flag-capture-event">
-                        <span class="flag-capture-timestamp">
-                            {{ match_time(flag_cap.matchTime, flag_cap.timestamp) }}
-                        </span>
+                        <dt>Duration</dt>
+                        <dd>{{ duration }} minutes</dd>
 
-                        <span class="flag-capture-description">
-                            <span class="color-{{ flag_cap.cappingTeam | team_literal }}-team">
-                                {{- players[playerId].callsign -}}
-                            </span>
+                        <dt>Filename</dt>
+                        <dd>{{ filename }}</dd>
+                    </dl>
+                </div>
+                <div class="col-md-8">
+                    <h2>Flag Capture Timeline</h2>
 
-                            captured the
+                    <ul class="flag-capture-timeline">
+                        {% for flag_cap in flag_caps %}
+                            {% set playerId = flag_cap.playerId %}
+                            {% set isTied = flag_cap.cappedTeamScore == flag_cap.cappingTeamScore %}
 
-                            <span class="color-{{ flag_cap.cappedTeam | team_literal }}-team no-cb-translation">
-                                {{- flag_cap.cappedTeam | team_literal | title -}}
-                            </span>
-
-                            team flag
-
-                            <span class="sr-only">. Score is now {{ isTied ? 'tied at' }},
-                                {{ flag_cap.cappingTeam | team_literal }} team, {{ flag_cap.cappingTeamScore }},
-                                {{ flag_cap.cappedTeam | team_literal }} team, {{ flag_cap.cappedTeamScore }}.
-                            </span>
-                        </span>
-
-                        <span class="flag-capture-score capping" aria-hidden="true">
-                            <span class="team-score">
-                                <span class="flag-capture-score__team">
-                                    {{ flag_cap.cappingTeam | team_literal | title }}
+                            <li class="flag-capture-event">
+                                <span class="flag-capture-timestamp">
+                                    {{ match_time(flag_cap.matchTime, flag_cap.timestamp) }}
                                 </span>
 
-                                <span class="flag-capture-score__points">
-                                    [{{ flag_cap.cappingTeamScore }}]
-                                </span>
-                            </span>
-                        </span>
+                                <span class="flag-capture-description">
+                                    <span class="color-{{ flag_cap.cappingTeam | team_literal }}-team">
+                                        {{- players[playerId].callsign -}}
+                                    </span>
 
-                        <span class="flag-capture-score capped" aria-hidden="true">
-                            <span class="team-score">
-                                <span class="flag-capture-score__team">
-                                    {{ flag_cap.cappedTeam | team_literal | title }}
+                                    captured the
+
+                                    <span class="color-{{ flag_cap.cappedTeam | team_literal }}-team no-cb-translation">
+                                        {{- flag_cap.cappedTeam | team_literal | title -}}
+                                    </span>
+
+                                    team flag
+
+                                    <span class="sr-only">. Score is now {{ isTied ? 'tied at' }},
+                                        {{ flag_cap.cappingTeam | team_literal }} team, {{ flag_cap.cappingTeamScore }},
+                                        {{ flag_cap.cappedTeam | team_literal }} team, {{ flag_cap.cappedTeamScore }}.
+                                    </span>
                                 </span>
 
-                                <span class="flag-capture-score__points">
-                                    [{{ flag_cap.cappedTeamScore }}]
+                                <span class="flag-capture-score capping" aria-hidden="true">
+                                    <span class="team-score">
+                                        <span class="flag-capture-score__team">
+                                            {{ flag_cap.cappingTeam | team_literal | title }}
+                                        </span>
+
+                                        <span class="flag-capture-score__points">
+                                            [{{ flag_cap.cappingTeamScore }}]
+                                        </span>
+                                    </span>
                                 </span>
-                            </span>
-                        </span>
-                    </li>
-                {% endfor %}
-            </ul>
+
+                                <span class="flag-capture-score capped" aria-hidden="true">
+                                    <span class="team-score">
+                                        <span class="flag-capture-score__team">
+                                            {{ flag_cap.cappedTeam | team_literal | title }}
+                                        </span>
+
+                                        <span class="flag-capture-score__points">
+                                            [{{ flag_cap.cappedTeamScore }}]
+                                        </span>
+                                    </span>
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
         </section>
 
         <section class="border-t my-4 py-4">
