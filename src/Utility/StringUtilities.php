@@ -23,10 +23,6 @@ class StringUtilities
     /**
      * Make a string with new lines and multiple spaces all into one line to fit
      * perfectly into a <title> tag.
-     *
-     * @param string $str
-     *
-     * @return string
      */
     public static function titlize(string $str): string
     {

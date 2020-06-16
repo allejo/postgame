@@ -9,7 +9,6 @@
 
 namespace App\Service;
 
-use allejo\bzflag\networking\InvalidReplayException;
 use allejo\bzflag\networking\Packets\GamePacket;
 use allejo\bzflag\networking\Packets\MsgAddPlayer;
 use allejo\bzflag\networking\Packets\MsgAdminInfo;
@@ -21,7 +20,10 @@ use allejo\bzflag\networking\Packets\MsgMessage;
 use allejo\bzflag\networking\Packets\MsgRemovePlayer;
 use allejo\bzflag\networking\Packets\MsgTimeUpdate;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
-use allejo\bzflag\networking\Replay as BZFlagReplay;
+use allejo\bzflag\replays\InvalidReplayException;
+use allejo\bzflag\replays\Replay as BZFlagReplay;
+use allejo\bzflag\world\InvalidWorldCompression;
+use allejo\bzflag\world\InvalidWorldDatabase;
 use App\Entity\CaptureEvent;
 use App\Entity\ChatMessage;
 use App\Entity\FlagUpdate;
@@ -62,6 +64,9 @@ class ReplayImportService
 
     /** @var LoggerInterface */
     private $logger;
+
+    /** @var MapThumbnailWriterService */
+    private $thumbnailWriterService;
 
     /**
      * The current Replay object we're working with.
@@ -173,26 +178,30 @@ class ReplayImportService
     /** @var array<int, string> A map of flag IDs to flag abbreviations */
     private $flagIDs;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapThumbnailWriterService $thumbnailWriterService)
     {
         $this->em = $em;
         $this->logger = $logger;
+        $this->thumbnailWriterService = $thumbnailWriterService;
     }
 
     /**
      * Import a replay file into the database.
      *
-     * @param string $filepath  The filename or filepath to the replay to import
-     * @param bool   $dryRun    Whether or not to actually write to the database
-     * @param bool   $doUpgrade Keep the replay ID but reimport all other information about the replay
+     * @param string $filepath     The filename or filepath to the replay to import
+     * @param bool   $dryRun       Whether or not to actually write to the database
+     * @param bool   $redoAnalysis Keep the replay ID but reimport all other information about the replay
+     * @param bool   $regenAssets  Keep the replay ID but regenerate all of the assets for a replay
      *
-     * @throws \InvalidArgumentException when a non-existent file is given or a directory is given
+     * @throws \InvalidArgumentException when an invalid path to a replay file is given
      * @throws InvalidReplayException    when an invalid replay is given
+     * @throws InvalidWorldCompression   when the world inside of the replay file could not be uncompressed
+     * @throws InvalidWorldDatabase      when the replay file has an invalid world
      * @throws PacketInvalidException    when an invalid replay is given
      *
      * @return bool Returns true if the import was successful
      */
-    public function importReplay(string $filepath, bool $dryRun, bool $doUpgrade): bool
+    public function importReplay(string $filepath, bool $dryRun, bool $redoAnalysis, bool $regenAssets): bool
     {
         if (!file_exists($filepath)) {
             throw new \InvalidArgumentException(sprintf('File not found: %s', $filepath));
@@ -219,17 +228,20 @@ class ReplayImportService
 
         // Don't import duplicate replays
         if (!empty($existing)) {
-            if (!$doUpgrade) {
+            if ($redoAnalysis === false && $regenAssets === false) {
                 return false;
             }
 
             $this->currReplay = $existing;
-            $this->performUpgrade($dryRun);
 
-            $this->logger->notice('Replay ID #{id} is being upgraded (hash: {hash})', [
-                'id' => $this->currReplay->getId(),
-                'hash' => substr($sha1, 0, 7),
-            ]);
+            if ($redoAnalysis) {
+                $this->clearReplayData($dryRun);
+
+                $this->logger->notice('Replay ID #{id} is being upgraded (hash: {hash})', [
+                    'id' => $this->currReplay->getId(),
+                    'hash' => substr($sha1, 0, 7),
+                ]);
+            }
         } else {
             $this->currReplay = new Replay();
 
@@ -238,6 +250,20 @@ class ReplayImportService
 
             // Only persist newly created replays
             $this->em->persist($this->currReplay);
+        }
+
+        // Create thumbnails for the maps
+        if (!$dryRun) {
+            if (($existing && $regenAssets) || !$existing) {
+                $this->thumbnailWriterService->writeThumbnail($replay->getHeader(), $this->currReplay);
+            }
+        }
+
+        // We were only asked to regenerate assets, don't import again
+        if ($existing && !$redoAnalysis) {
+            $this->updateBatchStatus($dryRun);
+
+            return false;
         }
 
         $this->currReplay
@@ -269,17 +295,7 @@ class ReplayImportService
 
         $this->currReplay->setCanceled($wasCanceled);
 
-        if (!$dryRun) {
-            ++self::$BATCH_COUNT;
-
-            $this->em->flush();
-
-            if (self::$BATCH_COUNT >= self::BATCH_SIZE) {
-                self::$BATCH_COUNT = 0;
-
-                $this->em->clear();
-            }
-        }
+        $this->updateBatchStatus($dryRun);
 
         $sqlConfig->setSQLLogger($sqlLogger);
 
@@ -302,7 +318,7 @@ class ReplayImportService
         $this->duration = null;
     }
 
-    private function performUpgrade(bool $dryRun): void
+    private function clearReplayData(bool $dryRun): void
     {
         if ($dryRun) {
             return;
@@ -320,11 +336,24 @@ class ReplayImportService
         $this->em->getRepository(ResumeEvent::class)->deleteByReplay($this->currReplay);
     }
 
+    private function updateBatchStatus(bool $dryRun): void
+    {
+        if (!$dryRun) {
+            ++self::$BATCH_COUNT;
+
+            $this->em->flush();
+
+            if (self::$BATCH_COUNT >= self::BATCH_SIZE) {
+                self::$BATCH_COUNT = 0;
+
+                $this->em->clear();
+            }
+        }
+    }
+
     /**
      * Given any supported GamePacket, this method will forward on the request
      * to specialized method for that type of GamePacket.
-     *
-     * @param GamePacket $packet
      */
     private function handlePacket(GamePacket $packet): void
     {
@@ -463,7 +492,6 @@ class ReplayImportService
 
     /**
      * @param GamePacket|MsgFlagGrab|MsgFlagDrop $packet
-     * @param bool                               $isGrab
      */
     private function handleMsgFlagUpdate(GamePacket $packet, bool $isGrab): void
     {
@@ -648,10 +676,6 @@ class ReplayImportService
 
     /**
      * Get the number of seconds *into* a match we're currently in.
-     *
-     * @param GamePacket $packet
-     *
-     * @return int
      */
     private function calculateRealMatchTime(GamePacket $packet): int
     {
@@ -665,9 +689,6 @@ class ReplayImportService
     /**
      * Queue a packet for future processing because the specified player ID does
      * not yet exist.
-     *
-     * @param int        $playerId
-     * @param GamePacket $packet
      */
     private function queuePacket(int $playerId, GamePacket $packet): void
     {
@@ -684,8 +705,6 @@ class ReplayImportService
      *
      * This method will safely requeue packets if the player ID still does not
      * exist.
-     *
-     * @param int $playerId
      */
     private function dequeueFuturePlayer(int $playerId): void
     {
@@ -707,8 +726,6 @@ class ReplayImportService
      * **Warning:** This is not safe for flag IDs that are not tied to team flags.
      *
      * @see BZTeamType
-     *
-     * @param int $flagId
      *
      * @return int the numerical representation of a team color
      */

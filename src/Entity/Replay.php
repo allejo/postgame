@@ -90,6 +90,11 @@ class Replay
      */
     private $canceled;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=MapThumbnail::class, inversedBy="replays")
+     */
+    private $mapThumbnail;
+
     public function __construct()
     {
         $this->players = new ArrayCollection();
@@ -391,6 +396,18 @@ class Replay
     public function setCanceled(bool $canceled): self
     {
         $this->canceled = $canceled;
+
+        return $this;
+    }
+
+    public function getMapThumbnail(): ?MapThumbnail
+    {
+        return $this->mapThumbnail;
+    }
+
+    public function setMapThumbnail(?MapThumbnail $mapThumbnail): self
+    {
+        $this->mapThumbnail = $mapThumbnail;
 
         return $this;
     }

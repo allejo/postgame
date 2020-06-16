@@ -57,9 +57,6 @@ class ReplayRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param DateTime|null $after
-     * @param DateTime|null $before
-     *
      * @return Replay[]
      */
     public function findByTimeRange(?DateTime $after = null, ?DateTime $before = null): array
