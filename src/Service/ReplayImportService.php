@@ -20,10 +20,10 @@ use allejo\bzflag\networking\Packets\MsgMessage;
 use allejo\bzflag\networking\Packets\MsgRemovePlayer;
 use allejo\bzflag\networking\Packets\MsgTimeUpdate;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
-use allejo\bzflag\replays\InvalidReplayException;
+use allejo\bzflag\replays\Exceptions\InvalidReplayException;
 use allejo\bzflag\replays\Replay as BZFlagReplay;
-use allejo\bzflag\world\InvalidWorldCompression;
-use allejo\bzflag\world\InvalidWorldDatabase;
+use allejo\bzflag\world\Exceptions\InvalidWorldCompressionException;
+use allejo\bzflag\world\Exceptions\InvalidWorldDatabaseException;
 use App\Entity\CaptureEvent;
 use App\Entity\ChatMessage;
 use App\Entity\FlagUpdate;
@@ -193,11 +193,11 @@ class ReplayImportService
      * @param bool   $redoAnalysis Keep the replay ID but reimport all other information about the replay
      * @param bool   $regenAssets  Keep the replay ID but regenerate all of the assets for a replay
      *
-     * @throws \InvalidArgumentException when an invalid path to a replay file is given
-     * @throws InvalidReplayException    when an invalid replay is given
-     * @throws InvalidWorldCompression   when the world inside of the replay file could not be uncompressed
-     * @throws InvalidWorldDatabase      when the replay file has an invalid world
-     * @throws PacketInvalidException    when an invalid replay is given
+     * @throws \InvalidArgumentException        when an invalid path to a replay file is given
+     * @throws InvalidReplayException           when an invalid replay is given
+     * @throws InvalidWorldCompressionException when the world inside of the replay file could not be uncompressed
+     * @throws InvalidWorldDatabaseException    when the replay file has an invalid world
+     * @throws PacketInvalidException           when an invalid replay is given
      *
      * @return bool Returns true if the import was successful
      */
