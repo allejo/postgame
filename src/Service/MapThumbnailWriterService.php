@@ -34,7 +34,7 @@ class MapThumbnailWriterService implements IThumbnailWriter
         $this->fs = new Filesystem();
     }
 
-    public function writeThumbnail(ReplayHeader $replayHeader, Replay $replay): bool
+    public function writeThumbnail(ReplayHeader $replayHeader, Replay $replay, bool $regenerate): bool
     {
         /** @var MapThumbnail $existingThumbnail */
         $existingThumbnail = $this->em->getRepository(MapThumbnail::class)->findOneBy([
@@ -44,12 +44,14 @@ class MapThumbnailWriterService implements IThumbnailWriter
         if ($existingThumbnail !== null) {
             $replay->setMapThumbnail($existingThumbnail);
 
+            if ($regenerate) {
+                $this->generateThumbnail($replayHeader);
+            }
+
             return true;
         }
 
-        $render = new WorldRenderer($replayHeader->getWorldDatabase());
-        $svgOutput = $render->exportStringSVG();
-        $svgFilename = $replayHeader->getWorldDatabase()->getWorldHash() . '.svg';
+        $svgFilename = $this->generateThumbnail($replayHeader);
 
         $thumbnail = new MapThumbnail();
         $thumbnail->setWorldHash($replayHeader->getWorldDatabase()->getWorldHash());
@@ -57,11 +59,20 @@ class MapThumbnailWriterService implements IThumbnailWriter
 
         $replay->setMapThumbnail($thumbnail);
 
-        $this->writeFile($svgFilename, $svgOutput);
-
         $this->em->persist($thumbnail);
 
         return true;
+    }
+
+    private function generateThumbnail(ReplayHeader $header): string
+    {
+        $render = new WorldRenderer($header->getWorldDatabase());
+        $svgOutput = $render->exportStringSVG();
+        $svgFilename = $header->getWorldDatabase()->getWorldHash() . '.svg';
+
+        $this->writeFile($svgFilename, $svgOutput);
+
+        return $svgFilename;
     }
 
     private function writeFile(string $filename, string $content): void
