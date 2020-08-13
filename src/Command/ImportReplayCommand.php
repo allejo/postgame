@@ -10,9 +10,9 @@
 namespace App\Command;
 
 use allejo\bzflag\networking\Packets\PacketInvalidException;
-use allejo\bzflag\replays\InvalidReplayException;
-use allejo\bzflag\world\InvalidWorldCompression;
-use allejo\bzflag\world\InvalidWorldDatabase;
+use allejo\bzflag\replays\Exceptions\InvalidReplayException;
+use allejo\bzflag\world\Exceptions\InvalidWorldCompressionException;
+use allejo\bzflag\world\Exceptions\InvalidWorldDatabaseException;
 use App\Service\ReplayImportService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -91,7 +91,7 @@ class ImportReplayCommand extends Command
             try {
                 $this->replayService->importReplay($replayFilePath, $dryRun, $redoAnalysis, $regenAssets);
                 $output->writeln('Finished.');
-            } catch (InvalidWorldCompression | InvalidWorldDatabase | InvalidReplayException | PacketInvalidException $e) {
+            } catch (InvalidWorldCompressionException | InvalidWorldDatabaseException | InvalidReplayException | PacketInvalidException $e) {
                 $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFilePath));
                 $output->writeln(sprintf('  %s', $e->getMessage()));
 
