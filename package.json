@@ -1,7 +1,7 @@
 {
     "devDependencies": {
-        "@fortawesome/fontawesome-free": "^5.8.2",
-        "@symfony/webpack-encore": "^0.27.0",
+        "@fortawesome/fontawesome-free": "^5.14.0",
+        "@symfony/webpack-encore": "^0.30.2",
         "babel-plugin-jsx-to-dom": "^0.6.1",
         "babel-plugin-syntax-jsx": "^6.18.0",
         "sass": "^1.20.1",

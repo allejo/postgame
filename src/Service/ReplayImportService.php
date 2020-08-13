@@ -255,7 +255,7 @@ class ReplayImportService
         // Create thumbnails for the maps
         if (!$dryRun) {
             if (($existing && $regenAssets) || !$existing) {
-                $this->thumbnailWriterService->writeThumbnail($replay->getHeader(), $this->currReplay);
+                $this->thumbnailWriterService->writeThumbnail($replay->getHeader(), $this->currReplay, $regenAssets);
             }
         }
 
