@@ -67,19 +67,19 @@ class ReplayRepository extends ServiceEntityRepository
 
         if ($after !== null) {
             $qb
-                ->andWhere('r.startTime < :after')
+                ->andWhere('r.startTime > :after')
                 ->setParameter('after', $after->format(DATE_ATOM))
-            ;
-        }
-
-        if ($before !== null) {
-            $qb
-                ->andWhere('r.startTime > :before')
-                ->setParameter('before', $before->format(DATE_ATOM))
                 ->orderBy('r.startTime', 'ASC')
             ;
 
             $flipRequired = true;
+        }
+
+        if ($before !== null) {
+            $qb
+                ->andWhere('r.startTime < :before')
+                ->setParameter('before', $before->format(DATE_ATOM))
+            ;
         }
 
         $qb->setMaxResults(20);

@@ -105,7 +105,7 @@
                     {% if newest_replay.id != first_replay.id %}
                         <a
                             class="c-button py-2"
-                            href="{{ url('replay_list', { 'before': first_replay.startTime | date(date_query_fmt, false) }) }}"
+                            href="{{ url('replay_list', { 'after': first_replay.startTime | date(date_query_fmt, false) }) }}"
                         >
                             Newer
                         </a>
@@ -118,7 +118,7 @@
                     {% if oldest_replay.id != last_replay.id %}
                         <a
                             class="c-button py-2"
-                            href="{{ url('replay_list', { 'after': last_replay.startTime | date(date_query_fmt, false) }) }}"
+                            href="{{ url('replay_list', { 'before': last_replay.startTime | date(date_query_fmt, false) }) }}"
                         >
                             Older
                         </a>
