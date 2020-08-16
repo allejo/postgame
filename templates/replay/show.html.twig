@@ -21,12 +21,14 @@
 
         <div class="row">
             <div class="col-lg-4">
-                <h2>Map Preview</h2>
+                <h2>
+                    Map {% if map and map.name %}- {{ map.name }}{% endif %}
+                </h2>
 
-                {% if thumbnail %}
+                {% if thumbnailURL %}
                     <img
                         class="map-thumbnail"
-                        src="{{ asset(thumbnail) }}"
+                        src="{{ asset(thumbnailURL) }}"
                         alt="A bird's-eye view of the map for this match"
                         aria-hidden="true"
                     />
