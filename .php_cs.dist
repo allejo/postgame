@@ -62,6 +62,7 @@ return PhpCsFixer\Config::create()
             'suffix' => '',
         ],
         PhpCsFixerCustomFixers\Fixer\MultilineCommentOpeningClosingAloneFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\NoCommentedOutCodeFixer::name() => true,
         PhpCsFixerCustomFixers\Fixer\NoDoctrineMigrationsGeneratedCommentFixer::name() => true,
         PhpCsFixerCustomFixers\Fixer\NoImportFromGlobalNamespaceFixer::name() => true,
         PhpCsFixerCustomFixers\Fixer\NoUselessCommentFixer::name() => true,
