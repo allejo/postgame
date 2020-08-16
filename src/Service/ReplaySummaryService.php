@@ -52,14 +52,14 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class ReplaySummaryService
 {
-    /** @var int Default state for this service, where nothing has been summarized. */
-    const UNSUMMARIZED = 0;
+    /** Default state for this service, where nothing has been summarized. */
+    public const UNSUMMARIZED = 0;
 
-    /** @var int This service has summarized a replay in a quick manner. */
-    const SUMMARIZED_QUICK = 10;
+    /** This service has summarized a replay in a quick manner. */
+    public const SUMMARIZED_QUICK = 10;
 
-    /** @var int This service has summarized a replay completely. */
-    const SUMMARIZED_FULL = 20;
+    /** This service has summarized a replay completely. */
+    public const SUMMARIZED_FULL = 20;
 
     /** @var EntityManagerInterface */
     private $em;

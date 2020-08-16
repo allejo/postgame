@@ -10,7 +10,6 @@
 namespace App\Repository;
 
 use App\Entity\Replay;
-use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\NonUniqueResultException;
@@ -59,7 +58,7 @@ class ReplayRepository extends ServiceEntityRepository
     /**
      * @return Replay[]
      */
-    public function findByTimeRange(?DateTime $after = null, ?DateTime $before = null): array
+    public function findByTimeRange(?\DateTime $after = null, ?\DateTime $before = null): array
     {
         $flipRequired = false;
         $qb = $this->createQueryBuilder('r');
@@ -96,10 +95,10 @@ class ReplayRepository extends ServiceEntityRepository
         return $result;
     }
 
-    public function getSummaryCount(?DateTime $start = null, ?DateTime $end = null)
+    public function getSummaryCount(?\DateTime $start = null, ?\DateTime $end = null)
     {
-        $end = $end ?? new DateTime('now');
-        $start = $start ?? (new DateTime('now'))->modify('-90 days');
+        $end = $end ?? new \DateTime('now');
+        $start = $start ?? (new \DateTime('now'))->modify('-90 days');
 
         $qb = $this->createQueryBuilder('r');
         $qb
