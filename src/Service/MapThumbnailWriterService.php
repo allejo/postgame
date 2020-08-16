@@ -11,9 +11,13 @@ namespace App\Service;
 
 use allejo\bzflag\graphics\SVG\Radar\WorldRenderer;
 use allejo\bzflag\replays\ReplayHeader;
+use allejo\bzflag\world\WorldDatabase;
 use App\Entity\MapThumbnail;
 use App\Entity\Replay;
+use App\Event\ExistingThumbnailUsedEvent;
+use App\Event\NewMapThumbnailGeneratedEvent;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 class MapThumbnailWriterService implements IThumbnailWriter
@@ -28,51 +32,59 @@ class MapThumbnailWriterService implements IThumbnailWriter
     /** @var Filesystem */
     private $fs;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    /** @var EventDispatcherInterface */
+    private $eventDispatcher;
+
+    public function __construct(EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher)
     {
         $this->em = $entityManager;
         $this->fs = new Filesystem();
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function writeThumbnail(ReplayHeader $replayHeader, Replay $replay, bool $regenerate): bool
     {
-        /** @var MapThumbnail $existingThumbnail */
+        $worldDatabase = $replayHeader->getWorldDatabase();
+
+        /** @var MapThumbnail|null $existingThumbnail */
         $existingThumbnail = $this->em->getRepository(MapThumbnail::class)->findOneBy([
-            'worldHash' => $replayHeader->getWorldDatabase()->getWorldHash(),
+            'worldHash' => $worldDatabase->getWorldHash(),
         ]);
 
         if ($existingThumbnail !== null) {
             $replay->setMapThumbnail($existingThumbnail);
 
+            $event = new ExistingThumbnailUsedEvent($worldDatabase, $existingThumbnail, $replay, $regenerate);
+            $this->eventDispatcher->dispatch($event);
+
             if ($regenerate) {
-                $this->generateThumbnail($replayHeader);
+                $this->writeThumbnailToFilesystem($worldDatabase);
             }
 
             return true;
         }
 
-        $svgFilename = $this->generateThumbnail($replayHeader);
-
         $thumbnail = new MapThumbnail();
-        $thumbnail->setWorldHash($replayHeader->getWorldDatabase()->getWorldHash());
-        $thumbnail->setFilename($svgFilename);
+        $thumbnail->setWorldHash($worldDatabase->getWorldHash());
 
         $replay->setMapThumbnail($thumbnail);
+        $this->writeThumbnailToFilesystem($worldDatabase);
+
+        $event = new NewMapThumbnailGeneratedEvent($worldDatabase, $thumbnail, $replay);
+        $this->eventDispatcher->dispatch($event);
 
         $this->em->persist($thumbnail);
 
         return true;
     }
 
-    private function generateThumbnail(ReplayHeader $header): string
+    private function writeThumbnailToFilesystem(WorldDatabase $database): void
     {
-        $render = new WorldRenderer($header->getWorldDatabase());
+        $render = new WorldRenderer($database);
         $svgOutput = $render->exportStringSVG();
-        $svgFilename = $header->getWorldDatabase()->getWorldHash() . '.svg';
+        $svgFilename = $database->getWorldHash() . '.svg';
 
         $this->writeFile($svgFilename, $svgOutput);
-
-        return $svgFilename;
     }
 
     private function writeFile(string $filename, string $content): void
