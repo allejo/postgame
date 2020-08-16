@@ -22,7 +22,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 
-class ImportReplayCommand extends Command
+class ReplayImportCommand extends Command
 {
     protected static $defaultName = 'app:replay:import';
 
