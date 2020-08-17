@@ -41,7 +41,7 @@ class MapController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $replayRepo = $em->getRepository(Replay::class);
-        $replays = $replayRepo->findByMap($map, 15);
+        $replays = $replayRepo->findByMap($map, 14);
         $summaries = QuickReplaySummary::summarizeReplays($summaryService, $replays, null);
 
         return $this->render('map/show.html.twig', [

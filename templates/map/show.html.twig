@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 
+{% from '_macros/versus-card.html.twig' import match_team_summary %}
+
 {% block title %}{{ map.name }} :: Map :: BZFlag Postgame{% endblock %}
 
 {% block body %}
@@ -8,7 +10,7 @@
             <div class="d-flex align-items-center">
                 <h1 class="mb-0">{{ map.name }}</h1>
                 <p class="mb-0 h5 flex-grow-1 text-right">
-                    {{ match_count | number_abbr(noun="matches") }}
+                    {{ match_count | number_abbr(noun="matches") }} matches
                 </p>
             </div>
         </div>
@@ -21,52 +23,56 @@
         </div>
 
         <section>
-            <h2 class="border-b py-2 mt-4 mb-3">Replays</h2>
+            <h2
+                class="border-b py-2 mt-4 mb-3"
+                id="recent-matches"
+            >
+                Recent Matches
+            </h2>
 
-            <table class="w-100">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th class="w-100">Match</th>
-                        <th>Options</th>
-                    </tr>
-                </thead>
+            <div class="row">
+                {% set curr_year = 'now' | date('Y') %}
+                {% for replay in replays %}
+                    {% set replay_year = replay.startTime | date('Y', false) %}
+                    {% set date_fmt = (curr_year == replay_year) ? 'M d h:ia' : 'M d, Y h:ia' %}
 
-                <tbody>
-                    {% set curr_year = 'now' | date('Y') %}
-                    {% for replay in replays %}
-                        {% set replay_year = replay.startTime | date('Y', false) %}
-                        {% set date_fmt = (curr_year == replay_year) ? 'M d h:ia' : 'M d, Y h:ia' %}
+                    {# @var summary \App\Utility\QuickReplaySummary #}
+                    {% set summary = summaries[replay.id] %}
 
-                        {# @var summary \App\Utility\QuickReplaySummary #}
-                        {% set summary = summaries[replay.id] %}
+                    <div class="col-md-6 mb-4">
+                        <article class="background-translucent border-rounded p-3">
+                            <div class="text-center mb-3">
+                                <strong>
+                                    <small>
+                                        {{ replay.startTime | human_time(date_fmt) }}
+                                    </small>
+                                </strong>
+                            </div>
 
-                        <tr>
-                            <td>
-                                <span class="text-nowrap">
-                                    {{ replay.startTime | human_time(date_fmt) }}
-                                </span>
-                            </td>
-                            <td>
-                                {{ summary.winner | team_literal | title }} [{{ summary.winnerScore }}]
-                                vs.
-                                [{{ summary.loserScore }}] {{ summary.loser | team_literal | title }}
-                            </td>
-                            <td>
+                            <div>
+                                {{ match_team_summary(
+                                    summary.winner,
+                                    summary.winnerScore,
+                                    summary.loser,
+                                    summary.loserScore
+                                ) }}
+                            </div>
+
+                            <div class="text-center pt-3">
                                 <a
-                                    class="text-nowrap"
+                                    class="c-button c-button--skinny c-button--no-shadow"
                                     href="{{ url('replay_show', {
                                         id: replay.id,
                                         filename: replay.fileName,
                                     }) }}"
                                 >
-                                    View Replay
+                                    <small>View Replay</small>
                                 </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+            </div>
         </section>
     </div>
 {% endblock %}
