@@ -22,7 +22,13 @@
         <div class="row">
             <div class="col-lg-4">
                 <h2>
-                    Map {% if map and map.name %}- {{ map.name }}{% endif %}
+                    Map
+                    {% if map and map.name %}
+                        -
+                        <a href="{{ url('map_show', { map: map.id, slug: map.slug }) }}">
+                            {{ map.name }}
+                        </a>
+                    {% endif %}
                 </h2>
 
                 {% if thumbnail %}

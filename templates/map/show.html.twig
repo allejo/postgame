@@ -6,7 +6,7 @@
 
 {% block body %}
     <div class="container">
-        <div class="border-b py-2 mb-3">
+        <div class="border-b py-2 mb-4">
             <div class="d-flex align-items-center">
                 <h1 class="mb-0">{{ map.name }}</h1>
                 <p class="mb-0 h5 flex-grow-1 text-right">
@@ -16,15 +16,17 @@
         </div>
 
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 {{ thumbnail | map_thumbnail }}
             </div>
-            <div class="col-md-8"></div>
+            <div class="col-lg-8">
+
+            </div>
         </div>
 
         <section>
             <h2
-                class="border-b py-2 mt-4 mb-3"
+                class="border-b py-2 my-4"
                 id="recent-matches"
             >
                 Recent Matches
@@ -39,7 +41,7 @@
                     {# @var summary \App\Utility\QuickReplaySummary #}
                     {% set summary = summaries[replay.id] %}
 
-                    <div class="col-md-6 mb-4">
+                    <div class="col-lg-6 mb-4">
                         <article class="background-translucent border-rounded p-3">
                             <div class="text-center mb-3">
                                 <strong>
