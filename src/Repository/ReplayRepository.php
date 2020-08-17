@@ -118,7 +118,20 @@ class ReplayRepository extends ServiceEntityRepository
         return $result;
     }
 
-    public function getSummaryCount(?\DateTime $start = null, ?\DateTime $end = null)
+    /**
+     * Fetch a summary of how many matches occurred on a given day between the
+     * given dates of `$start` and `$end`; optionally filtered by `$map`.
+     *
+     * - If null is given for `$start`, then -90 days from today.
+     * - If null is given for `$end`, the current day is used.
+     *
+     * This method returns an array of array shapes; the `match_date` is a
+     * string in the format of `YYYY-MM-DD` and `match_count` is a string with
+     * the number of matches that occurred on that day.
+     *
+     * @return array<array{match_date: string, match_count: string}>
+     */
+    public function getSummaryCount(?\DateTime $start = null, ?\DateTime $end = null, ?KnownMap $map = null): array
     {
         $end = $end ?? new \DateTime('now');
         $start = $start ?? (new \DateTime('now'))->modify('-90 days');
@@ -133,6 +146,15 @@ class ReplayRepository extends ServiceEntityRepository
             ->orderBy('match_date', 'ASC')
             ->groupBy('match_date')
         ;
+
+        if ($map !== null) {
+            $qb
+                ->join('r.mapThumbnail', 't')
+                ->join('t.knownMap', 'm')
+                ->andWhere('m = :map')
+                ->setParameter('map', $map)
+            ;
+        }
 
         return $qb->getQuery()->getResult();
     }

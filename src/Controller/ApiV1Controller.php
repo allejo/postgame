@@ -9,6 +9,7 @@
 
 namespace App\Controller;
 
+use App\Entity\KnownMap;
 use App\Entity\Replay;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,13 +21,16 @@ use Symfony\Component\Routing\Annotation\Route;
 class ApiV1Controller extends AbstractController
 {
     /**
-     * @Route("/summarize/replays", name="api_summary_replays")
+     * @Route("/summarize/replays/{map}", name="api_summary_replays")
      */
-    public function replayCountAction()
+    public function replayCountAction(?KnownMap $map = null)
     {
-        $em = $this->getDoctrine()->getManager();
-
-        $summary_count = $em->getRepository(Replay::class)->getSummaryCount();
+        $summary_count = $this
+            ->getDoctrine()
+            ->getManager()
+            ->getRepository(Replay::class)
+            ->getSummaryCount(null, null, $map)
+        ;
 
         return new JsonResponse($this->renderTimeSeriesGraph(
             'match_date',

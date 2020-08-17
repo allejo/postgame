@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
 
+{% from '_macros/charts.html.twig' import make_chart %}
 {% from '_macros/versus-card.html.twig' import match_team_summary %}
 
 {% block title %}{{ map.name }} :: Map :: BZFlag Postgame{% endblock %}
@@ -20,7 +21,7 @@
                 {{ thumbnail | map_thumbnail }}
             </div>
             <div class="col-lg-8">
-
+                {{ make_chart('match_activity', url('api_summary_replays', { map: map.id })) }}
             </div>
         </div>
 
