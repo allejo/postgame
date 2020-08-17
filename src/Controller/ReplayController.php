@@ -111,16 +111,7 @@ class ReplayController extends AbstractController
         }
 
         $summaryService->summarizeFull($replay);
-
         $thumbnail = $replay->getMapThumbnail();
-        $thumbnailURL = null;
-
-        if ($thumbnail !== null) {
-            $thumbnailURL = vsprintf('generated/%s/%s.svg', [
-                MapThumbnailWriterService::FOLDER_NAME,
-                $thumbnail->getWorldHash(),
-            ]);
-        }
 
         $replayMap = null;
 
@@ -133,7 +124,7 @@ class ReplayController extends AbstractController
                 'id' => $replay->getId(),
                 'filename' => $replay->getFileName(),
                 'map' => $replayMap,
-                'thumbnailURL' => $thumbnailURL,
+                'thumbnail' => $thumbnail,
                 'start' => $replay->getStartTime(),
                 'end' => $replay->getEndTime(),
                 'duration' => $summaryService->getDuration(),

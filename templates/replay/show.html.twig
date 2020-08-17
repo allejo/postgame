@@ -25,13 +25,8 @@
                     Map {% if map and map.name %}- {{ map.name }}{% endif %}
                 </h2>
 
-                {% if thumbnailURL %}
-                    <img
-                        class="map-thumbnail"
-                        src="{{ asset(thumbnailURL) }}"
-                        alt="A bird's-eye view of the map for this match"
-                        aria-hidden="true"
-                    />
+                {% if thumbnail %}
+                    {{ thumbnail | map_thumbnail }}
                 {% else %}
                     <p class="my-5 text-center"><em>No preview available</em></p>
                 {% endif %}
