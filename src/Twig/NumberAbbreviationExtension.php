@@ -14,7 +14,7 @@ use Twig\Extension\AbstractExtension;
 use Twig\Markup;
 use Twig\TwigFilter;
 
-class NumberAbbreviation extends AbstractExtension
+class NumberAbbreviationExtension extends AbstractExtension
 {
     public function abbreviateNumber(int $number, int $precision = 1, ?string $noun = null, ?string $content = null): Markup
     {
