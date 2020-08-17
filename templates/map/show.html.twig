@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ map.name }} :: Map :: BZFlag Postgame{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="border-b py-2 mb-3">
+            <div class="d-flex align-items-center">
+                <h1 class="mb-0">{{ map.name }}</h1>
+                <p class="mb-0 h5 flex-grow-1 text-right">
+                    {{ match_count | number_abbr(noun="matches") }}
+                </p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                {{ thumbnail | map_thumbnail }}
+            </div>
+            <div class="col-md-8"></div>
+        </div>
+
+        <section>
+            <h2 class="border-b py-2 mt-4 mb-3">Replays</h2>
+
+            <table class="w-100">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th class="w-100">Match</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% set curr_year = 'now' | date('Y') %}
+                    {% for replay in replays %}
+                        {% set replay_year = replay.startTime | date('Y', false) %}
+                        {% set date_fmt = (curr_year == replay_year) ? 'M d h:ia' : 'M d, Y h:ia' %}
+
+                        {# @var summary \App\Utility\QuickReplaySummary #}
+                        {% set summary = summaries[replay.id] %}
+
+                        <tr>
+                            <td>
+                                <span class="text-nowrap">
+                                    {{ replay.startTime | human_time(date_fmt) }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ summary.winner | team_literal | title }} [{{ summary.winnerScore }}]
+                                vs.
+                                [{{ summary.loserScore }}] {{ summary.loser | team_literal | title }}
+                            </td>
+                            <td>
+                                <a
+                                    class="text-nowrap"
+                                    href="{{ url('replay_show', {
+                                        id: replay.id,
+                                        filename: replay.fileName,
+                                    }) }}"
+                                >
+                                    View Replay
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+{% endblock %}

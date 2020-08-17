@@ -20,12 +20,18 @@
                             {% endif %}
                         </div>
 
-                        <div class="map-card__title">
+                        <a
+                            class="map-card__title"
+                            href="{{ url('map_show', {
+                                map: map.id,
+                                slug: map.slug,
+                            }) }}"
+                        >
                             <h2 class="map-card__title__name">{{ map.name }}</h2>
                             <p class="map-card__title__count">
                                 {{ (map_counts[map.id] ?? 0) | number_abbr(noun="match", content="played on this map") }}
                             </p>
-                        </div>
+                        </a>
                     </article>
                 </div>
             {% endfor %}

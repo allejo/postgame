@@ -10,6 +10,10 @@
 namespace App\Controller;
 
 use App\Entity\KnownMap;
+use App\Entity\MapThumbnail;
+use App\Entity\Replay;
+use App\Service\ReplaySummaryService;
+use App\Utility\QuickReplaySummary;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -27,6 +31,25 @@ class MapController extends AbstractController
             'maps' => $mapRepo->findAll(),
             'map_counts' => $mapRepo->findUsageCounts(),
             'map_thumbnails' => $mapRepo->findThumbnails(),
+        ]);
+    }
+
+    /**
+     * @Route("/maps/{map}/{slug}", name="map_show")
+     */
+    public function show(KnownMap $map, string $slug, ReplaySummaryService $summaryService)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $replayRepo = $em->getRepository(Replay::class);
+        $replays = $replayRepo->findByMap($map, 15);
+        $summaries = QuickReplaySummary::summarizeReplays($summaryService, $replays, null);
+
+        return $this->render('map/show.html.twig', [
+            'map' => $map,
+            'thumbnail' => $em->getRepository(MapThumbnail::class)->findSingleThumbnailForMap($map),
+            'match_count' => $em->getRepository(Replay::class)->getMapUsageCount($map),
+            'replays' => $replays,
+            'summaries' => $summaries,
         ]);
     }
 }

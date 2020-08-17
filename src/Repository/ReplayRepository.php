@@ -9,10 +9,12 @@
 
 namespace App\Repository;
 
+use App\Entity\KnownMap;
 use App\Entity\Replay;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 
 /**
  * @method Replay|null find($id, $lockMode = null, $lockVersion = null)
@@ -25,6 +27,27 @@ class ReplayRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Replay::class);
+    }
+
+    public function findByMap(KnownMap $map, int $limit = null, \DateTime $after = null): array
+    {
+        $query = $this->createQueryBuilder('r')
+            ->join('r.mapThumbnail', 't')
+            ->join('t.knownMap', 'm')
+            ->where('m = :map')
+            ->setParameter('map', $map)
+            ->setMaxResults($limit)
+            ->orderBy('r.startTime', 'DESC')
+        ;
+
+        if ($after !== null) {
+            $query
+                ->where('r.startTime < :after')
+                ->setParameter('after', $after->format(DATE_ATOM))
+            ;
+        }
+
+        return $query->getQuery()->getResult();
     }
 
     public function findNewest(): ?Replay
@@ -112,5 +135,25 @@ class ReplayRepository extends ServiceEntityRepository
         ;
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Get the number of replays that have taken a part on this map.
+     */
+    public function getMapUsageCount(KnownMap $map): int
+    {
+        try {
+            return (int)$this->createQueryBuilder('r')
+                ->select('COUNT(r.id)')
+                ->join('r.mapThumbnail', 't')
+                ->join('t.knownMap', 'm')
+                ->where('m = :map')
+                ->setParameter('map', $map)
+                ->getQuery()
+                ->getSingleScalarResult()
+            ;
+        } catch (NonUniqueResultException | NoResultException $e) {
+            return 0;
+        }
     }
 }
