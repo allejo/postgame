@@ -48,13 +48,7 @@
                                 <div class="replay-summary">
                                     <div class="replay-summary__timing small">
                                         <p>
-                                            <time
-                                                datetime="{{ replay.startTime | date('c', false) }}"
-                                                data-format="{{ time_fmt | dayjs_fmt }}"
-                                                title="{{ replay.startTime | date('F d, Y h:ia T', false) }}"
-                                            >
-                                                {{ replay.startTime | date(time_fmt, false) }} UTC
-                                            </time>
+                                            {{ replay.startTime | human_time(time_fmt) }}
                                         </p>
 
                                         <p>
