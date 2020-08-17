@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Map List :: BZFlag Postgame{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="py-2">Map List</h1>
+
+        <div class="row">
+            {% for map in maps %}
+                <div class="col-md-4 mb-4">
+                    <article class="map-card">
+                        <div>
+                            {% if map.id in map_thumbnails | keys %}
+                                {{ map_thumbnails[map.id] | map_thumbnail }}
+                            {% else %}
+                                <p class="map-card__no-preview" aria-hidden="true">
+                                    <span>No map preview available</span>
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="map-card__title">
+                            <h2 class="map-card__title__name">{{ map.name }}</h2>
+                            <p class="map-card__title__count">
+                                {{ (map_counts[map.id] ?? 0) | number_abbr(noun="match", content="played on this map") }}
+                            </p>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
