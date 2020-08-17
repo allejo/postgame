@@ -9,6 +9,9 @@
 
 namespace App\Utility;
 
+use App\Entity\Replay;
+use App\Service\ReplaySummaryService;
+
 class QuickReplaySummary
 {
     /**
@@ -49,4 +52,43 @@ class QuickReplaySummary
      * @var int
      */
     public $loserScore;
+
+    /**
+     * @param ReplaySummaryService $service  The summary service that typically comes via DI
+     * @param Replay[]             $replays
+     * @param null|callable(Replay $replay): void $callback
+     * @param null|callable(Replay $replay,  UnsummarizedException|WrongSummarizationException $e): void $onError
+     *
+     * @return QuickReplaySummary[]
+     */
+    public static function summarizeReplays(ReplaySummaryService $service, array $replays, ?callable $callback = null, ?callable $onError = null): array
+    {
+        /** @var QuickReplaySummary[] $summaries */
+        $summaries = [];
+
+        foreach ($replays as $replay) {
+            if ($callback) {
+                $callback($replay);
+            }
+
+            $service->summarizeQuick($replay);
+
+            try {
+                $summary = new self();
+                $summary->duration = $service->getDuration();
+                $summary->winner = $service->getWinner();
+                $summary->winnerScore = $service->getWinnerScore();
+                $summary->loser = $service->getLoser();
+                $summary->loserScore = $service->getLoserScore();
+
+                $summaries[$replay->getId()] = $summary;
+            } catch (UnsummarizedException | WrongSummarizationException $e) {
+                if ($onError) {
+                    $onError($replay, $e);
+                }
+            }
+        }
+
+        return $summaries;
+    }
 }

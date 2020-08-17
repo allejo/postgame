@@ -11,7 +11,6 @@ namespace App\Controller;
 
 use App\Entity\Replay;
 use App\Repository\ReplayRepository;
-use App\Service\MapThumbnailWriterService;
 use App\Service\ReplaySummaryService;
 use App\Utility\DefaultArray;
 use App\Utility\QuickReplaySummary;
@@ -47,30 +46,18 @@ class ReplayController extends AbstractController
 
         /** @var DefaultArray<string, array<Replay>> $replaysByDay */
         $replaysByDay = new DefaultArray([]);
-
-        /** @var QuickReplaySummary[] $summaries */
-        $summaries = [];
-
-        foreach ($replays as $replay) {
-            $replaysByDay[$replay->getStartTime()->format('Y-m-d')][] = $replay;
-
-            $summaryService->summarizeQuick($replay);
-
-            try {
-                $summary = new QuickReplaySummary();
-                $summary->duration = $summaryService->getDuration();
-                $summary->winner = $summaryService->getWinner();
-                $summary->winnerScore = $summaryService->getWinnerScore();
-                $summary->loser = $summaryService->getLoser();
-                $summary->loserScore = $summaryService->getLoserScore();
-
-                $summaries[$replay->getId()] = $summary;
-            } catch (UnsummarizedException | WrongSummarizationException $e) {
+        $summaries = QuickReplaySummary::summarizeReplays(
+            $summaryService,
+            $replays,
+            static function (Replay $replay) use (&$replaysByDay) {
+                $replaysByDay[$replay->getStartTime()->format('Y-m-d')][] = $replay;
+            },
+            static function (Replay $replay, \Exception $e) use ($logger) {
                 $logger->warning('Replay ID {id} could not be summarized correctly', [
                     'id' => $replay->getId(),
                 ]);
             }
-        }
+        );
 
         return $this->render('replay/index.html.twig', [
             'replays' => $replaysByDay->getAsArray(),
