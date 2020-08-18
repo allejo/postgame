@@ -1,0 +1,42 @@
+.map-card {
+    border: $border-default;
+}
+
+.map-card__no-preview {
+    margin-bottom: 0;
+    padding-bottom: 100%;
+    position: relative;
+    width: 100%;
+
+    span {
+        position: absolute;
+        text-align: center;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 100%;
+    }
+}
+
+.map-card__title {
+    @include padding(x, 3);
+    @include padding(y, 2);
+
+    align-items: center;
+    border-top: $border-default;
+    display: flex;
+}
+
+.map-card__title__count,
+.map-card__title__name {
+    margin-bottom: 0;
+}
+
+.map-card__title__name {
+}
+
+.map-card__title__count {
+    @include font-size(h5);
+
+    flex-grow: 1;
+    text-align: right;
+}

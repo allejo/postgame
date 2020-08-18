@@ -14,6 +14,7 @@ LICENSE.md file that was distributed with this source code.
 HEADER;
 
 return PhpCsFixer\Config::create()
+    ->registerCustomFixers(new PhpCsFixerCustomFixers\Fixers())
     ->setRiskyAllowed(true)
     ->setRules([
         '@Symfony' => true,
@@ -56,6 +57,20 @@ return PhpCsFixer\Config::create()
             'equal' => false,
             'identical' => false,
         ],
+        PhpCsFixerCustomFixers\Fixer\DataProviderNameFixer::name() => [
+            'prefix' => 'dataProvider_test',
+            'suffix' => '',
+        ],
+        PhpCsFixerCustomFixers\Fixer\MultilineCommentOpeningClosingAloneFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\NoCommentedOutCodeFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\NoDoctrineMigrationsGeneratedCommentFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\NoImportFromGlobalNamespaceFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\NoUselessCommentFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\NoUselessDoctrineRepositoryCommentFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\NoUselessStrlenFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\PhpdocNoIncorrectVarAnnotationFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\PhpdocSingleLineVarFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\PhpdocTypesTrimFixer::name() => true,
     ])
     ->setFinder($finder)
 ;
