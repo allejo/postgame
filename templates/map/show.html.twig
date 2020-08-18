@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% from '_macros/charts.html.twig' import make_chart %}
+{% from '_macros/versus-card.html.twig' import match_team_summary %}
+
+{% block title %}{{ map.name }} :: Map :: BZFlag Postgame{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="border-b py-2 mb-4">
+            <div class="d-flex align-items-center">
+                <h1 class="mb-0">{{ map.name }}</h1>
+                <p class="mb-0 h5 flex-grow-1 text-right">
+                    {{ match_count | number_abbr(noun="matches") }} matches
+                </p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4">
+                {{ thumbnail | map_thumbnail }}
+            </div>
+            <div class="col-lg-8">
+                {{ make_chart('match_activity', url('api_summary_replays', { map: map.id })) }}
+            </div>
+        </div>
+
+        <section>
+            <h2
+                class="border-b py-2 my-4"
+                id="recent-matches"
+            >
+                Recent Matches
+            </h2>
+
+            <div class="row">
+                {% set curr_year = 'now' | date('Y') %}
+                {% for replay in replays %}
+                    {% set replay_year = replay.startTime | date('Y', false) %}
+                    {% set date_fmt = (curr_year == replay_year) ? 'M d h:ia' : 'M d, Y h:ia' %}
+
+                    {# @var summary \App\Utility\QuickReplaySummary #}
+                    {% set summary = summaries[replay.id] %}
+
+                    <div class="col-lg-6 mb-4">
+                        <article class="background-translucent border-rounded p-3">
+                            <div class="text-center mb-3">
+                                <strong>
+                                    <small>
+                                        {{ replay.startTime | human_time(date_fmt) }}
+                                    </small>
+                                </strong>
+                            </div>
+
+                            <div>
+                                {{ match_team_summary(
+                                    summary.winner,
+                                    summary.winnerScore,
+                                    summary.loser,
+                                    summary.loserScore
+                                ) }}
+                            </div>
+
+                            <div class="text-center pt-3">
+                                <a
+                                    class="c-button c-button--skinny c-button--no-shadow"
+                                    href="{{ url('replay_show', {
+                                        id: replay.id,
+                                        filename: replay.fileName,
+                                    }) }}"
+                                >
+                                    <small>View Replay</small>
+                                </a>
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+{% endblock %}

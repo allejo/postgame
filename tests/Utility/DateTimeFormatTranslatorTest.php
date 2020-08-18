@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 
 class DateTimeFormatTranslatorTest extends TestCase
 {
-    public static function dataProvider_dayJsFormats(): array
+    public static function dataProvider_testToDayJSConversion(): array
     {
         return [
             ['F j, Y, g:i a', 'MMMM D, YYYY, h:mm a'],
@@ -26,7 +26,7 @@ class DateTimeFormatTranslatorTest extends TestCase
     }
 
     /**
-     * @dataProvider dataProvider_dayJsFormats
+     * @dataProvider dataProvider_testToDayJSConversion
      *
      * @param $phpFormat
      * @param $expectedJS
@@ -35,7 +35,7 @@ class DateTimeFormatTranslatorTest extends TestCase
     {
         $translated = DateTimeFormatTranslator::toDayJS($phpFormat);
 
-        $this->assertEquals($expectedJS, $translated);
+        self::assertEquals($expectedJS, $translated);
     }
 
     public function testToDayJsConversionThrowsWarningWithUnsupportedCharacter(): void
@@ -45,6 +45,6 @@ class DateTimeFormatTranslatorTest extends TestCase
         $format = '\t\h\e jS \d\a\y';
         $translated = DateTimeFormatTranslator::toDayJS($format);
 
-        $this->assertEquals('[the] D [day]', $translated);
+        self::assertEquals('[the] D [day]', $translated);
     }
 }

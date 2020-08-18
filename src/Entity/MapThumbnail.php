@@ -32,14 +32,14 @@ class MapThumbnail
     private $worldHash;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $filename;
-
-    /**
      * @ORM\OneToMany(targetEntity=Replay::class, mappedBy="mapThumbnail")
      */
     private $replays;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=KnownMap::class)
+     */
+    private $knownMap;
 
     public function __construct()
     {
@@ -59,18 +59,6 @@ class MapThumbnail
     public function setWorldHash(string $worldHash): self
     {
         $this->worldHash = $worldHash;
-
-        return $this;
-    }
-
-    public function getFilename(): ?string
-    {
-        return $this->filename;
-    }
-
-    public function setFilename(string $filename): self
-    {
-        $this->filename = $filename;
 
         return $this;
     }
@@ -102,6 +90,18 @@ class MapThumbnail
                 $replay->setMapThumbnail(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getKnownMap(): ?KnownMap
+    {
+        return $this->knownMap;
+    }
+
+    public function setKnownMap(?KnownMap $knownMap): self
+    {
+        $this->knownMap = $knownMap;
 
         return $this;
     }

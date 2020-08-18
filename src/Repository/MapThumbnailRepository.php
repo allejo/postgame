@@ -9,6 +9,7 @@
 
 namespace App\Repository;
 
+use App\Entity\KnownMap;
 use App\Entity\MapThumbnail;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -26,32 +27,15 @@ class MapThumbnailRepository extends ServiceEntityRepository
         parent::__construct($registry, MapThumbnail::class);
     }
 
-    // /**
-    //  * @return MapThumbnail[] Returns an array of MapThumbnail objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findSingleThumbnailForMap(KnownMap $map): ?MapThumbnail
     {
-        return $this->createQueryBuilder('m')
-            ->andWhere('m.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('m.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?MapThumbnail
-    {
-        return $this->createQueryBuilder('m')
-            ->andWhere('m.exampleField = :val')
-            ->setParameter('val', $value)
+        return $this->createQueryBuilder('t')
+            ->join('t.knownMap', 'm')
+            ->where('m = :map')
+            ->setMaxResults(1)
+            ->setParameter('map', $map)
             ->getQuery()
             ->getOneOrNullResult()
         ;
     }
-    */
 }

@@ -26,6 +26,8 @@ doctrine:
         dql:
             datetime_functions:
                 date_format: DoctrineExtensions\Query\Mysql\DateFormat
+            string_functions:
+                any_value: DoctrineExtensions\Query\Mysql\AnyValue
         mappings:
             App:
                 is_bundle: false

@@ -17,7 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class DeleteReplayCommand extends Command
+class ReplayDeleteCommand extends Command
 {
     protected static $defaultName = 'app:replay:delete';
 

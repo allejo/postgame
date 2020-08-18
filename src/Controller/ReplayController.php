@@ -10,7 +10,7 @@
 namespace App\Controller;
 
 use App\Entity\Replay;
-use App\Service\MapThumbnailWriterService;
+use App\Repository\ReplayRepository;
 use App\Service\ReplaySummaryService;
 use App\Utility\DefaultArray;
 use App\Utility\QuickReplaySummary;
@@ -33,8 +33,12 @@ class ReplayController extends AbstractController
         $after = $this->safeGetTimestamp($request, 'after');
         $before = $this->safeGetTimestamp($request, 'before');
 
-        $em = $this->getDoctrine()->getManager();
-        $repo = $em->getRepository(Replay::class);
+        /** @var ReplayRepository $repo */
+        $repo = $this
+            ->getDoctrine()
+            ->getManager()
+            ->getRepository(Replay::class)
+        ;
 
         $oldest = $repo->findOldest();
         $newest = $repo->findNewest();
@@ -42,30 +46,18 @@ class ReplayController extends AbstractController
 
         /** @var DefaultArray<string, array<Replay>> $replaysByDay */
         $replaysByDay = new DefaultArray([]);
-
-        /** @var QuickReplaySummary[] $summaries */
-        $summaries = [];
-
-        foreach ($replays as $replay) {
-            $replaysByDay[$replay->getStartTime()->format('Y-m-d')][] = $replay;
-
-            $summaryService->summarizeQuick($replay);
-
-            try {
-                $summary = new QuickReplaySummary();
-                $summary->duration = $summaryService->getDuration();
-                $summary->winner = $summaryService->getWinner();
-                $summary->winnerScore = $summaryService->getWinnerScore();
-                $summary->loser = $summaryService->getLoser();
-                $summary->loserScore = $summaryService->getLoserScore();
-
-                $summaries[$replay->getId()] = $summary;
-            } catch (UnsummarizedException | WrongSummarizationException $e) {
+        $summaries = QuickReplaySummary::summarizeReplays(
+            $summaryService,
+            $replays,
+            static function (Replay $replay) use (&$replaysByDay) {
+                $replaysByDay[$replay->getStartTime()->format('Y-m-d')][] = $replay;
+            },
+            static function (Replay $replay, \Exception $e) use ($logger) {
                 $logger->warning('Replay ID {id} could not be summarized correctly', [
                     'id' => $replay->getId(),
                 ]);
             }
-        }
+        );
 
         return $this->render('replay/index.html.twig', [
             'replays' => $replaysByDay->getAsArray(),
@@ -90,8 +82,13 @@ class ReplayController extends AbstractController
      */
     public function showAction(int $id, string $filename, string $_format, ReplaySummaryService $summaryService, LoggerInterface $logger): Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $replay = $em->getRepository(Replay::class)->findOneBy([
+        /** @var ReplayRepository $replayRepo */
+        $replayRepo = $this
+            ->getDoctrine()
+            ->getManager()
+            ->getRepository(Replay::class)
+        ;
+        $replay = $replayRepo->findOneBy([
             'id' => $id,
             'fileName' => $filename,
         ]);
@@ -101,22 +98,20 @@ class ReplayController extends AbstractController
         }
 
         $summaryService->summarizeFull($replay);
-
         $thumbnail = $replay->getMapThumbnail();
-        $thumbnailURL = null;
 
-        if ($thumbnail !== null) {
-            $thumbnailURL = vsprintf('generated/%s/%s', [
-                MapThumbnailWriterService::FOLDER_NAME,
-                $thumbnail->getFilename(),
-            ]);
+        $replayMap = null;
+
+        if (($t = $replay->getMapThumbnail()) !== null) {
+            $replayMap = $t->getKnownMap();
         }
 
         try {
             $replaySummary = [
                 'id' => $replay->getId(),
                 'filename' => $replay->getFileName(),
-                'thumbnail' => $thumbnailURL,
+                'map' => $replayMap,
+                'thumbnail' => $thumbnail,
                 'start' => $replay->getStartTime(),
                 'end' => $replay->getEndTime(),
                 'duration' => $summaryService->getDuration(),

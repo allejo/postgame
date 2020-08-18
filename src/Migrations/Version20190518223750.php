@@ -14,9 +14,6 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20190518223750 extends AbstractMigration
 {
     public function getDescription(): string
@@ -26,7 +23,6 @@ final class Version20190518223750 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('CREATE TABLE capture_event (id INT AUTO_INCREMENT NOT NULL, replay_id INT NOT NULL, capper_id INT NOT NULL, capper_team INT NOT NULL, capped_team INT NOT NULL, timestamp DATETIME NOT NULL, INDEX IDX_83A193C9186CE3E1 (replay_id), INDEX IDX_83A193C971085808 (capper_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
@@ -57,7 +53,6 @@ final class Version20190518223750 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE part_event DROP FOREIGN KEY FK_A8DD5D443C972CB8');

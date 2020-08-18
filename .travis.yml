@@ -1,6 +1,6 @@
 language: php
 php:
-    - "7.4snapshot"
+    - "7.4"
     - "7.3"
     - "7.2"
 
@@ -11,7 +11,7 @@ install:
     - composer install --no-interaction --no-progress
 
 script:
-    - bin/phpunit
+    - composer test
 
 notifications:
     email: false

@@ -21,15 +21,18 @@
 
         <div class="row">
             <div class="col-lg-4">
-                <h2>Map Preview</h2>
+                <h2>
+                    Map
+                    {% if map and map.name %}
+                        -
+                        <a href="{{ url('map_show', { map: map.id, slug: map.slug }) }}">
+                            {{ map.name }}
+                        </a>
+                    {% endif %}
+                </h2>
 
                 {% if thumbnail %}
-                    <img
-                        class="map-thumbnail"
-                        src="{{ asset(thumbnail) }}"
-                        alt="A bird's-eye view of the map for this match"
-                        aria-hidden="true"
-                    />
+                    {{ thumbnail | map_thumbnail }}
                 {% else %}
                     <p class="my-5 text-center"><em>No preview available</em></p>
                 {% endif %}
