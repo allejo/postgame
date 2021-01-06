@@ -9,9 +9,21 @@ use SVG\Nodes\Shapes\SVGRect;
 
 class GameMovement
 {
+    /**
+     * Size of the map in the replay file
+     */
     private $grid_size;
+    /**
+     * Size of the heatmap
+     */
     private $heatmap_size;
+    /**
+     * Hashmap with {userID: Callsign} since userID is temporary
+     */
     private $id_to_callsign;
+    /**
+     * Hashmap with {Callsign: Heatmap}
+     */
     private $callsign_heatmap;
 
 
@@ -36,11 +48,11 @@ class GameMovement
     }
 
     /**
-     * @param int $grid_size
+     * @return int
      */
-    public function setGridSize(int $grid_size): void
+    public function getHeatmapSize(): int
     {
-        $this->grid_size = $grid_size;
+        return $this->heatmap_size;
     }
 
     /**
@@ -50,11 +62,6 @@ class GameMovement
     {
         return $this->callsign_heatmap;
     }
-
-    /**
-     * @param int $x
-     * @param int $y
-     */
 
     /**
      * Add A position from the replay file to the heatmap
@@ -74,5 +81,42 @@ class GameMovement
         $grid_y = floor($positive_x / $grid_quadrant_size);
 
         ($this->callsign_heatmap[$callsign])[$grid_x][$grid_y]++;
+    }
+
+    /**
+     * Import and Process a replay file
+     * @param string $location
+     * @throws \allejo\bzflag\networking\Packets\PacketInvalidException
+     * @throws \allejo\bzflag\replays\Exceptions\InvalidReplayException
+     * @throws \allejo\bzflag\world\Exceptions\InvalidWorldCompressionException
+     * @throws \allejo\bzflag\world\Exceptions\InvalidWorldDatabaseException
+     */
+    public function replayHeatmap(string $location): void
+    {
+        $replay = new Replay($location);
+        $this->id_to_callsign = array();
+        $this->callsign_heatmap = array();
+
+        foreach ($replay->getPacketsIterable() as $packet) {
+            if ($packet->getPacketType() === "MsgAddPlayer") {
+
+                if (!isset( $this->callsign_heatmap[$packet->getCallsign()])) {
+                    $this->callsign_heatmap[$packet->getCallsign()] = array_fill(0, $this->heatmap_size, array_fill(0, $this->heatmap_size, 0));
+                }
+
+                $this->id_to_callsign[$packet->getPlayerIndex()] = $packet->getCallsign();
+            }
+
+
+            if ($packet->getPacketType() === "MsgPlayerUpdate") {
+                $callsign = $this->id_to_callsign[$packet->getPlayerId()];
+                $position = $packet->getState()->position;
+                $this->addPosition($position[0], $position[1], $callsign);
+
+            }
+            if ($packet->getPacketType() === "MsgRemovePlayer") {
+                unset($this->id_to_callsign[$packet->getPlayerId()]);
+            }
+        }
     }
 }
