@@ -119,59 +119,85 @@ class GameMovement
             }
         }
     }
-}
 
-function maxval(array $x): int
-{
-    $max = 0;
-    foreach ($x as $row){
-        $max_col = max($row);
-        if ($max_col>$max){
-            $max = $max_col;
+    /**
+     * Get the max value in a 2D array
+     * @param array $x
+     * @return int
+     */
+    function maxval(array $x): int
+    {
+        $max = 0;
+        foreach ($x as $row){
+            $max_col = max($row);
+            if ($max_col>$max){
+                $max = $max_col;
+            }
         }
+        return $max;
     }
-    return $max;
+
+    /**
+     * Returns a colour value for a given heatmap value
+     * @param $t float
+     * @param $start string
+     * @param $middle string
+     * @param $end string
+     * @return string
+     */
+    function gradient(float $t,string $start, string $middle, string $end) {
+        return $t>=0.5 ? $this->linear($middle,$end,($t-.5)*2) : $this->linear($start,$middle,$t*2);
+    }
+
+    /** Linearly Interpolate a given value over a given range
+     * @param $start string
+     * @param $end string
+     * @param $x float
+     * @return string
+     */
+    function linear(string $start, string $end, float $x) {
+        $r = $this->byteLinear($start[1].$start[2], $end[1].$end[2], $x);
+        $g = $this->byteLinear($start[3].$start[4], $end[3].$end[4], $x);
+        $b = $this->byteLinear($start[5].$start[6], $end[5].$end[6], $x);
+        return "#".$r.$g.$b;
+    }
+
+    function byteLinear(string $a, string $b, float $x) {
+        $y = (hexdec(('0x'.$a))*(1-$x) + hexdec(('0x'.$b))*$x)|0;
+        return dechex($y);
+    }
+
+    function createSVG(int $SVGSize, string $GradientStart, string $GradientMid, string $GradientEnd): array{
+        $svg_list = [];
+
+        $newRange = 255;
+
+        foreach ($this->getCallsignHeatmap() as $heatmap){
+            $oldRange = $this->maxval($heatmap);
+            $image = new SVG($SVGSize, $SVGSize);
+            $doc = $image->getDocument();
+
+            $SquareSize = $SVGSize/$this->heatmap_size;
+            for ($i = 0; $i < count($heatmap); $i++) {
+                for ($j = 0; $j < count($heatmap[$i]); $j++) {
+                    $square = new SVGRect($SquareSize*$j, $SquareSize*$i, $SquareSize, $SquareSize);
+                    $colour = $this->gradient($heatmap[$i][$j]/$oldRange, $GradientStart, $GradientMid, $GradientEnd);
+
+                    $square->setStyle('fill', $colour);
+                    $doc->addChild($square);
+                }
+            }
+            array_push($svg_list, $image);
+        }
+    return $svg_list;
+    }
+
 }
 
-function gradient($t,$start, $middle, $end) {
-    return $t>=0.5 ? linear($middle,$end,($t-.5)*2) : linear($start,$middle,$t*2);
-}
 
-function linear( $start, $end, $x) {
-    $r = byteLinear($start[1].$start[2], $end[1].$end[2], $x);
-    $g = byteLinear($start[3].$start[4], $end[3].$end[4], $x);
-    $b = byteLinear($start[5].$start[6], $end[5].$end[6], $x);
-    return "#".$r.$g.$b;
-}
-
-function byteLinear($a,$b,$x) {
-    $y = (hexdec(('0x'.$a))*(1-$x) + hexdec(('0x'.$b))*$x)|0;
-    return dechex($y);
-}
-
-
-$movement = new GameMovement(300, 10);
+$movement = new GameMovement(300, 20);
 $movement->replayHeatmap('replay_ID_change.rec');
-$heatmap_list = $movement->getCallsignHeatmap();
+$svg_list = $movement->createSVG(400, "#1a2a6c", "#b21f1f", "#fdbb2d");
 
-$svg_list = [];
-
-$newRange = 255;
-
-foreach ($heatmap_list as $heatmap){
-    $oldRange = maxval($heatmap);
-    $image = new SVG(400, 400);
-    $doc = $image->getDocument();
-    for ($i = 0; $i < count($heatmap); $i++) {
-        for ($j = 0; $j < count($heatmap[$i]); $j++) {
-            $square = new SVGRect(40*$j, 40*$i, 40, 40);
-            $colour = gradient($heatmap[$i][$j]/$oldRange, "#1a2a6c", "#b21f1f", "#fdbb2d");
-
-            $square->setStyle('fill', $colour);
-            $doc->addChild($square);
-        }
-    }
-    array_push($svg_list, $image);
-}
 
 echo $svg_list[4];
