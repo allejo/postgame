@@ -120,3 +120,45 @@ class GameMovement
         }
     }
 }
+
+function maxval(array $x): int
+{
+    $max = 0;
+    foreach ($x as $row){
+        $max_col = max($row);
+        if ($max_col>$max){
+            $max = $max_col;
+        }
+    }
+    return $max;
+}
+
+
+$movement = new GameMovement(300, 10);
+$movement->replayHeatmap('replay_ID_change.rec');
+$heatmap_list = $movement->getCallsignHeatmap();
+
+$svg_list = [];
+
+$newRange = 255;
+
+foreach ($heatmap_list as $heatmap){
+    $oldRange = maxval($heatmap);
+    $image = new SVG(400, 400);
+    $doc = $image->getDocument();
+    for ($i = 0; $i < count($heatmap); $i++) {
+        for ($j = 0; $j < count($heatmap[$i]); $j++) {
+            $square = new SVGRect(40*$j, 40*$i, 40, 40);
+            $colour = gradient($heatmap[$i][$j]/$oldRange, "#1a2a6c", "#b21f1f", "#fdbb2d");
+
+            $square->setStyle('fill', $colour);
+            $doc->addChild($square);
+        }
+    }
+    array_push($svg_list, $image);
+}
+
+
+
+
+echo $svg_list[4];
