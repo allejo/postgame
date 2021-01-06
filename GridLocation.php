@@ -56,4 +56,23 @@ class GameMovement
      * @param int $y
      */
 
+    /**
+     * Add A position from the replay file to the heatmap
+     * @param float $x
+     * @param float $y
+     * @param string $callsign
+     */
+    public function addPosition(float $x, float $y, string $callsign): void
+    {
+        //Shift to N
+        $positive_x = $x + ($this->grid_size / 2);
+        $positive_y = $y + ($this->grid_size / 2);
+
+        $grid_quadrant_size = $this->grid_size / $this->heatmap_size;
+
+        $grid_x = $this->heatmap_size - 1 - floor($positive_y / $grid_quadrant_size);
+        $grid_y = floor($positive_x / $grid_quadrant_size);
+
+        ($this->callsign_heatmap[$callsign])[$grid_x][$grid_y]++;
+    }
 }
