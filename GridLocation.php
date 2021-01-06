@@ -133,6 +133,22 @@ function maxval(array $x): int
     return $max;
 }
 
+function gradient($t,$start, $middle, $end) {
+    return $t>=0.5 ? linear($middle,$end,($t-.5)*2) : linear($start,$middle,$t*2);
+}
+
+function linear( $start, $end, $x) {
+    $r = byteLinear($start[1].$start[2], $end[1].$end[2], $x);
+    $g = byteLinear($start[3].$start[4], $end[3].$end[4], $x);
+    $b = byteLinear($start[5].$start[6], $end[5].$end[6], $x);
+    return "#".$r.$g.$b;
+}
+
+function byteLinear($a,$b,$x) {
+    $y = (hexdec(('0x'.$a))*(1-$x) + hexdec(('0x'.$b))*$x)|0;
+    return dechex($y);
+}
+
 
 $movement = new GameMovement(300, 10);
 $movement->replayHeatmap('replay_ID_change.rec');
@@ -157,8 +173,5 @@ foreach ($heatmap_list as $heatmap){
     }
     array_push($svg_list, $image);
 }
-
-
-
 
 echo $svg_list[4];
