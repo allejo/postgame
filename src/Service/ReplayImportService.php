@@ -357,45 +357,24 @@ class ReplayImportService
      */
     private function handlePacket(GamePacket $packet): void
     {
-        switch ($packet::PACKET_TYPE) {
-            case MsgAddPlayer::PACKET_TYPE:
-                $this->handleMsgAddPlayer($packet);
-                break;
-
-            case MsgAdminInfo::PACKET_TYPE:
-                $this->handleMsgAdminInfo($packet);
-                break;
-
-            case MsgCaptureFlag::PACKET_TYPE:
-                $this->handleMsgCaptureFlag($packet);
-                break;
-
-            case MsgFlagGrab::PACKET_TYPE:
-                $this->handleMsgFlagUpdate($packet, true);
-                break;
-
-            case MsgFlagDrop::PACKET_TYPE:
-                $this->handleMsgFlagUpdate($packet, false);
-                break;
-
-            case MsgKilled::PACKET_TYPE:
-                $this->handleMsgKilled($packet);
-                break;
-
-            case MsgMessage::PACKET_TYPE:
-                $this->handleMsgMessage($packet);
-                break;
-
-            case MsgRemovePlayer::PACKET_TYPE:
-                $this->handleMsgRemovePlayer($packet);
-                break;
-
-            case MsgTimeUpdate::PACKET_TYPE:
-                $this->handleMsgTimeUpdate($packet);
-                break;
-
-            default:
-                break;
+        if ($packet instanceof MsgAddPlayer) {
+            $this->handleMsgAddPlayer($packet);
+        } elseif ($packet instanceof MsgAdminInfo) {
+            $this->handleMsgAdminInfo($packet);
+        } elseif ($packet instanceof MsgCaptureFlag) {
+            $this->handleMsgCaptureFlag($packet);
+        } elseif ($packet instanceof MsgFlagGrab) {
+            $this->handleMsgFlagUpdate($packet, true);
+        } elseif ($packet instanceof MsgFlagDrop) {
+            $this->handleMsgFlagUpdate($packet, false);
+        } elseif ($packet instanceof MsgKilled) {
+            $this->handleMsgKilled($packet);
+        } elseif ($packet instanceof MsgMessage) {
+            $this->handleMsgMessage($packet);
+        } elseif ($packet instanceof MsgRemovePlayer) {
+            $this->handleMsgRemovePlayer($packet);
+        } elseif ($packet instanceof MsgTimeUpdate) {
+            $this->handleMsgTimeUpdate($packet);
         }
     }
 
