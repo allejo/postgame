@@ -1,12 +1,12 @@
 {
     "devDependencies": {
         "@fortawesome/fontawesome-free": "^5.14.0",
-        "@symfony/webpack-encore": "^0.30.2",
+        "@symfony/webpack-encore": "^0.33.0",
         "babel-plugin-jsx-to-dom": "^0.6.1",
         "babel-plugin-syntax-jsx": "^6.18.0",
         "sass": "^1.20.1",
-        "sass-loader": "^8.0.0",
-        "webpack-notifier": "^1.6.0"
+        "sass-loader": "^10.0.0",
+        "webpack-notifier": "^1.12.0"
     },
     "license": "MIT",
     "private": true,
