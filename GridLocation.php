@@ -195,9 +195,11 @@ class GameMovement
 }
 
 
-$movement = new GameMovement(300, 20);
+$movement = new GameMovement(300, 10);
+
 $movement->replayHeatmap('replay_ID_change.rec');
+
 $svg_list = $movement->createSVG(400, "#1a2a6c", "#b21f1f", "#fdbb2d");
 
+echo $svg_list[0];
 
-echo $svg_list[4];
