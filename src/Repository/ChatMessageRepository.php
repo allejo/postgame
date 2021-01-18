@@ -15,7 +15,7 @@ use App\Entity\ChatMessage;
 use App\Entity\Replay;
 use App\Utility\BZChatTarget;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method null|ChatMessage find($id, $lockMode = null, $lockVersion = null)
