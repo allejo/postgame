@@ -221,6 +221,7 @@ class ReplaySummaryService
         ];
 
         $this->handleDuration($replay);
+        $this->handlePlayers($findByFilter);
         $this->handleCaps($findByFilter);
 
         $this->summarized = self::SUMMARIZED_QUICK;
@@ -538,6 +539,7 @@ class ReplaySummaryService
         $session->totalTime = 1;
 
         $serverPlayer->sessions[] = $session;
+
 
         return $serverPlayer;
     }
