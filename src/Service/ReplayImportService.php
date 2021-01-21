@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use allejo\bzflag\graphics\Common\WorldBoundary;
 use allejo\bzflag\networking\Packets\GamePacket;
 use allejo\bzflag\networking\Packets\MsgAddPlayer;
 use allejo\bzflag\networking\Packets\MsgAdminInfo;
@@ -187,6 +188,8 @@ class ReplayImportService
 
     /** @const int The size of the Heatmap */
     const HEATMAP_SIZE = 10;
+    /** @var int The size of the World */
+    private $worldSize;
 
 
     public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapThumbnailWriterService $thumbnailWriterService)
@@ -232,6 +235,8 @@ class ReplayImportService
         $wasCanceled = false;
         $filename = basename($filepath);
         $sha1 = sha1_file($filepath);
+
+        $this->worldSize = WorldBoundary::fromWorldDatabase($replay->getWorldDatabase())->getWorldWidthX();
 
         $existing = $this->em->getRepository(Replay::class)->findOneBy([
             'fileHash' => $sha1,
@@ -671,11 +676,11 @@ class ReplayImportService
         $callsign = $this->currPlayersByIndex[$packet->getPlayerId()];
 
         if (!isset( $this->currPlayersHeatMap[$callsign])) {
-            $this->currPlayersHeatMap[$callsign] = new PlayerMovementGrid($this->currReplay,self::HEATMAP_SIZE);
+            $this->currPlayersHeatMap[$callsign] = new PlayerMovementGrid($this->worldSize,self::HEATMAP_SIZE);
         }
 
         $position = $packet->getState()->position;
-        ($this->currPlayersHeatMap[$callsign])->addPosition($position[0], $position[1]);
+        $this->currPlayersHeatMap[$callsign]->addPosition($position[0], $position[1]);
 
     }
 

@@ -36,7 +36,7 @@ class PlayerMovementGrid
 
         $grid_quadrant_size =  $this->grid_size / $this->heatmap_size;
 
-        $grid_x = 10 - 1 - floor($positive_y / $grid_quadrant_size);
+        $grid_x = $this->heatmap_size - 1 - floor($positive_y / $grid_quadrant_size);
         $grid_y = floor($positive_x / $grid_quadrant_size);
 
         $this->movement[$grid_x][$grid_y]++;
