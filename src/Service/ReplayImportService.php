@@ -19,6 +19,7 @@ use allejo\bzflag\networking\Packets\MsgFlagDrop;
 use allejo\bzflag\networking\Packets\MsgFlagGrab;
 use allejo\bzflag\networking\Packets\MsgKilled;
 use allejo\bzflag\networking\Packets\MsgMessage;
+use allejo\bzflag\networking\Packets\MsgPlayerUpdate;
 use allejo\bzflag\networking\Packets\MsgRemovePlayer;
 use allejo\bzflag\networking\Packets\MsgTimeUpdate;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
@@ -38,6 +39,7 @@ use App\Entity\Replay;
 use App\Entity\ResumeEvent;
 use App\Utility\BZChatTarget;
 use App\Utility\BZTeamType;
+use App\Utility\PlayerMovementGrid;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -179,6 +181,9 @@ class ReplayImportService
 
     /** @var array<int, string> A map of flag IDs to flag abbreviations */
     private $flagIDs;
+
+    /** @var array<int, PlayerMovementGrid> A map of flag IDs to flag abbreviations */
+    private $currPlayersHeatMap;
 
     public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapThumbnailWriterService $thumbnailWriterService)
     {
@@ -377,6 +382,8 @@ class ReplayImportService
             $this->handleMsgRemovePlayer($packet);
         } elseif ($packet instanceof MsgTimeUpdate) {
             $this->handleMsgTimeUpdate($packet);
+        } elseif ($packet instanceof MsgPlayerUpdate) {
+            $this->handleMsgPlayerUpdate($packet);
         }
     }
 
@@ -652,6 +659,11 @@ class ReplayImportService
             $this->em->persist($event);
         }
     }
+    private function handleMsgPlayerUpdate(MsgTimeUpdate $packet): void{
+
+    }
+
+
 
     /**
      * Get the number of seconds *into* a match we're currently in.
