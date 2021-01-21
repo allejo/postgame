@@ -185,6 +185,10 @@ class ReplayImportService
     /** @var array<int, PlayerMovementGrid> A map of flag IDs to flag abbreviations */
     private $currPlayersHeatMap;
 
+    /** @const int The size of the Heatmap */
+    const HEATMAP_SIZE = 10;
+
+
     public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapThumbnailWriterService $thumbnailWriterService)
     {
         $this->em = $em;
@@ -659,11 +663,21 @@ class ReplayImportService
             $this->em->persist($event);
         }
     }
-    private function handleMsgPlayerUpdate(MsgTimeUpdate $packet): void{
+    private function handleMsgPlayerUpdate(MsgPlayerUpdate $packet): void{
+         if ($this->currPlayersHeatMap == null){
+             $this->currPlayersHeatMap = array();
+         }
+
+        $callsign = $this->currPlayersByIndex[$packet->getPlayerId()];
+
+        if (!isset( $this->currPlayersHeatMap[$callsign])) {
+            $this->currPlayersHeatMap[$callsign] = new PlayerMovementGrid($this->currReplay,self::HEATMAP_SIZE);
+        }
+
+        $position = $packet->getState()->position;
+        ($this->currPlayersHeatMap[$callsign])->addPosition($position[0], $position[1]);
 
     }
-
-
 
     /**
      * Get the number of seconds *into* a match we're currently in.
