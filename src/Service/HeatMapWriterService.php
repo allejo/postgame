@@ -16,8 +16,9 @@ use SVG\SVG;
 use SVG\Nodes\Shapes\SVGRect;
 
 
-class HeatMapWriterService
+class HeatMapWriterService implements IFileWriter
 {
+    use FileWriterTrait;
 
     public const FOLDER_NAME = 'heat-maps';
 
@@ -38,7 +39,18 @@ class HeatMapWriterService
         $this->fs = new Filesystem();
     }
 
-    public function writeHeatMap(Replay $replay, PlayerHeatMap $heatMap, int $SVGSize,
+    /**
+     * Create and write heatmap to a file location
+     * @param Replay $replay Replay file associated with heatmap
+     * @param PlayerHeatMap $heatMap Heatmap 2D array
+     * @param int $SVGSize size of heatMap SVG
+     * @param string $callsign callsign of player
+     * @param string $GradientStart Beginning colour for gradient
+     * @param string $GradientMid Mid colour for gradient
+     * @param string $GradientEnd End colour for gradient
+     * @return bool
+     */
+    public function writeHeatMap(Replay $replay, PlayerHeatMap $heatMap, int $SVGSize, string $callsign,
                                  string $GradientStart=self::GRADIENT_FIRST,
                                  string $GradientMid=self::GRADIENT_SECOND,
                                  string $GradientEnd=self::GRADIENT_THIRD): bool
@@ -60,7 +72,7 @@ class HeatMapWriterService
                 $doc->addChild($square);
             }
         }
-        $svgFilename = $database->getWorldHash() . '.svg';
+        $svgFilename = strval($replay->getId()).urlencode($callsign). '.svg';
 
         $this->writeFile($svgFilename, $image);
         return true;

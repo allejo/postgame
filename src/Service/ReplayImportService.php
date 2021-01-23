@@ -64,6 +64,10 @@ class ReplayImportService
      * @var int
      */
     private static $BATCH_COUNT = 0;
+    /**
+     *@var int Size of SVG File
+     */
+    private $SVGSize = 400;
 
     /** @var EntityManagerInterface */
     private $em;
@@ -73,6 +77,9 @@ class ReplayImportService
 
     /** @var MapFileWriterService */
     private $thumbnailWriterService;
+
+    /** @var HeatMapWriterService */
+    private $heatMapWriterService;
 
     /**
      * The current Replay object we're working with.
@@ -189,15 +196,17 @@ class ReplayImportService
 
     /** @const int The size of the Heatmap */
     const HEATMAP_SIZE = 10;
+
     /** @var int The size of the World */
     private $worldSize;
 
-
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapFileWriterService $thumbnailWriterService)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger,
+                                MapFileWriterService $thumbnailWriterService, HeatMapWriterService $heatMapWriterService)
     {
         $this->em = $em;
         $this->logger = $logger;
         $this->thumbnailWriterService = $thumbnailWriterService;
+        $this->heatMapWriterService = $heatMapWriterService;
     }
 
     /**
@@ -679,7 +688,8 @@ class ReplayImportService
         $callsign = $this->currPlayersByIndex[$packet->getPlayerId()];
 
         if (!isset( $this->currPlayersHeatMap[$callsign])) {
-            $this->currPlayersHeatMap[$callsign] = new PlayerMovementGrid($this->worldSize,self::HEATMAP_SIZE);
+            $this->currPlayersHeatMap[$callsign] =
+                new PlayerMovementGrid($this->worldSize,self::HEATMAP_SIZE);
         }
 
         $position = $packet->getState()->position;
@@ -766,6 +776,8 @@ class ReplayImportService
             $playerHeatmap->setReplay($this->currReplay);
             $playerHeatmap->setPlayer($this->currPlayersByCallsign[$callsign]);
             $playerHeatmap->setHeatmap($heatmap->movement);
+
+            $this->heatMapWriterService->writeHeatMap($this->currReplay, $playerHeatmap, $this->SVGSize, $callsign);
 
             $this->em->persist($playerHeatmap);
         }
