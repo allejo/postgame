@@ -22,9 +22,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-class MapThumbnailWriterService implements IThumbnailWriter
+class MapFileWriterService implements IFileWriter
 {
-    use ThumbnailWriterTrait;
+    use FileWriterTrait;
 
     public const FOLDER_NAME = 'map-thumbnails';
 

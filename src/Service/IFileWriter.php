@@ -11,12 +11,13 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-interface IThumbnailWriter
+interface IFileWriter
 {
-    public function getThumbnailDirectory(): string;
+    public function getFileDirectory(): string;
 
     /**
      * @required
+     * @param string $directory
      */
-    public function setThumbnailDirectory(string $map_thumbnails);
+    public function setFileDirectory(string $directory);
 }

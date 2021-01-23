@@ -11,19 +11,19 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-trait ThumbnailWriterTrait
+trait FileWriterTrait
 {
     /** @var null|string */
     protected $targetDirectory;
 
-    public function getThumbnailDirectory(): string
+    public function getFileDirectory(): string
     {
         return $this->targetDirectory;
     }
 
-    public function setThumbnailDirectory(string $mapThumbnails): self
+    public function setFileDirectory(string $directory): self
     {
-        $this->targetDirectory = $mapThumbnails;
+        $this->targetDirectory = $directory;
 
         return $this;
     }

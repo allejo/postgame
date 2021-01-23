@@ -71,7 +71,7 @@ class ReplayImportService
     /** @var LoggerInterface */
     private $logger;
 
-    /** @var MapThumbnailWriterService */
+    /** @var MapFileWriterService */
     private $thumbnailWriterService;
 
     /**
@@ -193,7 +193,7 @@ class ReplayImportService
     private $worldSize;
 
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapThumbnailWriterService $thumbnailWriterService)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapFileWriterService $thumbnailWriterService)
     {
         $this->em = $em;
         $this->logger = $logger;
