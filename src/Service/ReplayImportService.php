@@ -36,6 +36,7 @@ use App\Entity\KillEvent;
 use App\Entity\PartEvent;
 use App\Entity\PauseEvent;
 use App\Entity\Player;
+use App\Entity\PlayerHeatMap;
 use App\Entity\Replay;
 use App\Entity\ResumeEvent;
 use App\Utility\BZChatTarget;
@@ -308,6 +309,8 @@ class ReplayImportService
         if ($rawDuration < $this->duration) {
             $wasCanceled = true;
         }
+
+        $this->processHeatMaps();
 
         $this->currReplay->setCanceled($wasCanceled);
 
@@ -750,5 +753,22 @@ class ReplayImportService
         ];
 
         return $teams[$flagAbbv];
+    }
+
+    /**
+     * Save PlayerMovementGrid objects as PLayerHeatMap instances in the DB
+     */
+    private function processHeatMaps()
+    {
+        foreach ($this->currPlayersHeatMap as $callsign =>$heatmap) {
+
+            $playerHeatmap = new PlayerHeatMap();
+            $playerHeatmap->setReplay($this->currReplay);
+            $playerHeatmap->setPlayer($this->currPlayersByCallsign[$callsign]);
+            $playerHeatmap->setHeatmap($heatmap->movement);
+
+            $this->em->persist($playerHeatmap);
+        }
+
     }
 }
