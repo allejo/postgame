@@ -27,4 +27,14 @@ trait FileWriterTrait
 
         return $this;
     }
+
+    private function writeFile(string $filename, string $content): void
+    {
+        $this->fs->dumpFile($this->getFilePath($filename), $content);
+    }
+
+    private function getFilePath(string $filename): string
+    {
+        return sprintf('%s/%s/%s', $this->targetDirectory, self::FOLDER_NAME, $filename);
+    }
 }

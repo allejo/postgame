@@ -70,7 +70,7 @@ class HeatMapWriterService implements IFileWriter
         }
         $svgFilename = strval($replay->getId()) . urlencode($callsign) . '.svg';
 
-        $this->writeFile($svgFilename, $image);
+        $this->writeFile($svgFilename, $image->toXMLString());
 
         return true;
     }
@@ -129,15 +129,5 @@ class HeatMapWriterService implements IFileWriter
         $y = (hexdec(('0x' . $a)) * (1 - $x) + hexdec(('0x' . $b)) * $x) | 0;
 
         return dechex($y);
-    }
-
-    private function writeFile(string $filename, SVG $content): void
-    {
-        $this->fs->dumpFile($this->getFilePath($filename), $content);
-    }
-
-    private function getFilePath(string $filename): string
-    {
-        return sprintf('%s/%s/%s', $this->targetDirectory, self::FOLDER_NAME, $filename);
     }
 }
