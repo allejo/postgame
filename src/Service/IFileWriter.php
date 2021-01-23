@@ -17,7 +17,6 @@ interface IFileWriter
 
     /**
      * @required
-     * @param string $directory
      */
     public function setFileDirectory(string $directory);
 }

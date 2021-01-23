@@ -540,7 +540,6 @@ class ReplaySummaryService
 
         $serverPlayer->sessions[] = $session;
 
-
         return $serverPlayer;
     }
 }

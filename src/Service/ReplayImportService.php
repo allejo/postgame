@@ -64,10 +64,13 @@ class ReplayImportService
      * @var int
      */
     private static $BATCH_COUNT = 0;
+
     /**
-     *@var int Size of SVG File
+     * Ratio between world size and heatmap size.
+     *
+     * @var int
      */
-    private $SVGSize = 400;
+    private const WORLD_HEATMAP_RATIO = 40;
 
     /** @var EntityManagerInterface */
     private $em;
@@ -195,7 +198,7 @@ class ReplayImportService
     private $currPlayersHeatMap;
 
     /** @const int The size of the Heatmap */
-    const HEATMAP_SIZE = 10;
+    private $heatMapSize;
 
     /** @var int The size of the World */
     private $worldSize;
@@ -247,6 +250,8 @@ class ReplayImportService
         $sha1 = sha1_file($filepath);
 
         $this->worldSize = WorldBoundary::fromWorldDatabase($replay->getWorldDatabase())->getWorldWidthX();
+
+        $this->heatMapSize = $this->worldSize / $this::WORLD_HEATMAP_RATIO;
 
         $existing = $this->em->getRepository(Replay::class)->findOneBy([
             'fileHash' => $sha1,
@@ -680,21 +685,22 @@ class ReplayImportService
             $this->em->persist($event);
         }
     }
-    private function handleMsgPlayerUpdate(MsgPlayerUpdate $packet): void{
-         if ($this->currPlayersHeatMap == null){
-             $this->currPlayersHeatMap = array();
-         }
+
+    private function handleMsgPlayerUpdate(MsgPlayerUpdate $packet): void
+    {
+        if ($this->currPlayersHeatMap == null) {
+            $this->currPlayersHeatMap = [];
+        }
 
         $callsign = $this->currPlayersByIndex[$packet->getPlayerId()];
 
-        if (!isset( $this->currPlayersHeatMap[$callsign])) {
+        if (!isset($this->currPlayersHeatMap[$callsign])) {
             $this->currPlayersHeatMap[$callsign] =
-                new PlayerMovementGrid($this->worldSize,self::HEATMAP_SIZE);
+                new PlayerMovementGrid($this->worldSize, $this->heatMapSize);
         }
 
         $position = $packet->getState()->position;
         $this->currPlayersHeatMap[$callsign]->addPosition($position[0], $position[1]);
-
     }
 
     /**
@@ -766,12 +772,11 @@ class ReplayImportService
     }
 
     /**
-     * Save PlayerMovementGrid objects as PLayerHeatMap instances in the DB
+     * Save PlayerMovementGrid objects as PLayerHeatMap instances in the DB.
      */
     private function processHeatMaps()
     {
-        foreach ($this->currPlayersHeatMap as $callsign =>$heatmap) {
-
+        foreach ($this->currPlayersHeatMap as $callsign => $heatmap) {
             $playerHeatmap = new PlayerHeatMap();
             $playerHeatmap->setReplay($this->currReplay);
             $playerHeatmap->setPlayer($this->currPlayersByCallsign[$callsign]);
@@ -781,6 +786,5 @@ class ReplayImportService
 
             $this->em->persist($playerHeatmap);
         }
-
     }
 }
