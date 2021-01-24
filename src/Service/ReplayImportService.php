@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -160,7 +162,7 @@ class ReplayImportService
      *
      * This value should only have a value when a match has been "paused."
      *
-     * @var MsgTimeUpdate|null
+     * @var null|MsgTimeUpdate
      */
     private $lastPausePacket;
 
@@ -470,7 +472,7 @@ class ReplayImportService
     }
 
     /**
-     * @param GamePacket|MsgFlagGrab|MsgFlagDrop $packet
+     * @param GamePacket|MsgFlagDrop|MsgFlagGrab $packet
      */
     private function handleMsgFlagUpdate(GamePacket $packet, bool $isGrab): void
     {
@@ -570,9 +572,7 @@ class ReplayImportService
 
         $this->em->persist($partEvent);
 
-        unset($this->currPlayersByIndex[$playerId]);
-        unset($this->currPlayersCurrentTeam[$playerId]);
-        unset($this->currPlayersJoinRecord[$playerId]);
+        unset($this->currPlayersByIndex[$playerId], $this->currPlayersCurrentTeam[$playerId], $this->currPlayersJoinRecord[$playerId]);
 
         if (in_array($playerId, $this->currFuturePlayers)) {
             unset($this->currFuturePlayers[$playerId]);

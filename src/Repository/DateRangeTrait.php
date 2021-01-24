@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -27,9 +29,9 @@ trait DateRangeTrait
             $end = $end ?? (new \DateTime('now'))->modify('-90 days');
 
             $qb
-                ->andWhere("$replayAlias.startTime <= :start")
+                ->andWhere("{$replayAlias}.startTime <= :start")
                 ->setParameter('start', $start->format(DATE_ATOM))
-                ->andWhere("$replayAlias.startTime >= :end")
+                ->andWhere("{$replayAlias}.startTime >= :end")
                 ->setParameter('end', $end->format(DATE_ATOM))
             ;
         } catch (\Exception $e) {

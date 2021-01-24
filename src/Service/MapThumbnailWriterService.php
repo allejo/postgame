@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -46,7 +48,7 @@ class MapThumbnailWriterService implements IThumbnailWriter
     {
         $worldDatabase = $replayHeader->getWorldDatabase();
 
-        /** @var MapThumbnail|null $existingThumbnail */
+        /** @var null|MapThumbnail $existingThumbnail */
         $existingThumbnail = $this->em->getRepository(MapThumbnail::class)->findOneBy([
             'worldHash' => $worldDatabase->getWorldHash(),
         ]);

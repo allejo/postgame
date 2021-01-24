@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -14,8 +16,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
- * @method FlagUpdate|null find($id, $lockMode = null, $lockVersion = null)
- * @method FlagUpdate|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|FlagUpdate find($id, $lockMode = null, $lockVersion = null)
+ * @method null|FlagUpdate findOneBy(array $criteria, array $orderBy = null)
  * @method FlagUpdate[]    findAll()
  * @method FlagUpdate[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */

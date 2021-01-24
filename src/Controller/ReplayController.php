@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -145,7 +147,7 @@ class ReplayController extends AbstractController
      * @param Request $request The incoming HTTP request
      * @param string  $param   The name of the query parameter
      *
-     * @return \DateTime|null Null is returned if there is no valid timestamp
+     * @return null|\DateTime Null is returned if there is no valid timestamp
      */
     private function safeGetTimestamp(Request $request, string $param): ?\DateTime
     {

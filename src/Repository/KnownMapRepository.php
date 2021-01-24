@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -15,8 +17,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
- * @method KnownMap|null find($id, $lockMode = null, $lockVersion = null)
- * @method KnownMap|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|KnownMap find($id, $lockMode = null, $lockVersion = null)
+ * @method null|KnownMap findOneBy(array $criteria, array $orderBy = null)
  * @method KnownMap[]    findAll()
  * @method KnownMap[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */

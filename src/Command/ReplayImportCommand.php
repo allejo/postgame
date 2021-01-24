@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -106,7 +108,7 @@ class ReplayImportCommand extends Command
             $afterTs = $input->getOption('after');
 
             if ($afterTs !== null && strtotime($afterTs) === false) {
-                $output->writeln("The --after flag does not support the following date/time string: $afterTs");
+                $output->writeln("The --after flag does not support the following date/time string: {$afterTs}");
 
                 return 1;
             }
@@ -122,7 +124,7 @@ class ReplayImportCommand extends Command
                     $fileNames = @file_get_contents($explicitFiles);
 
                     if ($fileNames === false) {
-                        $output->writeln("The following file could not be read: $explicitFiles");
+                        $output->writeln("The following file could not be read: {$explicitFiles}");
 
                         return 2;
                     }
@@ -141,7 +143,7 @@ class ReplayImportCommand extends Command
             ;
 
             if ($afterTs !== null) {
-                $replayFiles->date(">= $afterTs");
+                $replayFiles->date(">= {$afterTs}");
             }
 
             $modifiedCount = 0;
@@ -179,6 +181,7 @@ class ReplayImportCommand extends Command
                     $output->writeln(sprintf('  %s: %s', get_class($e), $e->getMessage()));
 
                     $errorExit = true;
+
                     break;
                 }
 

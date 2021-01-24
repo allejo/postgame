@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -17,8 +19,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 
 /**
- * @method Replay|null find($id, $lockMode = null, $lockVersion = null)
- * @method Replay|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|Replay find($id, $lockMode = null, $lockVersion = null)
+ * @method null|Replay findOneBy(array $criteria, array $orderBy = null)
  * @method Replay[]    findAll()
  * @method Replay[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -14,8 +16,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
- * @method CaptureEvent|null find($id, $lockMode = null, $lockVersion = null)
- * @method CaptureEvent|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|CaptureEvent find($id, $lockMode = null, $lockVersion = null)
+ * @method null|CaptureEvent findOneBy(array $criteria, array $orderBy = null)
  * @method CaptureEvent[]    findAll()
  * @method CaptureEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */

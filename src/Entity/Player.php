@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -118,7 +120,7 @@ class Player
     }
 
     /**
-     * @return Collection|CaptureEvent[]
+     * @return CaptureEvent[]|Collection
      */
     public function getCaptureEvents(): Collection
     {
@@ -149,7 +151,7 @@ class Player
     }
 
     /**
-     * @return Collection|ChatMessage[]
+     * @return ChatMessage[]|Collection
      */
     public function getSentMessages(): Collection
     {
@@ -180,7 +182,7 @@ class Player
     }
 
     /**
-     * @return Collection|ChatMessage[]
+     * @return ChatMessage[]|Collection
      */
     public function getReceivedMessages(): Collection
     {

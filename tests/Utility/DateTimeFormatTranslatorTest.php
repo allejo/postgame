@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -13,6 +15,10 @@ use App\Utility\DateTimeFormatTranslator;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ * @covers DateTimeFormatTranslator
+ */
 class DateTimeFormatTranslatorTest extends TestCase
 {
     public static function dataProvider_testToDayJSConversion(): array

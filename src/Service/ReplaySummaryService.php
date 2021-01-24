@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -325,8 +327,8 @@ class ReplaySummaryService
 
             foreach ($this->playerRecords[$playerId]->sessions as &$session) {
                 if (
-                    $session->partTime === null &&
-                    $part->getJoinEvent()->getTimestamp()->getTimestamp() === $session->joinTime->getTimestamp()
+                    $session->partTime === null
+                    && $part->getJoinEvent()->getTimestamp()->getTimestamp() === $session->joinTime->getTimestamp()
                 ) {
                     $session->partTime = $part->getTimestamp();
                     $session->totalTime = $session->partTime->getTimestamp() - $session->joinTime->getTimestamp();

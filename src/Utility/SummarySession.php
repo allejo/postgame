@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -20,7 +22,7 @@ class SummarySession implements \JsonSerializable
     /** @var \DateTime */
     public $joinTime;
 
-    /** @var \DateTime|null */
+    /** @var null|\DateTime */
     public $partTime;
 
     /** @var int Total time of this session in seconds */

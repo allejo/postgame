@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -36,7 +38,7 @@ class MapCreateCommand extends Command
 
     protected function configure()
     {
-        $desc = <<<DESC
+        $desc = <<<'DESC'
 Create a new known map definition
 
 A known map definition is useful for associating map thumbnails with human-
