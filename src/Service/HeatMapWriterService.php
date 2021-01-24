@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /*
@@ -22,14 +23,14 @@ class HeatMapWriterService implements IFileWriter
 
     public const FOLDER_NAME = 'heat-maps';
 
-    /** @var Filesystem */
-    private $fs;
-
     const GRADIENT_FIRST = '#1a2a6c';
 
     const GRADIENT_SECOND = '#b21f1f';
 
     const GRADIENT_THIRD = '#fdbb2d';
+
+    /** @var Filesystem */
+    private $fs;
 
     public function __construct()
     {
@@ -47,10 +48,15 @@ class HeatMapWriterService implements IFileWriter
      * @param string        $GradientMid   Mid colour for gradient
      * @param string        $GradientEnd   End colour for gradient
      */
-    public function writeHeatMap(Replay $replay, PlayerHeatMap $heatMap, int $SVGSize, string $callsign,
-                                 string $GradientStart = self::GRADIENT_FIRST,
-                                 string $GradientMid = self::GRADIENT_SECOND,
-                                 string $GradientEnd = self::GRADIENT_THIRD): bool
+    public function writeHeatMap(
+        Replay $replay,
+        PlayerHeatMap $heatMap,
+        int $SVGSize,
+        string $callsign,
+        string $GradientStart = self::GRADIENT_FIRST,
+        string $GradientMid = self::GRADIENT_SECOND,
+        string $GradientEnd = self::GRADIENT_THIRD
+    ): bool
     {
         $heatmap = $heatMap->getHeatmap();
         $heatmap_size = count($heatmap);

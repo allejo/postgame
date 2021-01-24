@@ -88,6 +88,4 @@ class MapThumbnailWriterService implements IFileWriter
 
         $this->writeFile($svgFilename, $svgOutput);
     }
-
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /*
@@ -15,8 +16,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method PlayerHeatMap|null find($id, $lockMode = null, $lockVersion = null)
- * @method PlayerHeatMap|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|PlayerHeatMap find($id, $lockMode = null, $lockVersion = null)
+ * @method null|PlayerHeatMap findOneBy(array $criteria, array $orderBy = null)
  * @method PlayerHeatMap[]    findAll()
  * @method PlayerHeatMap[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */

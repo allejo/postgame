@@ -57,6 +57,13 @@ class ReplayImportService
     private const BATCH_SIZE = 10;
 
     /**
+     * Ratio between world size and heatmap size.
+     *
+     * @var int
+     */
+    private const WORLD_HEATMAP_RATIO = 40;
+
+    /**
      * The internal count of how many replays have been imported in the current
      * batch. This number is reset to 0 each time the entity manager cache is
      * cleared.
@@ -64,13 +71,6 @@ class ReplayImportService
      * @var int
      */
     private static $BATCH_COUNT = 0;
-
-    /**
-     * Ratio between world size and heatmap size.
-     *
-     * @var int
-     */
-    private const WORLD_HEATMAP_RATIO = 40;
 
     /** @var EntityManagerInterface */
     private $em;
@@ -203,8 +203,12 @@ class ReplayImportService
     /** @var int The size of the World */
     private $worldSize;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger,
-                                MapThumbnailWriterService $thumbnailWriterService, HeatMapWriterService $heatMapWriterService)
+    public function __construct(
+        EntityManagerInterface $em,
+        LoggerInterface $logger,
+        MapThumbnailWriterService $thumbnailWriterService,
+        HeatMapWriterService $heatMapWriterService
+    )
     {
         $this->em = $em;
         $this->logger = $logger;
@@ -694,7 +698,7 @@ class ReplayImportService
 
         $callsign = $this->currPlayersByIndex[$packet->getPlayerId()]->getCallsign();
 
-        if (!array_key_exists($callsign ,$this->currPlayersHeatMap)) {
+        if (!array_key_exists($callsign, $this->currPlayersHeatMap)) {
             $this->currPlayersHeatMap[$callsign] =
                 new PlayerMovementGrid($this->worldSize, $this->heatMapSize);
         }
