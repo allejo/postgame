@@ -197,7 +197,7 @@ class ReplayImportService
     /** @var array<int, PlayerMovementGrid> A map of flag IDs to flag abbreviations */
     private $currPlayersHeatMap;
 
-    /** @const int The size of the Heatmap */
+    /** @var int The size of the Heatmap */
     private $heatMapSize;
 
     /** @var int The size of the World */
@@ -249,7 +249,7 @@ class ReplayImportService
         $filename = basename($filepath);
         $sha1 = sha1_file($filepath);
 
-        $this->worldSize = WorldBoundary::fromWorldDatabase($replay->getWorldDatabase())->getWorldWidthX();
+        $this->worldSize = (int)WorldBoundary::fromWorldDatabase($replay->getWorldDatabase())->getWorldWidthX();
 
         $this->heatMapSize = max($this->worldSize / $this::WORLD_HEATMAP_RATIO, 10);
 
@@ -692,9 +692,9 @@ class ReplayImportService
             $this->currPlayersHeatMap = [];
         }
 
-        $callsign = $this->currPlayersByIndex[$packet->getPlayerId()];
+        $callsign = $this->currPlayersByIndex[$packet->getPlayerId()]->getCallsign();
 
-        if (!isset($this->currPlayersHeatMap[$callsign])) {
+        if (!array_key_exists($callsign ,$this->currPlayersHeatMap)) {
             $this->currPlayersHeatMap[$callsign] =
                 new PlayerMovementGrid($this->worldSize, $this->heatMapSize);
         }
@@ -780,7 +780,7 @@ class ReplayImportService
             $playerHeatmap = new PlayerHeatMap();
             $playerHeatmap->setReplay($this->currReplay);
             $playerHeatmap->setPlayer($this->currPlayersByCallsign[$callsign]);
-            $playerHeatmap->setHeatmap($heatmap->movement);
+            $playerHeatmap->setHeatmap($heatmap->getMovement());
 
             $this->heatMapWriterService->writeHeatMap($this->currReplay, $playerHeatmap, $this->worldSize, $callsign);
 

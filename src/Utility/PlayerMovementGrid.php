@@ -26,6 +26,60 @@ class PlayerMovementGrid
         $this->movement = array_fill(0, $heatmap_size, array_fill(0, $heatmap_size, 0));
     }
 
+    /**
+     * @return array
+     */
+    public function getMovement(): array
+    {
+        return $this->movement;
+    }
+
+    /**
+     * @param array $movement
+     * @return PlayerMovementGrid
+     */
+    public function setMovement(array $movement): PlayerMovementGrid
+    {
+        $this->movement = $movement;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGridSize(): int
+    {
+        return $this->grid_size;
+    }
+
+    /**
+     * @param int $grid_size
+     * @return PlayerMovementGrid
+     */
+    public function setGridSize(int $grid_size): PlayerMovementGrid
+    {
+        $this->grid_size = $grid_size;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getHeatmapSize(): int
+    {
+        return $this->heatmap_size;
+    }
+
+    /**
+     * @param int $heatmap_size
+     * @return PlayerMovementGrid
+     */
+    public function setHeatmapSize(int $heatmap_size): PlayerMovementGrid
+    {
+        $this->heatmap_size = $heatmap_size;
+        return $this;
+    }
+
     public function addPosition(float $x, float $y): void
     {
         //Shift to N
