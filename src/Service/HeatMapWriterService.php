@@ -40,19 +40,16 @@ class HeatMapWriterService implements IFileWriter
     /**
      * Create and write heatmap to a file location.
      *
-     * @param Replay        $replay        Replay file associated with heatmap
-     * @param PlayerHeatMap $heatMap       Heatmap 2D array
-     * @param int           $SVGSize       size of heatMap SVG
-     * @param string        $callsign      callsign of player
-     * @param string        $GradientStart Beginning colour for gradient
-     * @param string        $GradientMid   Mid colour for gradient
-     * @param string        $GradientEnd   End colour for gradient
+     * @param PlayerHeatMap $heatMap Heatmap 2D array
+     * @param int $SVGSize size of heatMap SVG
+     * @param string $GradientStart Beginning colour for gradient
+     * @param string $GradientMid Mid colour for gradient
+     * @param string $GradientEnd End colour for gradient
+     * @return bool
      */
     public function writeHeatMap(
-        Replay $replay,
         PlayerHeatMap $heatMap,
         int $SVGSize,
-        string $callsign,
         string $GradientStart = self::GRADIENT_FIRST,
         string $GradientMid = self::GRADIENT_SECOND,
         string $GradientEnd = self::GRADIENT_THIRD
@@ -74,15 +71,16 @@ class HeatMapWriterService implements IFileWriter
                 $doc->addChild($square);
             }
         }
-        $svgFilename = strval($replay->getId()) . urlencode($callsign) . '.svg';
 
-        $this->writeFile($svgFilename, $image->toXMLString());
+        $this->writeFile($heatMap->getFilename(), $image->toXMLString());
 
         return true;
     }
 
     /**
      * Get the max value in a 2D array.
+     * @param array $x
+     * @return int
      */
     public function maxval(array $x): int
     {
@@ -125,7 +123,13 @@ class HeatMapWriterService implements IFileWriter
     {
         $r = $this->byteLinear($start[1] . $start[2], $end[1] . $end[2], $x);
         $g = $this->byteLinear($start[3] . $start[4], $end[3] . $end[4], $x);
-        $b = $this->byteLinear($start[5] . $start[6], $end[5] . $end[6], $x);
+
+        if (strlen($end) == 7){
+            echo "END";
+        }else{
+            echo "NOEND";
+
+        }        $b = $this->byteLinear($start[5] . $start[6], $end[5] . $end[6], $x);
 
         return '#' . $r . $g . $b;
     }

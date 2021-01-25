@@ -785,8 +785,9 @@ class ReplayImportService
             $playerHeatmap->setReplay($this->currReplay);
             $playerHeatmap->setPlayer($this->currPlayersByCallsign[$callsign]);
             $playerHeatmap->setHeatmap($heatmap->getMovement());
+            $playerHeatmap->setFilename(urlencode($callsign) . "_" . uniqid() . '.svg');
 
-            $this->heatMapWriterService->writeHeatMap($this->currReplay, $playerHeatmap, $this->worldSize, $callsign);
+            $this->heatMapWriterService->writeHeatMap($playerHeatmap, $this->worldSize);
 
             $this->em->persist($playerHeatmap);
         }
