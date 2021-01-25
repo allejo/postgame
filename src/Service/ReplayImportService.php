@@ -194,7 +194,7 @@ class ReplayImportService
     /** @var array<int, string> A map of flag IDs to flag abbreviations */
     private $flagIDs;
 
-    /** @var array<int, PlayerMovementGrid> A map of flag IDs to flag abbreviations */
+    /** @var array<string, PlayerMovementGrid> A map of callsigns to their respective movement grids */
     private $currPlayersHeatMap;
 
     /** @var int The size of the Heatmap */
@@ -255,7 +255,7 @@ class ReplayImportService
 
         $this->worldSize = (int)WorldBoundary::fromWorldDatabase($replay->getWorldDatabase())->getWorldWidthX();
 
-        $this->heatMapSize = max($this->worldSize / $this::WORLD_HEATMAP_RATIO, 10);
+        $this->heatMapSize = max($this->worldSize / self::WORLD_HEATMAP_RATIO, 10);
 
         $existing = $this->em->getRepository(Replay::class)->findOneBy([
             'fileHash' => $sha1,
@@ -351,6 +351,7 @@ class ReplayImportService
         $this->currPlayersJoinRecord = [];
         $this->currFuturePlayers = [];
         $this->currPartialJoins = [];
+        $this->currPlayersHeatMap = [];
         $this->lastPausePacket = null;
         $this->duration = null;
     }
@@ -692,15 +693,11 @@ class ReplayImportService
 
     private function handleMsgPlayerUpdate(MsgPlayerUpdate $packet): void
     {
-        if ($this->currPlayersHeatMap == null) {
-            $this->currPlayersHeatMap = [];
-        }
 
         $callsign = $this->currPlayersByIndex[$packet->getPlayerId()]->getCallsign();
 
         if (!array_key_exists($callsign, $this->currPlayersHeatMap)) {
-            $this->currPlayersHeatMap[$callsign] =
-                new PlayerMovementGrid($this->worldSize, $this->heatMapSize);
+            $this->currPlayersHeatMap[$callsign] = new PlayerMovementGrid($this->worldSize, $this->heatMapSize);
         }
 
         $position = $packet->getState()->position;
@@ -785,7 +782,7 @@ class ReplayImportService
             $playerHeatmap->setReplay($this->currReplay);
             $playerHeatmap->setPlayer($this->currPlayersByCallsign[$callsign]);
             $playerHeatmap->setHeatmap($heatmap->getMovement());
-            $playerHeatmap->setFilename(urlencode($callsign) . "_" . uniqid() . '.svg');
+            $playerHeatmap->setFilename(sprintf('%s_%s.svg', urlencode($callsign), uniqid('', true)));
 
             $this->heatMapWriterService->writeHeatMap($playerHeatmap, $this->worldSize);
 

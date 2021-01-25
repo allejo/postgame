@@ -16,15 +16,15 @@ class PlayerMovementGrid
     /** @var array */
     private $movement;
     /** @var int Size of the map in the replay file */
-    private $grid_size;
+    private $worldSize;
     /** @var int Size of the heatmap */
-    private $heatmap_size;
+    private $heatmapSize;
 
-    public function __construct(int $grid_size, int $heatmap_size)
+    public function __construct(int $worldSize, int $heatmapSize)
     {
-        $this->grid_size = $grid_size;
-        $this->heatmap_size = $heatmap_size;
-        $this->movement = array_fill(0, $heatmap_size, array_fill(0, $heatmap_size, 0));
+        $this->worldSize = $worldSize;
+        $this->heatmapSize = $heatmapSize;
+        $this->movement = array_fill(0, $heatmapSize, array_fill(0, $heatmapSize, 0));
     }
 
     public function getMovement(): array
@@ -39,26 +39,26 @@ class PlayerMovementGrid
         return $this;
     }
 
-    public function getGridSize(): int
+    public function getWorldSize(): int
     {
-        return $this->grid_size;
+        return $this->worldSize;
     }
 
-    public function setGridSize(int $grid_size): PlayerMovementGrid
+    public function setWorldSize(int $worldSize): PlayerMovementGrid
     {
-        $this->grid_size = $grid_size;
+        $this->worldSize = $worldSize;
 
         return $this;
     }
 
     public function getHeatmapSize(): int
     {
-        return $this->heatmap_size;
+        return $this->heatmapSize;
     }
 
-    public function setHeatmapSize(int $heatmap_size): PlayerMovementGrid
+    public function setHeatmapSize(int $heatmapSize): PlayerMovementGrid
     {
-        $this->heatmap_size = $heatmap_size;
+        $this->heatmapSize = $heatmapSize;
 
         return $this;
     }
@@ -66,13 +66,13 @@ class PlayerMovementGrid
     public function addPosition(float $x, float $y): void
     {
         //Shift to N
-        $positive_x = $x + ($this->grid_size / 2);
-        $positive_y = $y + ($this->grid_size / 2);
+        $positive_x = $x + ($this->worldSize / 2);
+        $positive_y = $y + ($this->worldSize / 2);
 
-        $grid_quadrant_size = $this->grid_size / $this->heatmap_size;
+        $cellSize = $this->worldSize / $this->heatmapSize;
 
-        $grid_x = $this->heatmap_size - 1 - floor($positive_y / $grid_quadrant_size);
-        $grid_y = floor($positive_x / $grid_quadrant_size);
+        $grid_x = $this->heatmapSize - 1 - floor($positive_y / $cellSize);
+        $grid_y = floor($positive_x / $cellSize);
 
         ++$this->movement[$grid_x][$grid_y];
     }

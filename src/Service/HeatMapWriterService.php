@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\PlayerHeatMap;
-use App\Entity\Replay;
 use SVG\Nodes\Shapes\SVGRect;
 use SVG\SVG;
 use Symfony\Component\Filesystem\Filesystem;
@@ -23,11 +22,11 @@ class HeatMapWriterService implements IFileWriter
 
     public const FOLDER_NAME = 'heat-maps';
 
-    const GRADIENT_FIRST = '#1a2a6c';
+    public const GRADIENT_FIRST = '#1a2a6c';
 
-    const GRADIENT_SECOND = '#b21f1f';
+    public const GRADIENT_SECOND = '#b21f1f';
 
-    const GRADIENT_THIRD = '#fdbb2d';
+    public const GRADIENT_THIRD = '#fdbb2d';
 
     /** @var Filesystem */
     private $fs;
@@ -41,7 +40,7 @@ class HeatMapWriterService implements IFileWriter
      * Create and write heatmap to a file location.
      *
      * @param PlayerHeatMap $heatMap Heatmap 2D array
-     * @param int $SVGSize size of heatMap SVG
+     * @param int $svgSize size of heatMap SVG
      * @param string $GradientStart Beginning colour for gradient
      * @param string $GradientMid Mid colour for gradient
      * @param string $GradientEnd End colour for gradient
@@ -49,21 +48,21 @@ class HeatMapWriterService implements IFileWriter
      */
     public function writeHeatMap(
         PlayerHeatMap $heatMap,
-        int $SVGSize,
+        int $svgSize,
         string $GradientStart = self::GRADIENT_FIRST,
         string $GradientMid = self::GRADIENT_SECOND,
         string $GradientEnd = self::GRADIENT_THIRD
     ): bool
     {
         $heatmap = $heatMap->getHeatmap();
-        $heatmap_size = count($heatmap);
+        $heatmapSize = count($heatmap);
         $oldRange = $this->maxval($heatmap);
-        $image = new SVG($SVGSize, $SVGSize);
+        $image = new SVG($svgSize, $svgSize);
         $doc = $image->getDocument();
 
-        $SquareSize = $SVGSize / $heatmap_size;
-        for ($i = 0; $i < count($heatmap); ++$i) {
-            for ($j = 0; $j < count($heatmap[$i]); ++$j) {
+        $SquareSize = $svgSize / $heatmapSize;
+        for ($i = 0, $iMax = count($heatmap); $i < $iMax; ++$i) {
+            for ($j = 0, $jMax = count($heatmap[$i]); $j < $jMax; ++$j) {
                 $square = new SVGRect($SquareSize * $j, $SquareSize * $i, $SquareSize, $SquareSize);
                 $colour = $this->gradient($heatmap[$i][$j] / $oldRange, $GradientStart, $GradientMid, $GradientEnd);
 
@@ -82,7 +81,7 @@ class HeatMapWriterService implements IFileWriter
      * @param array $x
      * @return int
      */
-    public function maxval(array $x): int
+    private function maxval(array $x): int
     {
         $max = 0;
         foreach ($x as $row) {
@@ -98,28 +97,29 @@ class HeatMapWriterService implements IFileWriter
     /**
      * Returns a colour value for a given heatmap value.
      *
-     * @param $t float
-     * @param $start string
-     * @param $middle string
-     * @param $end string
+     * @param float $offset The point in the gradient that we're trying to find a colour value for
+     * @param string  $start Colour at the beginning of the gradient in hex
+     * @param string $middle Colour at the middle of the gradient in hex
+     * @param string $end Colour at the end of the gradient in hex
      *
-     * @return string
+     * @return string The colour value at offset in the gradient
      */
-    public function gradient(float $t, string $start, string $middle, string $end)
+    private function gradient(float $offset, string $start, string $middle, string $end): string
     {
-        return $t >= 0.5 ? $this->linear($middle, $end, ($t - .5) * 2) : $this->linear($start, $middle, $t * 2);
+        return $offset >= 0.5 ? $this->linear($middle, $end, ($offset - .5) * 2)
+            : $this->linear($start, $middle, $offset * 2);
     }
 
     /**
      * Linearly Interpolate a given value over a given range.
      *
-     * @param $start string
-     * @param $end string
-     * @param $x float
+     * @param string $start Start value, in hex, of the range on which we want to interpolate
+     * @param  string $end End value, in hex, of the range on which we want to interpolate
+     * @param $x float The value that we want to interpolate
      *
-     * @return string
+     * @return string Interpolated value in a hex string form
      */
-    public function linear(string $start, string $end, float $x)
+    private function linear(string $start, string $end, float $x): string
     {
         $r = $this->byteLinear($start[1] . $start[2], $end[1] . $end[2], $x);
         $g = $this->byteLinear($start[3] . $start[4], $end[3] . $end[4], $x);
@@ -128,7 +128,7 @@ class HeatMapWriterService implements IFileWriter
         return '#' . $r . $g . $b;
     }
 
-    public function byteLinear(string $a, string $b, float $x)
+    private function byteLinear(string $a, string $b, float $x): string
     {
         $y = (hexdec(('0x' . $a)) * (1 - $x) + hexdec(('0x' . $b)) * $x) | 0;
 
