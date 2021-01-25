@@ -123,13 +123,7 @@ class HeatMapWriterService implements IFileWriter
     {
         $r = $this->byteLinear($start[1] . $start[2], $end[1] . $end[2], $x);
         $g = $this->byteLinear($start[3] . $start[4], $end[3] . $end[4], $x);
-
-        if (strlen($end) == 7){
-            echo "END";
-        }else{
-            echo "NOEND";
-
-        }        $b = $this->byteLinear($start[5] . $start[6], $end[5] . $end[6], $x);
+        $b = $this->byteLinear($start[5] . $start[6], $end[5] . $end[6], $x);
 
         return '#' . $r . $g . $b;
     }
