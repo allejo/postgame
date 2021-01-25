@@ -43,6 +43,11 @@ class PlayerHeatMap
      */
     private $heatmap = [];
 
+    /**
+     * @ORM\Column(type="string", length=64)
+     */
+    private $filename;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -80,6 +85,18 @@ class PlayerHeatMap
     public function setHeatmap(array $heatmap): self
     {
         $this->heatmap = $heatmap;
+
+        return $this;
+    }
+
+    public function getFilename(): ?string
+    {
+        return $this->filename;
+    }
+
+    public function setFilename(string $filename): self
+    {
+        $this->filename = $filename;
 
         return $this;
     }
