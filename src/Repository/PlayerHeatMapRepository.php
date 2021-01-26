@@ -23,6 +23,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PlayerHeatMapRepository extends ServiceEntityRepository
 {
+    use DeletableReplayTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, PlayerHeatMap::class);

@@ -370,8 +370,9 @@ class ReplayImportService
         $this->em->getRepository(KillEvent::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(PartEvent::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(PauseEvent::class)->deleteByReplay($this->currReplay);
-        $this->em->getRepository(Player::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(PlayerHeatMap::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(ResumeEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(Player::class)->deleteByReplay($this->currReplay);
     }
 
     private function updateBatchStatus(bool $dryRun): void
