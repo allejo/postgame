@@ -39,12 +39,11 @@ class HeatMapWriterService implements IFileWriter
     /**
      * Create and write heatmap to a file location.
      *
-     * @param PlayerHeatMap $heatMap Heatmap 2D array
-     * @param int $svgSize size of heatMap SVG
-     * @param string $gradientStart Beginning colour for gradient
-     * @param string $gradientMid Mid colour for gradient
-     * @param string $gradientEnd End colour for gradient
-     * @return bool
+     * @param PlayerHeatMap $heatMap       Heatmap 2D array
+     * @param int           $svgSize       size of heatMap SVG
+     * @param string        $gradientStart Beginning colour for gradient
+     * @param string        $gradientMid   Mid colour for gradient
+     * @param string        $gradientEnd   End colour for gradient
      */
     public function writeHeatMap(
         PlayerHeatMap $heatMap,
@@ -52,8 +51,7 @@ class HeatMapWriterService implements IFileWriter
         string $gradientStart = self::GRADIENT_FIRST,
         string $gradientMid = self::GRADIENT_SECOND,
         string $gradientEnd = self::GRADIENT_THIRD
-    ): bool
-    {
+    ): bool {
         $heatmap = $heatMap->getHeatmap();
         $heatmapSize = count($heatmap);
         $oldRange = $this->maxval($heatmap);
@@ -78,8 +76,6 @@ class HeatMapWriterService implements IFileWriter
 
     /**
      * Get the max value in a 2D array.
-     * @param array $x
-     * @return int
      */
     private function maxval(array $x): int
     {
@@ -97,10 +93,10 @@ class HeatMapWriterService implements IFileWriter
     /**
      * Returns a colour value for a given heatmap value.
      *
-     * @param float $offset The point in the gradient that we're trying to find a colour value for
-     * @param string  $start Colour at the beginning of the gradient in hex
+     * @param float  $offset The point in the gradient that we're trying to find a colour value for
+     * @param string $start  Colour at the beginning of the gradient in hex
      * @param string $middle Colour at the middle of the gradient in hex
-     * @param string $end Colour at the end of the gradient in hex
+     * @param string $end    Colour at the end of the gradient in hex
      *
      * @return string The colour value at offset in the gradient
      */
@@ -114,7 +110,7 @@ class HeatMapWriterService implements IFileWriter
      * Linearly Interpolate a given value over a given range.
      *
      * @param string $start Start value, in hex, of the range on which we want to interpolate
-     * @param  string $end End value, in hex, of the range on which we want to interpolate
+     * @param string $end   End value, in hex, of the range on which we want to interpolate
      * @param $x float The value that we want to interpolate
      *
      * @return string Interpolated value in a hex string form

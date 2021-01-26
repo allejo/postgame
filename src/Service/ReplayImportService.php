@@ -207,8 +207,7 @@ class ReplayImportService
         LoggerInterface $logger,
         MapThumbnailWriterService $thumbnailWriterService,
         HeatMapWriterService $heatMapWriterService
-    )
-    {
+    ) {
         $this->em = $em;
         $this->logger = $logger;
         $this->thumbnailWriterService = $thumbnailWriterService;
@@ -693,7 +692,6 @@ class ReplayImportService
 
     private function handleMsgPlayerUpdate(MsgPlayerUpdate $packet): void
     {
-
         $callsign = $this->currPlayersByIndex[$packet->getPlayerId()]->getCallsign();
 
         if (!array_key_exists($callsign, $this->currPlayersHeatMap)) {
