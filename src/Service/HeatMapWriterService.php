@@ -41,17 +41,17 @@ class HeatMapWriterService implements IFileWriter
      *
      * @param PlayerHeatMap $heatMap Heatmap 2D array
      * @param int $svgSize size of heatMap SVG
-     * @param string $GradientStart Beginning colour for gradient
-     * @param string $GradientMid Mid colour for gradient
-     * @param string $GradientEnd End colour for gradient
+     * @param string $gradientStart Beginning colour for gradient
+     * @param string $gradientMid Mid colour for gradient
+     * @param string $gradientEnd End colour for gradient
      * @return bool
      */
     public function writeHeatMap(
         PlayerHeatMap $heatMap,
         int $svgSize,
-        string $GradientStart = self::GRADIENT_FIRST,
-        string $GradientMid = self::GRADIENT_SECOND,
-        string $GradientEnd = self::GRADIENT_THIRD
+        string $gradientStart = self::GRADIENT_FIRST,
+        string $gradientMid = self::GRADIENT_SECOND,
+        string $gradientEnd = self::GRADIENT_THIRD
     ): bool
     {
         $heatmap = $heatMap->getHeatmap();
@@ -60,11 +60,11 @@ class HeatMapWriterService implements IFileWriter
         $image = new SVG($svgSize, $svgSize);
         $doc = $image->getDocument();
 
-        $SquareSize = $svgSize / $heatmapSize;
+        $squareSize = $svgSize / $heatmapSize;
         for ($i = 0, $iMax = count($heatmap); $i < $iMax; ++$i) {
             for ($j = 0, $jMax = count($heatmap[$i]); $j < $jMax; ++$j) {
-                $square = new SVGRect($SquareSize * $j, $SquareSize * $i, $SquareSize, $SquareSize);
-                $colour = $this->gradient($heatmap[$i][$j] / $oldRange, $GradientStart, $GradientMid, $GradientEnd);
+                $square = new SVGRect($squareSize * $j, $squareSize * $i, $squareSize, $squareSize);
+                $colour = $this->gradient($heatmap[$i][$j] / $oldRange, $gradientStart, $gradientMid, $gradientEnd);
 
                 $square->setStyle('fill', $colour);
                 $doc->addChild($square);

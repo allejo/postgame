@@ -13,11 +13,11 @@ namespace App\Utility;
 
 class PlayerMovementGrid
 {
-    /** @var array */
+    /** @var int[][] The heatmap 2D array */
     private $movement;
-    /** @var int Size of the map in the replay file */
+    /** @var int Size of the map in the replay file in World Units (wu) */
     private $worldSize;
-    /** @var int Size of the heatmap */
+    /** @var int The number of cells in a single row of the heatmaps */
     private $heatmapSize;
 
     public function __construct(int $worldSize, int $heatmapSize)

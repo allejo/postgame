@@ -197,10 +197,9 @@ class ReplayImportService
     /** @var array<string, PlayerMovementGrid> A map of callsigns to their respective movement grids */
     private $currPlayersHeatMap;
 
-    /** @var int The size of the Heatmap */
+    /** @var int The number of cells in a single row of the heatmap */
     private $heatMapSize;
-
-    /** @var int The size of the World */
+    /** @var int The size of the world in World Units (wu) */
     private $worldSize;
 
     public function __construct(
