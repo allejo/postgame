@@ -328,8 +328,17 @@
                                         <h4>Heatmap</h4>
 
                                         <div class="heat-map">
-                                            {{ thumbnail | map_thumbnail }}
-                                            {{ heatmaps[player.callsign] | heatmap_thumbnail }}
+                                            {% set heatmap = heatmaps[player.callsign] %}
+                                            {% if heatmap %}
+                                                {{ thumbnail | map_thumbnail }}
+                                                {{ heatmap | heatmap_thumbnail }}
+                                            {% else %}
+                                                <div class="background-dark perfect-square">
+                                                    <p class="mb-0 position-abs-v-center text-center w-100">
+                                                        <em>No heatmap available</em>
+                                                    </p>
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     </section>
                                 </div>
