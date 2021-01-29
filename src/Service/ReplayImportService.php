@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use allejo\bzflag\graphics\Common\WorldBoundary;
 use allejo\bzflag\networking\Packets\GamePacket;
 use allejo\bzflag\networking\Packets\MsgAddPlayer;
 use allejo\bzflag\networking\Packets\MsgAdminInfo;
@@ -19,6 +20,7 @@ use allejo\bzflag\networking\Packets\MsgFlagDrop;
 use allejo\bzflag\networking\Packets\MsgFlagGrab;
 use allejo\bzflag\networking\Packets\MsgKilled;
 use allejo\bzflag\networking\Packets\MsgMessage;
+use allejo\bzflag\networking\Packets\MsgPlayerUpdate;
 use allejo\bzflag\networking\Packets\MsgRemovePlayer;
 use allejo\bzflag\networking\Packets\MsgTimeUpdate;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
@@ -34,10 +36,12 @@ use App\Entity\KillEvent;
 use App\Entity\PartEvent;
 use App\Entity\PauseEvent;
 use App\Entity\Player;
+use App\Entity\PlayerHeatMap;
 use App\Entity\Replay;
 use App\Entity\ResumeEvent;
 use App\Utility\BZChatTarget;
 use App\Utility\BZTeamType;
+use App\Utility\PlayerMovementGrid;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -51,6 +55,13 @@ class ReplayImportService
      * @var int
      */
     private const BATCH_SIZE = 10;
+
+    /**
+     * Ratio between world size and heatmap size.
+     *
+     * @var int
+     */
+    private const WORLD_HEATMAP_RATIO = 40;
 
     /**
      * The internal count of how many replays have been imported in the current
@@ -69,6 +80,9 @@ class ReplayImportService
 
     /** @var MapThumbnailWriterService */
     private $thumbnailWriterService;
+
+    /** @var HeatMapWriterService */
+    private $heatMapWriterService;
 
     /**
      * The current Replay object we're working with.
@@ -180,11 +194,24 @@ class ReplayImportService
     /** @var array<int, string> A map of flag IDs to flag abbreviations */
     private $flagIDs;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapThumbnailWriterService $thumbnailWriterService)
-    {
+    /** @var array<string, PlayerMovementGrid> A map of callsigns to their respective movement grids */
+    private $currPlayersHeatMap;
+
+    /** @var int The number of cells in a single row of the heatmap */
+    private $heatMapSize;
+    /** @var int The size of the world in World Units (wu) */
+    private $worldSize;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        LoggerInterface $logger,
+        MapThumbnailWriterService $thumbnailWriterService,
+        HeatMapWriterService $heatMapWriterService
+    ) {
         $this->em = $em;
         $this->logger = $logger;
         $this->thumbnailWriterService = $thumbnailWriterService;
+        $this->heatMapWriterService = $heatMapWriterService;
     }
 
     /**
@@ -223,6 +250,10 @@ class ReplayImportService
         $wasCanceled = false;
         $filename = basename($filepath);
         $sha1 = sha1_file($filepath);
+
+        $this->worldSize = (int)WorldBoundary::fromWorldDatabase($replay->getWorldDatabase())->getWorldWidthX();
+
+        $this->heatMapSize = max($this->worldSize / self::WORLD_HEATMAP_RATIO, 10);
 
         $existing = $this->em->getRepository(Replay::class)->findOneBy([
             'fileHash' => $sha1,
@@ -295,6 +326,8 @@ class ReplayImportService
             $wasCanceled = true;
         }
 
+        $this->processHeatMaps();
+
         $this->currReplay->setCanceled($wasCanceled);
 
         $this->updateBatchStatus($dryRun);
@@ -316,6 +349,7 @@ class ReplayImportService
         $this->currPlayersJoinRecord = [];
         $this->currFuturePlayers = [];
         $this->currPartialJoins = [];
+        $this->currPlayersHeatMap = [];
         $this->lastPausePacket = null;
         $this->duration = null;
     }
@@ -334,8 +368,9 @@ class ReplayImportService
         $this->em->getRepository(KillEvent::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(PartEvent::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(PauseEvent::class)->deleteByReplay($this->currReplay);
-        $this->em->getRepository(Player::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(PlayerHeatMap::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(ResumeEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(Player::class)->deleteByReplay($this->currReplay);
     }
 
     private function updateBatchStatus(bool $dryRun): void
@@ -377,6 +412,8 @@ class ReplayImportService
             $this->handleMsgRemovePlayer($packet);
         } elseif ($packet instanceof MsgTimeUpdate) {
             $this->handleMsgTimeUpdate($packet);
+        } elseif ($packet instanceof MsgPlayerUpdate) {
+            $this->handleMsgPlayerUpdate($packet);
         }
     }
 
@@ -653,6 +690,18 @@ class ReplayImportService
         }
     }
 
+    private function handleMsgPlayerUpdate(MsgPlayerUpdate $packet): void
+    {
+        $callsign = $this->currPlayersByIndex[$packet->getPlayerId()]->getCallsign();
+
+        if (!array_key_exists($callsign, $this->currPlayersHeatMap)) {
+            $this->currPlayersHeatMap[$callsign] = new PlayerMovementGrid($this->worldSize, $this->heatMapSize);
+        }
+
+        $position = $packet->getState()->position;
+        $this->currPlayersHeatMap[$callsign]->addPosition($position[0], $position[1]);
+    }
+
     /**
      * Get the number of seconds *into* a match we're currently in.
      */
@@ -719,5 +768,23 @@ class ReplayImportService
         ];
 
         return $teams[$flagAbbv];
+    }
+
+    /**
+     * Save PlayerMovementGrid objects as PLayerHeatMap instances in the DB.
+     */
+    private function processHeatMaps()
+    {
+        foreach ($this->currPlayersHeatMap as $callsign => $heatmap) {
+            $playerHeatmap = new PlayerHeatMap();
+            $playerHeatmap->setReplay($this->currReplay);
+            $playerHeatmap->setPlayer($this->currPlayersByCallsign[$callsign]);
+            $playerHeatmap->setHeatmap($heatmap->getMovement());
+            $playerHeatmap->setFilename(sprintf('%s_%s.svg', urlencode($callsign), uniqid('', true)));
+
+            $this->heatMapWriterService->writeHeatMap($playerHeatmap, $this->worldSize);
+
+            $this->em->persist($playerHeatmap);
+        }
     }
 }

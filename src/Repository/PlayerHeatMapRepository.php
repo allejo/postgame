@@ -11,22 +11,22 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\JoinEvent;
+use App\Entity\PlayerHeatMap;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method null|JoinEvent find($id, $lockMode = null, $lockVersion = null)
- * @method null|JoinEvent findOneBy(array $criteria, array $orderBy = null)
- * @method JoinEvent[]    findAll()
- * @method JoinEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method null|PlayerHeatMap find($id, $lockMode = null, $lockVersion = null)
+ * @method null|PlayerHeatMap findOneBy(array $criteria, array $orderBy = null)
+ * @method PlayerHeatMap[]    findAll()
+ * @method PlayerHeatMap[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class JoinEventRepository extends ServiceEntityRepository
+class PlayerHeatMapRepository extends ServiceEntityRepository
 {
     use DeletableReplayTrait;
 
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, JoinEvent::class);
+        parent::__construct($registry, PlayerHeatMap::class);
     }
 }

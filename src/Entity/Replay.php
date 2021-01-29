@@ -97,6 +97,11 @@ class Replay
      */
     private $mapThumbnail;
 
+    /**
+     * @ORM\OneToMany(targetEntity=PlayerHeatMap::class, mappedBy="replay", orphanRemoval=true)
+     */
+    private $playerHeatMaps;
+
     public function __construct()
     {
         $this->players = new ArrayCollection();
@@ -106,6 +111,7 @@ class Replay
         $this->joinEvents = new ArrayCollection();
         $this->killEvents = new ArrayCollection();
         $this->partEvents = new ArrayCollection();
+        $this->playerHeatMaps = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -410,6 +416,36 @@ class Replay
     public function setMapThumbnail(?MapThumbnail $mapThumbnail): self
     {
         $this->mapThumbnail = $mapThumbnail;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PlayerHeatMap[]
+     */
+    public function getPlayerHeatMaps(): Collection
+    {
+        return $this->playerHeatMaps;
+    }
+
+    public function addPlayerHeatMap(PlayerHeatMap $playerHeatMap): self
+    {
+        if (!$this->playerHeatMaps->contains($playerHeatMap)) {
+            $this->playerHeatMaps[] = $playerHeatMap;
+            $playerHeatMap->setReplay($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlayerHeatMap(PlayerHeatMap $playerHeatMap): self
+    {
+        if ($this->playerHeatMaps->removeElement($playerHeatMap)) {
+            // set the owning side to null (unless already changed)
+            if ($playerHeatMap->getReplay() === $this) {
+                $playerHeatMap->setReplay(null);
+            }
+        }
 
         return $this;
     }

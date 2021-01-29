@@ -245,79 +245,93 @@
 
                             <div class="row">
                                 <div class="col-lg-6">
-                                    <dl>
-                                        <dt>Callsign</dt>
-                                        <dd>{{ player.callsign }}</dd>
-                                    </dl>
+                                    <section class="mb-4">
+                                        <h4>Flag Captures</h4>
 
-                                    <h3>Flag Captures</h3>
+                                        <ul class="list-inline mb-0">
+                                            {% for cap in player.flagCaptures %}
+                                                <li>
+                                                    {{ match_time(cap.matchTime, cap.timestamp) }}
+                                                    Captured the
 
-                                    <ul>
-                                        {% for cap in player.flagCaptures %}
-                                            <li>
-                                                {{ cap.matchTime }} Captured {{ cap.cappingTeam | team_literal | upper | slice(0, 1) }}*
-                                                (Score: {{ cap.cappingTeamScore }} - {{ cap.cappedTeamScore }})
-                                            </li>
-                                        {% else %}
-                                            <li>No caps this match</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                <div class="col-lg-6">
-                                    <h3 class="h4">
-                                        <abbr title="Kills and deaths">K/D</abbr>
-                                        Stats Against
-                                    </h3>
+                                                    <span class="color-{{ cap.cappingTeam | team_literal }}-team no-cb-translation">
+                                                        {{ cap.cappingTeam | team_literal | title }}
+                                                    </span>
 
-                                    <table class="table--skinny w-100" data-sortable="true">
-                                        <thead>
-                                            <tr>
-                                                <th
-                                                    class="w-100"
-                                                    data-sort-case-insensitive="true"
-                                                    data-sort-default
-                                                    data-sort="ASC"
-                                                >
-                                                    Callsign
-                                                </th>
-                                                <th data-sort-cast="number">
-                                                    <abbr title="Kills against" class="hide-md">K</abbr>
-                                                    <span class="hide-xs show-md">Kill against</span>
-                                                </th>
-                                                <th data-sort-cast="number">
-                                                    <abbr title="Deaths by" class="hide-md">D</abbr>
-                                                    <span class="hide-xs show-md">Deaths by</span>
-                                                </th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            {% for j, stats in player.against %}
-                                                <tr>
-                                                    <td>
-                                                        <span class="color-{{ players[j].teamLiteral }}-team">
-                                                            {{ players[j].callsign }}
-                                                        </span>
-                                                    </td>
-                                                    <td class="text-center">{{ stats.kills }}</td>
-                                                    <td class="text-center">{{ stats.deaths }}</td>
-                                                </tr>
+                                                    team flag (Score: {{ cap.cappingTeamScore }} - {{ cap.cappedTeamScore }})
+                                                </li>
+                                            {% else %}
+                                                <li>No caps this match</li>
                                             {% endfor %}
-                                        </tbody>
+                                        </ul>
+                                    </section>
 
-                                        <caption>
-                                            <p class="m-0">The kill to death ratios of {{ player.callsign }} against the rest of the players.</p>
+                                    <section class="mb-4 mb-lg-0">
+                                        <h4>
+                                            <abbr title="Kills and deaths">K/D</abbr>
+                                            Stats Against
+                                        </h4>
 
-                                            <ul class="hide-md mt-3 mb-0" aria-hidden="true">
-                                                <li>
-                                                    <strong>K</strong> - Number of times {{ player.callsign }} killed said player
-                                                </li>
-                                                <li>
-                                                    <strong>D</strong> - Number of times {{ player.callsign }} was killed by said player
-                                                </li>
-                                            </ul>
-                                        </caption>
-                                    </table>
+                                        <table class="table--skinny w-100" data-sortable="true">
+                                            <thead>
+                                                <tr>
+                                                    <th
+                                                        class="w-100"
+                                                        data-sort-case-insensitive="true"
+                                                        data-sort-default
+                                                        data-sort="ASC"
+                                                    >
+                                                        Callsign
+                                                    </th>
+                                                    <th data-sort-cast="number">
+                                                        <abbr title="Kills against" class="hide-md">K</abbr>
+                                                        <span class="hide-xs show-md">Kill against</span>
+                                                    </th>
+                                                    <th data-sort-cast="number">
+                                                        <abbr title="Deaths by" class="hide-md">D</abbr>
+                                                        <span class="hide-xs show-md">Deaths by</span>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                {% for j, stats in player.against %}
+                                                    <tr>
+                                                        <td>
+                                                            <span class="color-{{ players[j].teamLiteral }}-team">
+                                                                {{ players[j].callsign }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-center">{{ stats.kills }}</td>
+                                                        <td class="text-center">{{ stats.deaths }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+
+                                            <caption>
+                                                <p class="m-0">The kill to death ratios of {{ player.callsign }} against the rest of the players.</p>
+
+                                                <ul class="hide-md mt-3 mb-0" aria-hidden="true">
+                                                    <li>
+                                                        <strong>K</strong> - Number of times {{ player.callsign }} killed said player
+                                                    </li>
+                                                    <li>
+                                                        <strong>D</strong> - Number of times {{ player.callsign }} was killed by said player
+                                                    </li>
+                                                </ul>
+                                            </caption>
+                                        </table>
+                                    </section>
+                                </div>
+                                <div class="col-lg-4 offset-2">
+                                    <section>
+                                        <h4>Heatmap</h4>
+
+                                        <div class="heat-map">
+                                            {{ thumbnail | map_thumbnail }}
+                                            {{ heatmaps[player.callsign] | heatmap_thumbnail }}
+                                        </div>
+                                    </section>
                                 </div>
                             </div>
                         </article>

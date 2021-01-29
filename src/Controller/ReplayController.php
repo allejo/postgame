@@ -109,6 +109,12 @@ class ReplayController extends AbstractController
         }
 
         try {
+            $heatmaps = [];
+
+            foreach ($replay->getPlayerHeatMaps() as $heatMap) {
+                $heatmaps[$heatMap->getPlayer()->getCallsign()] = $heatMap;
+            }
+
             $replaySummary = [
                 'id' => $replay->getId(),
                 'filename' => $replay->getFileName(),
@@ -124,6 +130,7 @@ class ReplayController extends AbstractController
                 'players' => $summaryService->getPlayerRecords(),
                 'flag_caps' => $summaryService->getFlagCaps(),
                 'messages' => $summaryService->getChatMessages(),
+                'heatmaps' => $heatmaps,
             ];
         } catch (UnsummarizedException | WrongSummarizationException $e) {
             $logger->warning($e->getMessage());

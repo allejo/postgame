@@ -78,6 +78,11 @@ class Player
      */
     private $partEvents;
 
+    /**
+     * @ORM\OneToOne(targetEntity=PlayerHeatMap::class, mappedBy="player", cascade={"persist", "remove"})
+     */
+    private $playerHeatMap;
+
     public function __construct()
     {
         $this->captureEvents = new ArrayCollection();
@@ -363,6 +368,23 @@ class Player
                 $partEvent->setPlayer(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPlayerHeatMap(): ?PlayerHeatMap
+    {
+        return $this->playerHeatMap;
+    }
+
+    public function setPlayerHeatMap(PlayerHeatMap $playerHeatMap): self
+    {
+        // set the owning side of the relation if necessary
+        if ($playerHeatMap->getPlayer() !== $this) {
+            $playerHeatMap->setPlayer($this);
+        }
+
+        $this->playerHeatMap = $playerHeatMap;
 
         return $this;
     }

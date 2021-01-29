@@ -14,9 +14,9 @@ namespace App\Repository;
 use App\Entity\KnownMap;
 use App\Entity\Replay;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method null|Replay find($id, $lockMode = null, $lockVersion = null)

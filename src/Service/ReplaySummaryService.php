@@ -221,6 +221,7 @@ class ReplaySummaryService
         ];
 
         $this->handleDuration($replay);
+        $this->handlePlayers($findByFilter);
         $this->handleCaps($findByFilter);
 
         $this->summarized = self::SUMMARIZED_QUICK;

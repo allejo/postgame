@@ -22,9 +22,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-class MapThumbnailWriterService implements IThumbnailWriter
+class MapThumbnailWriterService implements IFileWriter
 {
-    use ThumbnailWriterTrait;
+    use FileWriterTrait;
 
     public const FOLDER_NAME = 'map-thumbnails';
 
@@ -87,15 +87,5 @@ class MapThumbnailWriterService implements IThumbnailWriter
         $svgFilename = $database->getWorldHash() . '.svg';
 
         $this->writeFile($svgFilename, $svgOutput);
-    }
-
-    private function writeFile(string $filename, string $content): void
-    {
-        $this->fs->dumpFile($this->getFilePath($filename), $content);
-    }
-
-    private function getFilePath(string $filename): string
-    {
-        return sprintf('%s/%s/%s', $this->targetDirectory, self::FOLDER_NAME, $filename);
     }
 }
