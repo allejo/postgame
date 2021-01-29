@@ -780,7 +780,11 @@ class ReplayImportService
             $playerHeatmap->setReplay($this->currReplay);
             $playerHeatmap->setPlayer($this->currPlayersByCallsign[$callsign]);
             $playerHeatmap->setHeatmap($heatmap->getMovement());
-            $playerHeatmap->setFilename(sprintf('%s_%s.svg', urlencode($callsign), uniqid('', true)));
+            $playerHeatmap->setFilename(vsprintf('%s_%s.svg', [
+                // $callsign will be cast into an int if the callsign is all numbers
+                urlencode((string)$callsign),
+                uniqid('', true),
+            ]));
 
             $this->heatMapWriterService->writeHeatMap($playerHeatmap, $this->worldSize);
 
