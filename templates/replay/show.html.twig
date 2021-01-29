@@ -330,7 +330,12 @@
                                         <div class="heat-map">
                                             {% set heatmap = heatmaps[player.callsign] %}
                                             {% if heatmap %}
-                                                {{ thumbnail | map_thumbnail }}
+                                                {% set styles = [
+                                                    '-webkit-mask-image: url(%s)' | format(thumbnail | map_url),
+                                                    'mask-image: url(%s)' | format(thumbnail | map_url),
+                                                ] %}
+                                                <div class="map-overlay" style="{{ styles | join(';') }}"></div>
+
                                                 {{ heatmap | heatmap_thumbnail }}
                                             {% else %}
                                                 <div class="background-dark perfect-square">

@@ -1,6 +1,17 @@
 .heat-map {
     position: relative;
 
+    .map-overlay {
+        background-color: black;
+        filter: opacity(0.45);
+        height: 100%;
+        -webkit-mask-size: 100% auto;
+        mask-size: 100% auto;
+        position: absolute;
+        width: 100%;
+
+    }
+
     .map-thumbnail {
         left: 0;
         position: absolute;
