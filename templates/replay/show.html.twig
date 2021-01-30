@@ -241,7 +241,12 @@
                             data-role="tab"
                             data-tab-heading="{{ player.callsign }}"
                         >
-                            <h2 class="sr-only">{{ player.callsign }}</h2>
+                            <noscript>
+                                <h2 class="border-b pb-1 mb-3">{{ player.callsign }}</h2>
+                            </noscript>
+                            <div class="show-js">
+                                <h2 class="sr-only">{{ player.callsign }}</h2>
+                            </div>
 
                             <div class="row">
                                 <div class="col-lg-6">
