@@ -1,5 +1,6 @@
 {
     "devDependencies": {
+        "@babel/plugin-proposal-nullish-coalescing-operator": "^7.12.1",
         "@fortawesome/fontawesome-free": "^5.14.0",
         "@symfony/webpack-encore": "^0.33.0",
         "babel-plugin-jsx-to-dom": "^0.6.1",

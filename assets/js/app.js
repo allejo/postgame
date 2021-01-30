@@ -20,5 +20,6 @@ require('../vendor/style-guide/src/js/table');
 require('../vendor/style-guide/src/js/tablist');
 
 require('./lib/graphs');
+require('./lib/heat-map');
 require('./lib/replay-list');
 require('./lib/timestamps');

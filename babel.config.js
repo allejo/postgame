@@ -3,6 +3,7 @@ module.exports = function (api) {
 
     const presets = [];
     const plugins = [
+        "@babel/plugin-proposal-nullish-coalescing-operator",
         "babel-plugin-jsx-to-dom",
         "babel-plugin-syntax-jsx",
     ];
