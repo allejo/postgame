@@ -335,17 +335,29 @@
                                         <figure>
                                             {% set heatmap = heatmaps[player.callsign] %}
                                             {% if heatmap %}
+{#                                                linear-gradient(90deg, #1a2a6c 15%, #b21f1f 75%, #fdbb2d 85%)#}
                                                 {% set styles = [
                                                     '-webkit-mask-image: url(%s)' | format(thumbnail | map_url),
                                                     'mask-image: url(%s)' | format(thumbnail | map_url),
                                                 ] %}
-                                                <div class="heat-map">
+                                                <div class="border heat-map">
                                                     <div class="map-overlay" style="{{ styles | join(';') }}"></div>
                                                     {{ heatmap | heatmap_thumbnail }}
                                                 </div>
 
+                                                {% set gradient_colors = [
+                                                    [constant('App\\Service\\HeatMapWriterService::GRADIENT_FIRST'), '15%'],
+                                                    [constant('App\\Service\\HeatMapWriterService::GRADIENT_SECOND'), '75%'],
+                                                    [constant('App\\Service\\HeatMapWriterService::GRADIENT_THIRD'), '85%'],
+                                                ] %}
+                                                <div
+                                                    class="heat-map-legend mt-3"
+                                                    style="background: linear-gradient(90deg, {{ gradient_colors | map(e => "#{e[0]} #{e[1]}") | join(', ') }})"
+                                                ></div>
+
                                                 <figcaption class="background-dark p-2 small text-muted">
-                                                    A heat map representing {{ player.callsign }}'s movement across the map during the match.
+                                                    A heatmap representing {{ player.callsign }}'s movement across the map during the match.
+                                                    The lighter the shade of the cell, the more time the player spent in that area.
                                                 </figcaption>
                                             {% else %}
                                                 <div class="background-dark perfect-square">
