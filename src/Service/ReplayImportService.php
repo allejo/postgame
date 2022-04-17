@@ -217,10 +217,10 @@ class ReplayImportService
     /**
      * Import a replay file into the database.
      *
-     * @param string $filepath     The filename or filepath to the replay to import
-     * @param bool   $dryRun       Whether or not to actually write to the database
-     * @param bool   $redoAnalysis Keep the replay ID but reimport all other information about the replay
-     * @param bool   $regenAssets  Keep the replay ID but regenerate all of the assets for a replay
+     * @param string $filepath          The filename or filepath to the replay to import
+     * @param bool   $dryRun            Whether or not to actually write to the database
+     * @param bool   $redoAnalysis      Keep the replay ID but reimport all other information about the replay
+     * @param bool   $regenAssets       Keep the replay ID but regenerate all of the assets for a replay
      * @param bool   $updateWorldHashes Keep everything of the replay but update the world hashes
      *
      * @throws \InvalidArgumentException        when an invalid path to a replay file is given

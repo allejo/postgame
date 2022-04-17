@@ -71,16 +71,17 @@ class DucatiThumbnailMatcherSubscriber implements EventSubscriberInterface
         $obstacleTypes = $worldDatabase->getObstacleManager()->getWorld()->getObstacles();
         $isDucMap = true;
 
-        for ($i = ObstacleType::TELE_TYPE; $i < ObstacleType::OBSTACLE_TYPE_COUNT; $i++) {
+        for ($i = ObstacleType::TELE_TYPE; $i < ObstacleType::OBSTACLE_TYPE_COUNT; ++$i) {
             if (count($obstacleTypes[$i]) > 0) {
                 $isDucMap = false;
+
                 break;
             }
         }
 
         if (!$isDucMap) {
             $this->logger->error('World (hash: {hash}) contains an obstacle type not expected in a Ducati map.');
-        } else if ($worldSize === 600) {
+        } elseif ($worldSize === 600) {
             if (($map = $this->getDucatiMini()) !== null) {
                 $thumbnail->setKnownMap($map);
             }

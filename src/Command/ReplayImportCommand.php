@@ -166,7 +166,7 @@ class ReplayImportCommand extends Command
                     $progressBar->setMessage('Importing replay...');
                     $progressBar->setMessage(sprintf('(%s)', basename($replayFile)), 'filename');
 
-                    $didImport = $this->replayService->importReplay($replayFile, $dryRun, $redoAnalysis, $regenAssets);
+                    $didImport = $this->replayService->importReplay($replayFile, $dryRun, $redoAnalysis, $regenAssets, $updateMetadata);
 
                     if ($didImport) {
                         ++$modifiedCount;
