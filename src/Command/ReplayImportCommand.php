@@ -48,6 +48,7 @@ class ReplayImportCommand extends Command
             ->addOption('upgrade', null, InputOption::VALUE_NONE, '(DEPRECATED) If a duplicate replay file is found, keep the replay ID but reimport all other information.')
             ->addOption('redo-analysis', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, keep the replay ID but reimport all other information (including player heatmaps).')
             ->addOption('regenerate-assets', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, regenerate the following: map thumbnails')
+            ->addOption('update-metadata', null, InputOption::VALUE_NONE, 'Update any metadata related to a replay')
             ->addOption('filenames', null, InputOption::VALUE_REQUIRED, 'A comma-separated list of file names or the path to a text file of file names (separated by new lines) to import from the directory', null)
             ->setDescription('Import a replay file or a folder of replay files')
             ->setHelp('This command allows you to import replay files into the database')
@@ -59,6 +60,7 @@ class ReplayImportCommand extends Command
         $dryRun = $input->getOption('dry-run');
         $redoAnalysis = $input->getOption('redo-analysis');
         $regenAssets = $input->getOption('regenerate-assets');
+        $updateMetadata = $input->getOption('update-metadata');
         $replayFilePath = $input->getArgument('file');
 
         // @TODO 1.1.0 Remove the deprecated --upgrade option
@@ -91,7 +93,7 @@ class ReplayImportCommand extends Command
             $output->writeln(sprintf('Reading replay file: %s', $replayFilePath));
 
             try {
-                $this->replayService->importReplay($replayFilePath, $dryRun, $redoAnalysis, $regenAssets);
+                $this->replayService->importReplay($replayFilePath, $dryRun, $redoAnalysis, $regenAssets, $updateMetadata);
                 $output->writeln('Finished.');
             } catch (InvalidWorldCompressionException | InvalidWorldDatabaseException | InvalidReplayException | PacketInvalidException $e) {
                 $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFilePath));

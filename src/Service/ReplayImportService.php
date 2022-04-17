@@ -221,6 +221,7 @@ class ReplayImportService
      * @param bool   $dryRun       Whether or not to actually write to the database
      * @param bool   $redoAnalysis Keep the replay ID but reimport all other information about the replay
      * @param bool   $regenAssets  Keep the replay ID but regenerate all of the assets for a replay
+     * @param bool   $updateWorldHashes Keep everything of the replay but update the world hashes
      *
      * @throws \InvalidArgumentException        when an invalid path to a replay file is given
      * @throws InvalidReplayException           when an invalid replay is given
@@ -230,7 +231,7 @@ class ReplayImportService
      *
      * @return bool Returns true if the import was successful
      */
-    public function importReplay(string $filepath, bool $dryRun, bool $redoAnalysis, bool $regenAssets): bool
+    public function importReplay(string $filepath, bool $dryRun, bool $redoAnalysis, bool $regenAssets, bool $updateWorldHashes): bool
     {
         if (!file_exists($filepath)) {
             throw new \InvalidArgumentException(sprintf('File not found: %s', $filepath));
@@ -293,7 +294,7 @@ class ReplayImportService
         }
 
         // We were only asked to regenerate assets, don't import again
-        if ($existing && !$redoAnalysis) {
+        if ($existing && !$redoAnalysis && !$updateWorldHashes) {
             $this->updateBatchStatus($dryRun);
 
             return false;
@@ -305,6 +306,12 @@ class ReplayImportService
             ->setStartTime($replay->getStartTime())
             ->setEndTime($replay->getEndTime())
         ;
+
+        if ($existing && !$redoAnalysis) {
+            $this->updateBatchStatus($dryRun);
+
+            return false;
+        }
 
         $this->relativeStartTime = $this->currReplay->getStartTime()->getTimestamp();
 
