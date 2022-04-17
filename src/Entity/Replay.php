@@ -88,6 +88,11 @@ class Replay
     private $fileHash;
 
     /**
+     * @ORM\Column(type="string", length=40, nullable=true)
+     */
+    private $worldHash;
+
+    /**
      * @ORM\Column(type="boolean", nullable=true, options={"default": false})
      */
     private $canceled;
@@ -392,6 +397,18 @@ class Replay
     public function setFileHash(?string $fileHash): self
     {
         $this->fileHash = $fileHash;
+
+        return $this;
+    }
+
+    public function getWorldHash(): ?string
+    {
+        return $this->worldHash;
+    }
+
+    public function setWorldHash(?string $worldHash): self
+    {
+        $this->worldHash = $worldHash;
 
         return $this;
     }

@@ -300,6 +300,7 @@ class ReplayImportService
         }
 
         $this->currReplay
+            ->setWorldHash($replay->getWorldDatabase()->getWorldHash())
             ->setFileName($filename)
             ->setStartTime($replay->getStartTime())
             ->setEndTime($replay->getEndTime())
