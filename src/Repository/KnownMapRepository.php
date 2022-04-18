@@ -39,7 +39,7 @@ class KnownMapRepository extends ServiceEntityRepository
             ])
             ->from('App:MapThumbnail', 't')
             ->join('t.knownMap', 'm')
-            ->orderBy('thumbnail_id')
+            ->orderBy('thumbnail_id', 'DESC')
             ->groupBy('t.knownMap')
             ->getQuery()
             ->getScalarResult()
