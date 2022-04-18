@@ -217,11 +217,11 @@ class ReplayImportService
     /**
      * Import a replay file into the database.
      *
-     * @param string $filepath          The filename or filepath to the replay to import
-     * @param bool   $dryRun            Whether or not to actually write to the database
-     * @param bool   $redoAnalysis      Keep the replay ID but reimport all other information about the replay
-     * @param bool   $regenAssets       Keep the replay ID but regenerate all of the assets for a replay
-     * @param bool   $updateWorldHashes Keep everything of the replay but update the world hashes
+     * @param string $filepath       The filename or filepath to the replay to import
+     * @param bool   $dryRun         Whether or not to actually write to the database
+     * @param bool   $redoAnalysis   Keep the replay ID but reimport all other information about the replay
+     * @param bool   $regenAssets    Keep the replay ID but regenerate all of the assets for a replay
+     * @param bool   $updateMetadata Keep everything of the replay but update the world hashes
      *
      * @throws \InvalidArgumentException        when an invalid path to a replay file is given
      * @throws InvalidReplayException           when an invalid replay is given
@@ -231,7 +231,7 @@ class ReplayImportService
      *
      * @return bool Returns true if the import was successful
      */
-    public function importReplay(string $filepath, bool $dryRun, bool $redoAnalysis, bool $regenAssets, bool $updateWorldHashes): bool
+    public function importReplay(string $filepath, bool $dryRun, bool $redoAnalysis, bool $regenAssets, bool $updateMetadata): bool
     {
         if (!file_exists($filepath)) {
             throw new \InvalidArgumentException(sprintf('File not found: %s', $filepath));
@@ -262,7 +262,7 @@ class ReplayImportService
 
         // Don't import duplicate replays
         if (!empty($existing)) {
-            if ($redoAnalysis === false && $regenAssets === false) {
+            if ($redoAnalysis === false && $regenAssets === false && $updateMetadata === false) {
                 return false;
             }
 
@@ -294,7 +294,7 @@ class ReplayImportService
         }
 
         // We were only asked to regenerate assets, don't import again
-        if ($existing && !$redoAnalysis && !$updateWorldHashes) {
+        if ($existing && !$redoAnalysis && !$updateMetadata) {
             $this->updateBatchStatus($dryRun);
 
             return false;
