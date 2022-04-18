@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ab8c72d622f9a5304c423704b626eacd",
+    "content-hash": "1fd926ecbdafff92534670400562c4e6",
     "packages": [
         {
             "name": "allejo/bzflag-networking.php",
-            "version": "v1.1.1",
+            "version": "v1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/allejo/bzflag-networking.php.git",
-                "reference": "f4949258edc23954c72fa0e355dea727985f092c"
+                "reference": "b9aee10c503e5df79e2310926c6d1f293a958331"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/allejo/bzflag-networking.php/zipball/f4949258edc23954c72fa0e355dea727985f092c",
-                "reference": "f4949258edc23954c72fa0e355dea727985f092c",
+                "url": "https://api.github.com/repos/allejo/bzflag-networking.php/zipball/b9aee10c503e5df79e2310926c6d1f293a958331",
+                "reference": "b9aee10c503e5df79e2310926c6d1f293a958331",
                 "shasum": ""
             },
             "require": {
@@ -59,7 +59,7 @@
             "description": "A library for unpacking BZFlag network packets",
             "support": {
                 "issues": "https://github.com/allejo/bzflag-networking.php/issues",
-                "source": "https://github.com/allejo/bzflag-networking.php/tree/v1.1.1"
+                "source": "https://github.com/allejo/bzflag-networking.php/tree/v1.1.2"
             },
             "funding": [
                 {
@@ -79,31 +79,33 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2022-04-05T04:48:27+00:00"
+            "time": "2022-04-17T23:35:08+00:00"
         },
         {
             "name": "allejo/bzflag-rendering.php",
-            "version": "v0.2.1",
+            "version": "v0.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/allejo/bzflag-rendering.php.git",
-                "reference": "431aaf982b41b58ed173bd293ced773bff5b1a16"
+                "reference": "5c8b172205b08f94a100fc5815e6e38c2594b79f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/allejo/bzflag-rendering.php/zipball/431aaf982b41b58ed173bd293ced773bff5b1a16",
-                "reference": "431aaf982b41b58ed173bd293ced773bff5b1a16",
+                "url": "https://api.github.com/repos/allejo/bzflag-rendering.php/zipball/5c8b172205b08f94a100fc5815e6e38c2594b79f",
+                "reference": "5c8b172205b08f94a100fc5815e6e38c2594b79f",
                 "shasum": ""
             },
             "require": {
                 "allejo/bzflag-networking.php": "^1.1.0",
+                "ext-json": "*",
                 "meyfa/php-svg": "^0.9.1",
                 "php": ">=7.1"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^2.16",
-                "phpstan/phpstan": "^0.12.25",
-                "phpunit/phpunit": "^7.0"
+                "mikey179/vfsstream": "^1.6",
+                "phpstan/phpstan": "^1.5.6",
+                "phpunit/phpunit": "^7.0",
+                "symfony/finder": "^5.4"
             },
             "suggest": {
                 "ext-imagick": "Needed to export thumbnails as PNGs"
@@ -132,7 +134,7 @@
             "description": "A library for rendering thumbnails of BZFlag worlds",
             "support": {
                 "issues": "https://github.com/allejo/bzflag-rendering.php/issues",
-                "source": "https://github.com/allejo/bzflag-rendering.php/tree/v0.2.1"
+                "source": "https://github.com/allejo/bzflag-rendering.php/tree/v0.2.2"
             },
             "funding": [
                 {
@@ -152,7 +154,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2022-04-17T08:40:08+00:00"
+            "time": "2022-04-17T23:54:17+00:00"
         },
         {
             "name": "beberlei/doctrineextensions",
