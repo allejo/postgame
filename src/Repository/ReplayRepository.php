@@ -16,6 +16,7 @@ use App\Entity\Replay;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -118,6 +119,33 @@ class ReplayRepository extends ServiceEntityRepository
         }
 
         return $result;
+    }
+
+    /**
+     * @return array<int, array{string, int}>
+     */
+    public function findBadDucatiGuesses(int $minCount): array
+    {
+        $ducatiMaps = $this->getEntityManager()
+            ->getRepository(KnownMap::class)
+            ->findBy([
+                'name' => ['Ducati', 'Ducati Mini'],
+            ])
+        ;
+
+        return $this->createQueryBuilder('r')
+            ->select('r.worldHash', 'COUNT(r.worldHash) as replayCount')
+            ->leftJoin('r.mapThumbnail', 't', Join::WITH, 't = r.mapThumbnail')
+            ->leftJoin('t.knownMap', 'm', Join::WITH, 'm = t.knownMap')
+            ->where('m IN (:maps)')
+            ->setParameter('maps', $ducatiMaps)
+            ->groupBy('r.worldHash')
+            ->having('replayCount > :min')
+            ->setParameter('min', $minCount)
+            ->orderBy('replayCount', 'DESC')
+            ->getQuery()
+            ->getArrayResult()
+        ;
     }
 
     /**
