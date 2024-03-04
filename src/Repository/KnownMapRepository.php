@@ -34,13 +34,12 @@ class KnownMapRepository extends ServiceEntityRepository
         /** @var array<int, array{map_id: string, thumbnail_id: string}> $results */
         $results = $this->getEntityManager()->createQueryBuilder()
             ->select([
-                'm.id AS map_id',
-                'ANY_VALUE(t.id) AS thumbnail_id',
+                'IDENTITY(t.knownMap) AS map_id',
+                'MAX(t.id) AS thumbnail_id',
             ])
             ->from('App:MapThumbnail', 't')
-            ->join('t.knownMap', 'm')
-            ->orderBy('thumbnail_id')
             ->groupBy('t.knownMap')
+            ->where('t.knownMap IS NOT NULL')
             ->getQuery()
             ->getScalarResult()
         ;
