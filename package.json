@@ -21,7 +21,7 @@
         "c3": "^0.7.2",
         "dayjs": "^1.8.14",
         "kind-of": "^6.0.3",
-        "minimist": "^1.2.3",
+        "minimist": "^1.2.6",
         "websocket-extensions": "^0.1.4"
     }
 }
