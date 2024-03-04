@@ -35,11 +35,11 @@ class KnownMapRepository extends ServiceEntityRepository
         $results = $this->getEntityManager()->createQueryBuilder()
             ->select([
                 'IDENTITY(t.knownMap) AS map_id',
-                'MAX(t.id) AS thumbnail_id',
+                'MIN(t.id) AS thumbnail_id',
             ])
             ->from('App:MapThumbnail', 't')
             ->groupBy('t.knownMap')
-            ->where('t.knownMap IS NOT NULL')
+            ->orderBy('thumbnail_id')
             ->getQuery()
             ->getScalarResult()
         ;
