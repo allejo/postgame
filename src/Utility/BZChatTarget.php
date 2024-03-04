@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -39,6 +41,6 @@ abstract class BZChatTarget
 
     public static function toString(int $code): string
     {
-        return self::$strings[$code] ?? "Player ID #${code}";
+        return self::$strings[$code] ?? "Player ID #{$code}";
     }
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -44,8 +46,9 @@ class ReplayImportCommand extends Command
             ->addOption('after', null, InputOption::VALUE_REQUIRED, 'Only import replays after this date/time string. This value can be anything supported by `strtotime()`', null)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not actually import the replay into the database, just make sure it runs without errors.')
             ->addOption('upgrade', null, InputOption::VALUE_NONE, '(DEPRECATED) If a duplicate replay file is found, keep the replay ID but reimport all other information.')
-            ->addOption('redo-analysis', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, keep the replay ID but reimport all other information.')
-            ->addOption('regenerate-assets', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, regenerate the assets related to a replay (e.g. map thumbnails, player density maps, etc.)')
+            ->addOption('redo-analysis', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, keep the replay ID but reimport all other information (including player heatmaps).')
+            ->addOption('regenerate-assets', null, InputOption::VALUE_NONE, 'If a duplicate replay file is found, regenerate the following: map thumbnails')
+            ->addOption('update-metadata', null, InputOption::VALUE_NONE, 'Update any metadata related to a replay')
             ->addOption('filenames', null, InputOption::VALUE_REQUIRED, 'A comma-separated list of file names or the path to a text file of file names (separated by new lines) to import from the directory', null)
             ->setDescription('Import a replay file or a folder of replay files')
             ->setHelp('This command allows you to import replay files into the database')
@@ -57,6 +60,7 @@ class ReplayImportCommand extends Command
         $dryRun = $input->getOption('dry-run');
         $redoAnalysis = $input->getOption('redo-analysis');
         $regenAssets = $input->getOption('regenerate-assets');
+        $updateMetadata = $input->getOption('update-metadata');
         $replayFilePath = $input->getArgument('file');
 
         // @TODO 1.1.0 Remove the deprecated --upgrade option
@@ -89,7 +93,7 @@ class ReplayImportCommand extends Command
             $output->writeln(sprintf('Reading replay file: %s', $replayFilePath));
 
             try {
-                $this->replayService->importReplay($replayFilePath, $dryRun, $redoAnalysis, $regenAssets);
+                $this->replayService->importReplay($replayFilePath, $dryRun, $redoAnalysis, $regenAssets, $updateMetadata);
                 $output->writeln('Finished.');
             } catch (InvalidWorldCompressionException | InvalidWorldDatabaseException | InvalidReplayException | PacketInvalidException $e) {
                 $output->writeln(sprintf('An invalid or corrupted replay file was given (%s).', $replayFilePath));
@@ -106,7 +110,7 @@ class ReplayImportCommand extends Command
             $afterTs = $input->getOption('after');
 
             if ($afterTs !== null && strtotime($afterTs) === false) {
-                $output->writeln("The --after flag does not support the following date/time string: $afterTs");
+                $output->writeln("The --after flag does not support the following date/time string: {$afterTs}");
 
                 return 1;
             }
@@ -122,7 +126,7 @@ class ReplayImportCommand extends Command
                     $fileNames = @file_get_contents($explicitFiles);
 
                     if ($fileNames === false) {
-                        $output->writeln("The following file could not be read: $explicitFiles");
+                        $output->writeln("The following file could not be read: {$explicitFiles}");
 
                         return 2;
                     }
@@ -141,7 +145,7 @@ class ReplayImportCommand extends Command
             ;
 
             if ($afterTs !== null) {
-                $replayFiles->date(">= $afterTs");
+                $replayFiles->date(">= {$afterTs}");
             }
 
             $modifiedCount = 0;
@@ -162,7 +166,7 @@ class ReplayImportCommand extends Command
                     $progressBar->setMessage('Importing replay...');
                     $progressBar->setMessage(sprintf('(%s)', basename($replayFile)), 'filename');
 
-                    $didImport = $this->replayService->importReplay($replayFile, $dryRun, $redoAnalysis, $regenAssets);
+                    $didImport = $this->replayService->importReplay($replayFile, $dryRun, $redoAnalysis, $regenAssets, $updateMetadata);
 
                     if ($didImport) {
                         ++$modifiedCount;
@@ -179,6 +183,7 @@ class ReplayImportCommand extends Command
                     $output->writeln(sprintf('  %s: %s', get_class($e), $e->getMessage()));
 
                     $errorExit = true;
+
                     break;
                 }
 

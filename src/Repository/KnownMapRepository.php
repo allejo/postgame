@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -12,11 +14,11 @@ namespace App\Repository;
 use App\Entity\KnownMap;
 use App\Entity\MapThumbnail;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method KnownMap|null find($id, $lockMode = null, $lockVersion = null)
- * @method KnownMap|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|KnownMap find($id, $lockMode = null, $lockVersion = null)
+ * @method null|KnownMap findOneBy(array $criteria, array $orderBy = null)
  * @method KnownMap[]    findAll()
  * @method KnownMap[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
@@ -32,13 +34,12 @@ class KnownMapRepository extends ServiceEntityRepository
         /** @var array<int, array{map_id: string, thumbnail_id: string}> $results */
         $results = $this->getEntityManager()->createQueryBuilder()
             ->select([
-                'm.id AS map_id',
-                'ANY_VALUE(t.id) AS thumbnail_id',
+                'IDENTITY(t.knownMap) AS map_id',
+                'MAX(t.id) AS thumbnail_id',
             ])
             ->from('App:MapThumbnail', 't')
-            ->join('t.knownMap', 'm')
-            ->orderBy('thumbnail_id')
             ->groupBy('t.knownMap')
+            ->where('t.knownMap IS NOT NULL')
             ->getQuery()
             ->getScalarResult()
         ;

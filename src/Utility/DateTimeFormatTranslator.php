@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -77,8 +79,6 @@ abstract class DateTimeFormatTranslator
         }, $translated);
 
         // Simplify our Day.js escaping by combining escaped characters that are next to each other
-        $translated = str_replace('][', '', $translated);
-
-        return $translated;
+        return str_replace('][', '', $translated);
     }
 }

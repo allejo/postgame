@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -9,12 +11,14 @@
 
 namespace App\EventSubscriber;
 
+use allejo\bzflag\world\Object\ObstacleType;
 use allejo\bzflag\world\WorldDatabase;
 use App\Entity\KnownMap;
 use App\Entity\MapThumbnail;
 use App\Event\ExistingThumbnailUsedEvent;
 use App\Event\NewMapThumbnailGeneratedEvent;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class DucatiThumbnailMatcherSubscriber implements EventSubscriberInterface
@@ -22,9 +26,13 @@ class DucatiThumbnailMatcherSubscriber implements EventSubscriberInterface
     /** @var EntityManagerInterface */
     private $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    /** @var LoggerInterface */
+    private $logger;
+
+    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger)
     {
         $this->entityManager = $entityManager;
+        $this->logger = $logger;
     }
 
     public function onExistingThumbnailSelected(ExistingThumbnailUsedEvent $event): void
@@ -60,8 +68,23 @@ class DucatiThumbnailMatcherSubscriber implements EventSubscriberInterface
     private function applyDucatiClassification(MapThumbnail $thumbnail, WorldDatabase $worldDatabase): void
     {
         $worldSize = (int)$worldDatabase->getBZDBManager()->getBZDBVariable('_worldSize');
+        $obstacleTypes = $worldDatabase->getObstacleManager()->getWorld()->getObstacles();
+        $obstacleType = -1;
 
-        if ($worldSize === 600) {
+        for ($i = ObstacleType::TELE_TYPE; $i < ObstacleType::OBSTACLE_TYPE_COUNT; ++$i) {
+            if (count($obstacleTypes[$i]) > 0) {
+                $obstacleType = $i;
+
+                break;
+            }
+        }
+
+        if ($obstacleType >= 0) {
+            $this->logger->error('World (hash: {hash}) contains an obstacle type ({type}) not expected in a Ducati map.', [
+                'hash' => $worldDatabase->getWorldHash(),
+                'type' => $obstacleType,
+            ]);
+        } elseif ($worldSize === 600) {
             if (($map = $this->getDucatiMini()) !== null) {
                 $thumbnail->setKnownMap($map);
             }
@@ -69,6 +92,8 @@ class DucatiThumbnailMatcherSubscriber implements EventSubscriberInterface
             if (($map = $this->getDucati()) !== null) {
                 $thumbnail->setKnownMap($map);
             }
+        } else {
+            $this->logger->error('World (hash: {hash}) does not have a known Ducati map size.');
         }
     }
 

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -86,6 +88,11 @@ class Replay
     private $fileHash;
 
     /**
+     * @ORM\Column(type="string", length=40, nullable=true)
+     */
+    private $worldHash;
+
+    /**
      * @ORM\Column(type="boolean", nullable=true, options={"default": false})
      */
     private $canceled;
@@ -94,6 +101,11 @@ class Replay
      * @ORM\ManyToOne(targetEntity=MapThumbnail::class, inversedBy="replays")
      */
     private $mapThumbnail;
+
+    /**
+     * @ORM\OneToMany(targetEntity=PlayerHeatMap::class, mappedBy="replay", orphanRemoval=true)
+     */
+    private $playerHeatMaps;
 
     public function __construct()
     {
@@ -104,6 +116,7 @@ class Replay
         $this->joinEvents = new ArrayCollection();
         $this->killEvents = new ArrayCollection();
         $this->partEvents = new ArrayCollection();
+        $this->playerHeatMaps = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -191,7 +204,7 @@ class Replay
     }
 
     /**
-     * @return Collection|CaptureEvent[]
+     * @return CaptureEvent[]|Collection
      */
     public function getCaptureEvents(): Collection
     {
@@ -222,7 +235,7 @@ class Replay
     }
 
     /**
-     * @return Collection|ChatMessage[]
+     * @return ChatMessage[]|Collection
      */
     public function getChatMessages(): Collection
     {
@@ -388,6 +401,18 @@ class Replay
         return $this;
     }
 
+    public function getWorldHash(): ?string
+    {
+        return $this->worldHash;
+    }
+
+    public function setWorldHash(?string $worldHash): self
+    {
+        $this->worldHash = $worldHash;
+
+        return $this;
+    }
+
     public function getCanceled(): ?bool
     {
         return $this->canceled;
@@ -408,6 +433,36 @@ class Replay
     public function setMapThumbnail(?MapThumbnail $mapThumbnail): self
     {
         $this->mapThumbnail = $mapThumbnail;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PlayerHeatMap[]
+     */
+    public function getPlayerHeatMaps(): Collection
+    {
+        return $this->playerHeatMaps;
+    }
+
+    public function addPlayerHeatMap(PlayerHeatMap $playerHeatMap): self
+    {
+        if (!$this->playerHeatMaps->contains($playerHeatMap)) {
+            $this->playerHeatMaps[] = $playerHeatMap;
+            $playerHeatMap->setReplay($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlayerHeatMap(PlayerHeatMap $playerHeatMap): self
+    {
+        if ($this->playerHeatMaps->removeElement($playerHeatMap)) {
+            // set the owning side to null (unless already changed)
+            if ($playerHeatMap->getReplay() === $this) {
+                $playerHeatMap->setReplay(null);
+            }
+        }
 
         return $this;
     }

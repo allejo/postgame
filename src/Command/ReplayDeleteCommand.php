@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -32,7 +34,7 @@ class ReplayDeleteCommand extends Command
 
     protected function configure()
     {
-        $desc = <<<DESC
+        $desc = <<<'DESC'
 Delete a replay file
 
 This operation performs a hard delete and cannot be undone. This will

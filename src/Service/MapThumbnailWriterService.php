@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -20,9 +22,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-class MapThumbnailWriterService implements IThumbnailWriter
+class MapThumbnailWriterService implements IFileWriter
 {
-    use ThumbnailWriterTrait;
+    use FileWriterTrait;
 
     public const FOLDER_NAME = 'map-thumbnails';
 
@@ -46,7 +48,7 @@ class MapThumbnailWriterService implements IThumbnailWriter
     {
         $worldDatabase = $replayHeader->getWorldDatabase();
 
-        /** @var MapThumbnail|null $existingThumbnail */
+        /** @var null|MapThumbnail $existingThumbnail */
         $existingThumbnail = $this->em->getRepository(MapThumbnail::class)->findOneBy([
             'worldHash' => $worldDatabase->getWorldHash(),
         ]);
@@ -85,15 +87,5 @@ class MapThumbnailWriterService implements IThumbnailWriter
         $svgFilename = $database->getWorldHash() . '.svg';
 
         $this->writeFile($svgFilename, $svgOutput);
-    }
-
-    private function writeFile(string $filename, string $content): void
-    {
-        $this->fs->dumpFile($this->getFilePath($filename), $content);
-    }
-
-    private function getFilePath(string $filename): string
-    {
-        return sprintf('%s/%s/%s', $this->targetDirectory, self::FOLDER_NAME, $filename);
     }
 }

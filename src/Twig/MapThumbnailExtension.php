@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -40,6 +42,26 @@ class MapThumbnailExtension extends AbstractExtension
             $mapName = $thumbnail->getKnownMap()->getName();
         }
 
+        $thumbnailURL = $this->buildImgUrl($thumbnail);
+
+        $markup = <<<MARKUP
+            <img
+                class="map-thumbnail"
+                src="{$thumbnailURL}"
+                alt="A bird's eye view of {$mapName}"
+                aria-hidden="true"
+            />
+MARKUP;
+
+        return new Markup($markup, 'UTF-8');
+    }
+
+    /**
+     * @throws MissingExtensionException when a required Twig extension could
+     *                                   not be found in the current Twig environment
+     */
+    public function buildImgUrl(MapThumbnail $thumbnail): string
+    {
         if (!$this->environment->hasExtension(AssetExtension::class)) {
             throw new MissingExtensionException('The `AssetExtension` is required for this extension');
         }
@@ -51,22 +73,14 @@ class MapThumbnailExtension extends AbstractExtension
             $thumbnail->getWorldHash(),
         ]);
 
-        $markup = <<<MARKUP
-            <img
-                class="map-thumbnail"
-                src="{$assetExtension->getAssetUrl($thumbnailURL)}"
-                alt="A bird's eye view of {$mapName}"
-                aria-hidden="true"
-            />
-MARKUP;
-
-        return new Markup($markup, 'UTF-8');
+        return $assetExtension->getAssetUrl($thumbnailURL);
     }
 
     public function getFilters()
     {
         return [
             new TwigFilter('map_thumbnail', [$this, 'buildImgTag']),
+            new TwigFilter('map_url', [$this, 'buildImgUrl']),
         ];
     }
 
@@ -74,6 +88,7 @@ MARKUP;
     {
         return [
             new TwigFunction('map_thumbnail', [$this, 'buildImgTag']),
+            new TwigFunction('map_url', [$this, 'buildImgUrl']),
         ];
     }
 }

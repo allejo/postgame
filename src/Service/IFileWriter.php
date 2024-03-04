@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -9,12 +11,12 @@
 
 namespace App\Service;
 
-interface IThumbnailWriter
+interface IFileWriter
 {
-    public function getThumbnailDirectory(): string;
+    public function getFileDirectory(): string;
 
     /**
      * @required
      */
-    public function setThumbnailDirectory(string $map_thumbnails);
+    public function setFileDirectory(string $directory);
 }

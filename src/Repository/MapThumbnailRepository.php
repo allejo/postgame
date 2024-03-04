@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -15,8 +17,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method MapThumbnail|null find($id, $lockMode = null, $lockVersion = null)
- * @method MapThumbnail|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|MapThumbnail find($id, $lockMode = null, $lockVersion = null)
+ * @method null|MapThumbnail findOneBy(array $criteria, array $orderBy = null)
  * @method MapThumbnail[]    findAll()
  * @method MapThumbnail[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */

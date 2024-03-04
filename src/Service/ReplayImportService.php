@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -9,6 +11,7 @@
 
 namespace App\Service;
 
+use allejo\bzflag\graphics\Common\WorldBoundary;
 use allejo\bzflag\networking\Packets\GamePacket;
 use allejo\bzflag\networking\Packets\MsgAddPlayer;
 use allejo\bzflag\networking\Packets\MsgAdminInfo;
@@ -17,6 +20,7 @@ use allejo\bzflag\networking\Packets\MsgFlagDrop;
 use allejo\bzflag\networking\Packets\MsgFlagGrab;
 use allejo\bzflag\networking\Packets\MsgKilled;
 use allejo\bzflag\networking\Packets\MsgMessage;
+use allejo\bzflag\networking\Packets\MsgPlayerUpdate;
 use allejo\bzflag\networking\Packets\MsgRemovePlayer;
 use allejo\bzflag\networking\Packets\MsgTimeUpdate;
 use allejo\bzflag\networking\Packets\PacketInvalidException;
@@ -32,10 +36,12 @@ use App\Entity\KillEvent;
 use App\Entity\PartEvent;
 use App\Entity\PauseEvent;
 use App\Entity\Player;
+use App\Entity\PlayerHeatMap;
 use App\Entity\Replay;
 use App\Entity\ResumeEvent;
 use App\Utility\BZChatTarget;
 use App\Utility\BZTeamType;
+use App\Utility\PlayerMovementGrid;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -49,6 +55,13 @@ class ReplayImportService
      * @var int
      */
     private const BATCH_SIZE = 10;
+
+    /**
+     * Ratio between world size and heatmap size.
+     *
+     * @var int
+     */
+    private const WORLD_HEATMAP_RATIO = 40;
 
     /**
      * The internal count of how many replays have been imported in the current
@@ -67,6 +80,9 @@ class ReplayImportService
 
     /** @var MapThumbnailWriterService */
     private $thumbnailWriterService;
+
+    /** @var HeatMapWriterService */
+    private $heatMapWriterService;
 
     /**
      * The current Replay object we're working with.
@@ -160,7 +176,7 @@ class ReplayImportService
      *
      * This value should only have a value when a match has been "paused."
      *
-     * @var MsgTimeUpdate|null
+     * @var null|MsgTimeUpdate
      */
     private $lastPausePacket;
 
@@ -178,20 +194,34 @@ class ReplayImportService
     /** @var array<int, string> A map of flag IDs to flag abbreviations */
     private $flagIDs;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, MapThumbnailWriterService $thumbnailWriterService)
-    {
+    /** @var array<string, PlayerMovementGrid> A map of callsigns to their respective movement grids */
+    private $currPlayersHeatMap;
+
+    /** @var int The number of cells in a single row of the heatmap */
+    private $heatMapSize;
+    /** @var int The size of the world in World Units (wu) */
+    private $worldSize;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        LoggerInterface $logger,
+        MapThumbnailWriterService $thumbnailWriterService,
+        HeatMapWriterService $heatMapWriterService
+    ) {
         $this->em = $em;
         $this->logger = $logger;
         $this->thumbnailWriterService = $thumbnailWriterService;
+        $this->heatMapWriterService = $heatMapWriterService;
     }
 
     /**
      * Import a replay file into the database.
      *
-     * @param string $filepath     The filename or filepath to the replay to import
-     * @param bool   $dryRun       Whether or not to actually write to the database
-     * @param bool   $redoAnalysis Keep the replay ID but reimport all other information about the replay
-     * @param bool   $regenAssets  Keep the replay ID but regenerate all of the assets for a replay
+     * @param string $filepath       The filename or filepath to the replay to import
+     * @param bool   $dryRun         Whether or not to actually write to the database
+     * @param bool   $redoAnalysis   Keep the replay ID but reimport all other information about the replay
+     * @param bool   $regenAssets    Keep the replay ID but regenerate all of the assets for a replay
+     * @param bool   $updateMetadata Keep everything of the replay but update the world hashes
      *
      * @throws \InvalidArgumentException        when an invalid path to a replay file is given
      * @throws InvalidReplayException           when an invalid replay is given
@@ -201,7 +231,7 @@ class ReplayImportService
      *
      * @return bool Returns true if the import was successful
      */
-    public function importReplay(string $filepath, bool $dryRun, bool $redoAnalysis, bool $regenAssets): bool
+    public function importReplay(string $filepath, bool $dryRun, bool $redoAnalysis, bool $regenAssets, bool $updateMetadata): bool
     {
         if (!file_exists($filepath)) {
             throw new \InvalidArgumentException(sprintf('File not found: %s', $filepath));
@@ -222,13 +252,17 @@ class ReplayImportService
         $filename = basename($filepath);
         $sha1 = sha1_file($filepath);
 
+        $this->worldSize = (int)WorldBoundary::fromWorldDatabase($replay->getWorldDatabase())->getWorldWidthX();
+
+        $this->heatMapSize = max($this->worldSize / self::WORLD_HEATMAP_RATIO, 10);
+
         $existing = $this->em->getRepository(Replay::class)->findOneBy([
             'fileHash' => $sha1,
         ]);
 
         // Don't import duplicate replays
         if (!empty($existing)) {
-            if ($redoAnalysis === false && $regenAssets === false) {
+            if ($redoAnalysis === false && $regenAssets === false && $updateMetadata === false) {
                 return false;
             }
 
@@ -260,17 +294,24 @@ class ReplayImportService
         }
 
         // We were only asked to regenerate assets, don't import again
-        if ($existing && !$redoAnalysis) {
+        if ($existing && !$redoAnalysis && !$updateMetadata) {
             $this->updateBatchStatus($dryRun);
 
             return false;
         }
 
         $this->currReplay
+            ->setWorldHash($replay->getWorldDatabase()->getWorldHash())
             ->setFileName($filename)
             ->setStartTime($replay->getStartTime())
             ->setEndTime($replay->getEndTime())
         ;
+
+        if ($existing && !$redoAnalysis) {
+            $this->updateBatchStatus($dryRun);
+
+            return false;
+        }
 
         $this->relativeStartTime = $this->currReplay->getStartTime()->getTimestamp();
 
@@ -293,6 +334,8 @@ class ReplayImportService
             $wasCanceled = true;
         }
 
+        $this->processHeatMaps();
+
         $this->currReplay->setCanceled($wasCanceled);
 
         $this->updateBatchStatus($dryRun);
@@ -314,6 +357,7 @@ class ReplayImportService
         $this->currPlayersJoinRecord = [];
         $this->currFuturePlayers = [];
         $this->currPartialJoins = [];
+        $this->currPlayersHeatMap = [];
         $this->lastPausePacket = null;
         $this->duration = null;
     }
@@ -332,8 +376,9 @@ class ReplayImportService
         $this->em->getRepository(KillEvent::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(PartEvent::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(PauseEvent::class)->deleteByReplay($this->currReplay);
-        $this->em->getRepository(Player::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(PlayerHeatMap::class)->deleteByReplay($this->currReplay);
         $this->em->getRepository(ResumeEvent::class)->deleteByReplay($this->currReplay);
+        $this->em->getRepository(Player::class)->deleteByReplay($this->currReplay);
     }
 
     private function updateBatchStatus(bool $dryRun): void
@@ -357,45 +402,26 @@ class ReplayImportService
      */
     private function handlePacket(GamePacket $packet): void
     {
-        switch ($packet::PACKET_TYPE) {
-            case MsgAddPlayer::PACKET_TYPE:
-                $this->handleMsgAddPlayer($packet);
-                break;
-
-            case MsgAdminInfo::PACKET_TYPE:
-                $this->handleMsgAdminInfo($packet);
-                break;
-
-            case MsgCaptureFlag::PACKET_TYPE:
-                $this->handleMsgCaptureFlag($packet);
-                break;
-
-            case MsgFlagGrab::PACKET_TYPE:
-                $this->handleMsgFlagUpdate($packet, true);
-                break;
-
-            case MsgFlagDrop::PACKET_TYPE:
-                $this->handleMsgFlagUpdate($packet, false);
-                break;
-
-            case MsgKilled::PACKET_TYPE:
-                $this->handleMsgKilled($packet);
-                break;
-
-            case MsgMessage::PACKET_TYPE:
-                $this->handleMsgMessage($packet);
-                break;
-
-            case MsgRemovePlayer::PACKET_TYPE:
-                $this->handleMsgRemovePlayer($packet);
-                break;
-
-            case MsgTimeUpdate::PACKET_TYPE:
-                $this->handleMsgTimeUpdate($packet);
-                break;
-
-            default:
-                break;
+        if ($packet instanceof MsgAddPlayer) {
+            $this->handleMsgAddPlayer($packet);
+        } elseif ($packet instanceof MsgAdminInfo) {
+            $this->handleMsgAdminInfo($packet);
+        } elseif ($packet instanceof MsgCaptureFlag) {
+            $this->handleMsgCaptureFlag($packet);
+        } elseif ($packet instanceof MsgFlagGrab) {
+            $this->handleMsgFlagUpdate($packet, true);
+        } elseif ($packet instanceof MsgFlagDrop) {
+            $this->handleMsgFlagUpdate($packet, false);
+        } elseif ($packet instanceof MsgKilled) {
+            $this->handleMsgKilled($packet);
+        } elseif ($packet instanceof MsgMessage) {
+            $this->handleMsgMessage($packet);
+        } elseif ($packet instanceof MsgRemovePlayer) {
+            $this->handleMsgRemovePlayer($packet);
+        } elseif ($packet instanceof MsgTimeUpdate) {
+            $this->handleMsgTimeUpdate($packet);
+        } elseif ($packet instanceof MsgPlayerUpdate) {
+            $this->handleMsgPlayerUpdate($packet);
         }
     }
 
@@ -491,7 +517,7 @@ class ReplayImportService
     }
 
     /**
-     * @param GamePacket|MsgFlagGrab|MsgFlagDrop $packet
+     * @param GamePacket|MsgFlagDrop|MsgFlagGrab $packet
      */
     private function handleMsgFlagUpdate(GamePacket $packet, bool $isGrab): void
     {
@@ -591,9 +617,7 @@ class ReplayImportService
 
         $this->em->persist($partEvent);
 
-        unset($this->currPlayersByIndex[$playerId]);
-        unset($this->currPlayersCurrentTeam[$playerId]);
-        unset($this->currPlayersJoinRecord[$playerId]);
+        unset($this->currPlayersByIndex[$playerId], $this->currPlayersCurrentTeam[$playerId], $this->currPlayersJoinRecord[$playerId]);
 
         if (in_array($playerId, $this->currFuturePlayers)) {
             unset($this->currFuturePlayers[$playerId]);
@@ -674,6 +698,18 @@ class ReplayImportService
         }
     }
 
+    private function handleMsgPlayerUpdate(MsgPlayerUpdate $packet): void
+    {
+        $callsign = $this->currPlayersByIndex[$packet->getPlayerId()]->getCallsign();
+
+        if (!array_key_exists($callsign, $this->currPlayersHeatMap)) {
+            $this->currPlayersHeatMap[$callsign] = new PlayerMovementGrid($this->worldSize, $this->heatMapSize);
+        }
+
+        $position = $packet->getState()->position;
+        $this->currPlayersHeatMap[$callsign]->addPosition($position[0], $position[1]);
+    }
+
     /**
      * Get the number of seconds *into* a match we're currently in.
      */
@@ -740,5 +776,27 @@ class ReplayImportService
         ];
 
         return $teams[$flagAbbv];
+    }
+
+    /**
+     * Save PlayerMovementGrid objects as PLayerHeatMap instances in the DB.
+     */
+    private function processHeatMaps()
+    {
+        foreach ($this->currPlayersHeatMap as $callsign => $heatmap) {
+            $playerHeatmap = new PlayerHeatMap();
+            $playerHeatmap->setReplay($this->currReplay);
+            $playerHeatmap->setPlayer($this->currPlayersByCallsign[$callsign]);
+            $playerHeatmap->setHeatmap($heatmap->getMovement());
+            $playerHeatmap->setFilename(vsprintf('%s_%s.svg', [
+                // $callsign will be cast into an int if the callsign is all numbers
+                urlencode((string)$callsign),
+                uniqid('', true),
+            ]));
+
+            $this->heatMapWriterService->writeHeatMap($playerHeatmap, $this->worldSize);
+
+            $this->em->persist($playerHeatmap);
+        }
     }
 }

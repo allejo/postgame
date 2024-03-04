@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -11,11 +13,11 @@ namespace App\Repository;
 
 use App\Entity\KillEvent;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method KillEvent|null find($id, $lockMode = null, $lockVersion = null)
- * @method KillEvent|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|KillEvent find($id, $lockMode = null, $lockVersion = null)
+ * @method null|KillEvent findOneBy(array $criteria, array $orderBy = null)
  * @method KillEvent[]    findAll()
  * @method KillEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */

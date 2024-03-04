@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -13,11 +15,11 @@ use App\Entity\ChatMessage;
 use App\Entity\Replay;
 use App\Utility\BZChatTarget;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method ChatMessage|null find($id, $lockMode = null, $lockVersion = null)
- * @method ChatMessage|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|ChatMessage find($id, $lockMode = null, $lockVersion = null)
+ * @method null|ChatMessage findOneBy(array $criteria, array $orderBy = null)
  * @method ChatMessage[]    findAll()
  * @method ChatMessage[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */

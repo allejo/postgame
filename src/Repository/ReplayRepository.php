@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -12,13 +14,14 @@ namespace App\Repository;
 use App\Entity\KnownMap;
 use App\Entity\Replay;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Replay|null find($id, $lockMode = null, $lockVersion = null)
- * @method Replay|null findOneBy(array $criteria, array $orderBy = null)
+ * @method null|Replay find($id, $lockMode = null, $lockVersion = null)
+ * @method null|Replay findOneBy(array $criteria, array $orderBy = null)
  * @method Replay[]    findAll()
  * @method Replay[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
@@ -116,6 +119,33 @@ class ReplayRepository extends ServiceEntityRepository
         }
 
         return $result;
+    }
+
+    /**
+     * @return array<int, array{string, int}>
+     */
+    public function findBadDucatiGuesses(int $minCount): array
+    {
+        $ducatiMaps = $this->getEntityManager()
+            ->getRepository(KnownMap::class)
+            ->findBy([
+                'name' => ['Ducati', 'Ducati Mini'],
+            ])
+        ;
+
+        return $this->createQueryBuilder('r')
+            ->select('r.worldHash', 'COUNT(r.worldHash) as replayCount')
+            ->leftJoin('r.mapThumbnail', 't', Join::WITH, 't = r.mapThumbnail')
+            ->leftJoin('t.knownMap', 'm', Join::WITH, 'm = t.knownMap')
+            ->where('m IN (:maps)')
+            ->setParameter('maps', $ducatiMaps)
+            ->groupBy('r.worldHash')
+            ->having('replayCount > :min')
+            ->setParameter('min', $minCount)
+            ->orderBy('replayCount', 'DESC')
+            ->getQuery()
+            ->getArrayResult()
+        ;
     }
 
     /**

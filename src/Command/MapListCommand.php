@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * (c) Vladimir "allejo" Jimenez <me@allejo.io>
@@ -33,7 +35,7 @@ class MapListCommand extends Command
 
     protected function configure()
     {
-        $desc = <<<DESC
+        $desc = <<<'DESC'
 List all of the known maps
 
 In addition to listing the maps, this also displays how many definitions each

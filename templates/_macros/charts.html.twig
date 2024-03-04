@@ -1,7 +1,11 @@
-{% macro make_chart(id, data) %}
+{% macro make_chart(id, data, explain = '') %}
+    {{ explain }}
     <div
         id="{{ id }}"
         data-role="c3-chart"
         data-url="{{ data }}"
+        {% if explain != '' %}
+            aria-describedby="{{ explain }}"
+        {% endif %}
     ></div>
 {% endmacro %}
